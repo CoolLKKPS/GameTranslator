@@ -1,3 +1,7 @@
+## v2.0.9
+
+	- Removed old Unity API
+
 ## v2.0.8
 
 	- Rework configs, sorry but that's necessary

@@ -42,16 +42,7 @@ namespace GameTranslator.Patches.Utils
 
         public static int GetActiveSceneId()
         {
-            int num;
-            if (UnityFeatures.SupportsSceneManager)
-            {
-                num = TranslationScopeHelper.GetActiveSceneIdBySceneManager();
-            }
-            else
-            {
-                num = TranslationScopeHelper.GetActiveSceneIdByApplication();
-            }
-            return num;
+            return TranslationScopeHelper.GetActiveSceneIdBySceneManager();
         }
 
         private static int GetActiveSceneIdBySceneManager()
@@ -66,11 +57,6 @@ namespace GameTranslator.Patches.Utils
                 sceneLoaded(scene.buildIndex);
             });
             SceneManagerLoader.EnableSceneLoadScanInternal(sceneLoaded);
-        }
-
-        private static int GetActiveSceneIdByApplication()
-        {
-            return Application.loadedLevel;
         }
 
         public static bool EnableTranslationScoping = true;

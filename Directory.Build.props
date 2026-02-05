@@ -5,7 +5,7 @@
     <TargetFrameworks>net481</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <!-- See: https://learn.microsoft.com/en-us/dotnet/csharp/nullable-references -->
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <!-- Allows references to non-public members at runtime, for use with BepInEx.AssemblyPublicizer. -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>

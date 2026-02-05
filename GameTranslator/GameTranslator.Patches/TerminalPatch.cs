@@ -34,10 +34,10 @@ namespace GameTranslator.Patches
                     list.Add(StartOfRound.Instance.mapScreen.radarTargets[i].name);
                     Debug.Log(string.Format("name {0}: {1}", i, list[i]));
                 }
-                secondWord = secondWord.ToLower();
+                string secondWordLower = secondWord.ToLower();
                 for (int j = 0; j < list.Count; j++)
                 {
-                    if (list[j].ToLower() == secondWord)
+                    if (list[j].ToLower() == secondWordLower)
                     {
                         return j;
                     }
@@ -318,9 +318,10 @@ namespace GameTranslator.Patches
         private static T TransReflection<T>(T tIn)
         {
             T t = Activator.CreateInstance<T>();
-            foreach (FieldInfo fieldInfo in tIn.GetType().GetRuntimeFields())
+            Type type = typeof(T);
+            foreach (FieldInfo fieldInfo in type.GetRuntimeFields())
             {
-                t.GetType().GetRuntimeField(fieldInfo.Name).SetValue(t, fieldInfo.GetValue(tIn));
+                type.GetRuntimeField(fieldInfo.Name).SetValue(t, fieldInfo.GetValue(tIn));
             }
             return t;
         }

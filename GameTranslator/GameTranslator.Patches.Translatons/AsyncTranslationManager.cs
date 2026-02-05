@@ -16,7 +16,6 @@ namespace GameTranslator.Patches.Translatons
         private readonly Dictionary<string, TextStabilizationContext> _stabilizationContexts;
         private bool _textHooksEnabled = true;
         private bool _temporarilyDisabled = false;
-        private bool _isInTranslatedMode = true;
 
         public static AsyncTranslationManager Instance { get; } = new AsyncTranslationManager();
 
