@@ -15,7 +15,11 @@ namespace GameTranslator
     {
         private static SafeFileWatcher _fileWatcher;
 
-        private static Dictionary<string, DateTime> _fileLastModifiedTimes = new Dictionary<string, DateTime>();
+        private static ConcurrentDictionary<string, DateTime> _fileLastModifiedTimes = new ConcurrentDictionary<string, DateTime>();
+
+        private static Timer _pollingTimer;
+
+        private static readonly object _updateLock = new object();
 
         public static void Load()
         {
@@ -67,63 +71,80 @@ namespace GameTranslator
                 }
             }
             GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
+            if (TranslatePlugin.enablePollingCheck?.Value ?? false)
+            {
+                _pollingTimer = new Timer(_ => OnDirectoryUpdated(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+            }
+        }
+
+        public static void Unload()
+        {
+            _fileWatcher?.Dispose();
+            _fileWatcher = null;
+            cache?.Dispose();
+            cache = null;
+            _pollingTimer?.Dispose();
+            _pollingTimer = null;
         }
 
         private static void OnDirectoryUpdated()
         {
-            try
+            lock (_updateLock)
             {
-                bool hasChanges = false;
-                foreach (TranslateConfig.TranslateConfigFile config in TranslateConfig.TranslateConfigFile.configs)
+                try
                 {
-                    if (!config.shouldLoad || !File.Exists(config.ConfigFilePath))
-                        continue;
-                    DateTime currentModifiedTime = File.GetLastWriteTime(config.ConfigFilePath);
-                    DateTime recordedTime;
-                    if (_fileLastModifiedTimes.TryGetValue(config.ConfigFilePath, out recordedTime))
+                    bool hasChanges = false;
+                    foreach (TranslateConfig.TranslateConfigFile config in TranslateConfig.TranslateConfigFile.configs)
                     {
-                        if (currentModifiedTime > recordedTime)
+                        if (!config.shouldLoad || !File.Exists(config.ConfigFilePath))
+                            continue;
+                        DateTime currentModifiedTime = File.GetLastWriteTime(config.ConfigFilePath);
+                        DateTime recordedTime;
+                        if (_fileLastModifiedTimes.TryGetValue(config.ConfigFilePath, out recordedTime))
                         {
-                            _fileLastModifiedTimes[config.ConfigFilePath] = currentModifiedTime;
-                            for (int i = 0; i < 3; i++)
+                            if (currentModifiedTime > recordedTime)
                             {
-                                try
+                                _fileLastModifiedTimes[config.ConfigFilePath] = currentModifiedTime;
+                                for (int i = 0; i < 3; i++)
                                 {
-                                    config.Reload();
-                                    NormalTextTranslator moduleTranslator = TranslateConfig.GetModuleTranslator(config);
-                                    if (moduleTranslator != null)
+                                    try
                                     {
-                                        moduleTranslator.Load();
+                                        config.Reload();
+                                        NormalTextTranslator moduleTranslator = TranslateConfig.GetModuleTranslator(config);
+                                        if (moduleTranslator != null)
+                                        {
+                                            moduleTranslator.Load();
+                                        }
+                                        TextTranslate.ChangeTime += 1L;
+                                        hasChanges = true;
+                                        break;
                                     }
-                                    TextTranslate.ChangeTime += 1L;
-                                    hasChanges = true;
-                                    break;
-                                }
-                                catch (IOException) when (i < 2)
-                                {
-                                    Thread.Sleep(100 * (i + 1));
-                                }
-                                catch (Exception ex)
-                                {
-                                    TranslatePlugin.logger.LogError($"Unexpected error reloading config {config.ConfigFileName}: {ex.Message}");
-                                    break;
+                                    catch (IOException) when (i < 2)
+                                    {
+                                        Thread.Sleep(100 * (i + 1));
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        TranslatePlugin.logger.LogError($"Unexpected error reloading config {config.ConfigFileName}: {ex.Message}");
+                                        break;
+                                    }
                                 }
                             }
                         }
+                        else
+                        {
+                            _fileLastModifiedTimes[config.ConfigFilePath] = currentModifiedTime;
+                        }
                     }
-                    else
+                    if (hasChanges)
                     {
-                        _fileLastModifiedTimes[config.ConfigFilePath] = currentModifiedTime;
+                        TranslatePlugin.logger.LogInfo("Translate files reloaded due to file changes.");
                     }
                 }
-                if (hasChanges)
+                catch (Exception ex)
                 {
-                    TranslatePlugin.logger.LogInfo("Translate files reloaded due to file changes.");
+                    TranslatePlugin.logger.LogError("Error in OnDirectoryUpdated: " + ex.Message);
                 }
-            }
-            catch (Exception ex)
-            {
-                TranslatePlugin.logger.LogError("Error in OnDirectoryUpdated: " + ex.Message);
             }
         }
 

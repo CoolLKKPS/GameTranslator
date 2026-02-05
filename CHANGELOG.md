@@ -1,6 +1,7 @@
 ## v2.0.9
 
 	- Removed old Unity API
+	- Added debug config "Polling Check", for solving LethalPerformance filewatcher patch compatibility, default to false
 
 ## v2.0.8
 
