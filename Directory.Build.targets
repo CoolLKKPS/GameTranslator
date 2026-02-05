@@ -1,0 +1,49 @@
+<Project>
+
+  <Import Project="$(SolutionRoot)Config.Build.user.props"
+    Condition="Exists('$(SolutionRoot)Config.Build.user.props')" />
+
+  <ItemGroup>
+    <PackageReference
+      Include="BepInEx.Analyzers"
+      Version="1.0.8"
+      PrivateAssets="all" />
+
+    <PackageReference
+      Include="BepInEx.Core"
+      Version="5.4.21" />
+	  <!--     <PackageReference
+      Include="BepInEx.Unity"
+      Version="" />-->
+  </ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net481'">
+		<PackageReference
+			Include="UnityEngine.Modules"
+			Version="2022.3.62"
+			Private="False"
+			PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$(CI) != 'true'">
+		<Reference Include="Assembly-CSharp">
+			<HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.Netcode.Runtime">
+			<HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/Unity.Netcode.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="XUnity.Common">
+			<HintPath>D:\Runtime dependencies (local)\BepInEx\core\Hayrizan-XUnity_AutoTranslator\XUnity.Common.dll</HintPath>
+		</Reference>
+		<Reference Include="InteractiveTerminalAPI">
+			<HintPath>D:\Runtime dependencies (local)\BepInEx\plugins\WhiteSpike-Interactive_Terminal_API\InteractiveTerminalAPI\InteractiveTerminalAPI.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+</Project>
