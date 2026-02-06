@@ -1,7 +1,8 @@
 ## v2.0.9
 
-	- Removed old Unity API
+	- Removed old Unity API support
 	- Added debug config "Polling Check", for solving LethalPerformance filewatcher patch compatibility, default to false
+	- Fixed CleanupInvalidEntries, now it should no longer clean valid textures at the first time
 
 ## v2.0.8
 

@@ -65,7 +65,6 @@ namespace GameTranslator.Patches.Translatons
                         this.RegisterImageFromFile(text);
                     }
                     this.CleanupInvalidEntries();
-
                     float realtimeSinceStartup2 = Time.realtimeSinceStartup;
                     XuaLogger.AutoTranslator.Debug(string.Format("Loaded texture files (took {0} seconds)", Math.Round((double)(realtimeSinceStartup2 - realtimeSinceStartup), 2)));
                 }
@@ -309,26 +308,6 @@ namespace GameTranslator.Patches.Translatons
 
         public void CleanupInvalidEntries()
         {
-            foreach (string text in this._translatedImages.Where(delegate (KeyValuePair<string, TranslatedImage> kv)
-            {
-                KeyValuePair<string, TranslatedImage> keyValuePair2 = kv;
-                if (keyValuePair2.Value != null)
-                {
-                    var texture = keyValuePair2.Value.GetTexture();
-                    return texture == null;
-                }
-                return true;
-            }).Select(delegate (KeyValuePair<string, TranslatedImage> kv)
-            {
-                KeyValuePair<string, TranslatedImage> keyValuePair3 = kv;
-                return keyValuePair3.Key;
-            }).ToList<string>())
-            {
-                TranslatedImage translatedImage;
-                this._translatedImages.TryRemove(text, out translatedImage);
-                DateTime dateTime;
-                this._textureAccessTime.TryRemove(text, out dateTime);
-            }
             foreach (KeyValuePair<string, DateTime> keyValuePair in this._textureAccessTime.ToList<KeyValuePair<string, DateTime>>())
             {
                 if (DateTime.Now - keyValuePair.Value > TextureTranslationCache.CLEANUP_INTERVAL)
@@ -358,6 +337,10 @@ namespace GameTranslator.Patches.Translatons
             }).ToList<string>())
             {
                 this._keyToFileName.TryRemove(text2, out _);
+                TranslatedImage removedImage;
+                this._translatedImages.TryRemove(text2, out removedImage);
+                DateTime removedTime;
+                this._textureAccessTime.TryRemove(text2, out removedTime);
             }
         }
 
@@ -434,7 +417,6 @@ namespace GameTranslator.Patches.Translatons
                 }
                 throw new IOException($"Unable to read file '{_fileName}' after 3 attempts due to sharing violation.");
             }
-
             private readonly string _fileName;
         }
 
