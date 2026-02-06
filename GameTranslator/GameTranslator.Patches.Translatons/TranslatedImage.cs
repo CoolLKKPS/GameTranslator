@@ -63,7 +63,7 @@ namespace GameTranslator.Patches.Translatons
                 data = this._source.GetData();
                 this.Data = data;
 
-                XuaLogger.AutoTranslator.Debug("Image loaded: " + this.FileName + ".");
+                XuaLogger.AutoTranslator.Debug("Image loaded in GetData: " + this.FileName + ".");
             }
 
             return data;

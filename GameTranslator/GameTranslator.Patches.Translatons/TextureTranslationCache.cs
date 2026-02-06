@@ -98,7 +98,7 @@ namespace GameTranslator.Patches.Translatons
                     {
                         if (array.Length != 2)
                         {
-                            XuaLogger.AutoTranslator.Warn("Image not loaded (unknown hash): " + fullFileName + ".");
+                            XuaLogger.AutoTranslator.Warn("Image not loaded (Unknown hash): " + fullFileName + ".");
                             return;
                         }
                         text = array[0];
@@ -113,22 +113,22 @@ namespace GameTranslator.Patches.Translatons
                         this.RegisterTranslatedImage(fullFileName, text, data);
                         if (!flag)
                         {
-                            XuaLogger.AutoTranslator.Debug("Image loaded (unmodified): " + fullFileName + ".");
+                            XuaLogger.AutoTranslator.Debug("Image loaded (Unmodified): " + fullFileName + ".");
                         }
                         else
                         {
-                            XuaLogger.AutoTranslator.Debug("Image loaded: " + fullFileName + ".");
+                            XuaLogger.AutoTranslator.Debug("Image loaded (Modified): " + fullFileName + ".");
                         }
                     }
                     else
                     {
                         this.RegisterUntranslatedImage(text);
-                        XuaLogger.AutoTranslator.Debug("Image not loaded (unmodified): " + fullFileName + ".");
+                        XuaLogger.AutoTranslator.Debug("Image not loaded (Unmodified): " + fullFileName + ".");
                     }
                 }
                 else
                 {
-                    XuaLogger.AutoTranslator.Warn("Image not loaded (no hash): " + fullFileName + ".");
+                    XuaLogger.AutoTranslator.Warn("Image not loaded (No hash): " + fullFileName + ".");
                 }
             }
             catch (Exception ex)
