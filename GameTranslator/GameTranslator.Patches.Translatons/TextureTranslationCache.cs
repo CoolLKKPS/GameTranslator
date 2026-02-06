@@ -28,12 +28,16 @@ namespace GameTranslator.Patches.Translatons
             {
                 Directory.CreateDirectory(TranslatePlugin.TexturesPath);
                 string fullPath = Path.GetFullPath(TranslatePlugin.TexturesPath);
-                _textureFileWatcher = new SafeFileWatcher(fullPath);
-                _textureFileWatcher.DirectoryUpdated += TextureFileWatcher_DirectoryUpdated;
-                TranslatePlugin.logger.LogInfo("Tracking texture path: " + fullPath);
+                if (TranslatePlugin.enableFileWatcher?.Value ?? false)
+                {
+                    _textureFileWatcher = new SafeFileWatcher(fullPath);
+                    _textureFileWatcher.DirectoryUpdated += TextureFileWatcher_DirectoryUpdated;
+                    TranslatePlugin.logger.LogInfo("Tracking texture path: " + fullPath);
+                }
                 if (TranslatePlugin.enablePollingCheck?.Value ?? false)
                 {
                     _texturePollingTimer = new Timer(_ => TextureFileWatcher_DirectoryUpdated(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+                    TranslatePlugin.logger.LogInfo("Polling check tracking texture path " + fullPath);
                 }
             }
             catch (Exception ex)
@@ -142,6 +146,7 @@ namespace GameTranslator.Patches.Translatons
             {
                 TextureTranslationCache.FileSystemTranslatedImageSource fileSystemTranslatedImageSource = new TextureTranslationCache.FileSystemTranslatedImageSource(fullFileName);
                 this.RegisterImageFromStream(fullFileName, fileSystemTranslatedImageSource);
+                _textureFileLastModifiedTimes[fullFileName] = File.GetLastWriteTime(fullFileName);
             }
         }
 
@@ -276,8 +281,30 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                LoadTranslationFiles();
-                XuaLogger.AutoTranslator.Info("Texture files reloaded due to file changes.");
+                bool hasChanges = false;
+                foreach (string filePath in GetTextureFiles())
+                {
+                    if (!File.Exists(filePath))
+                        continue;
+                    DateTime currentModifiedTime = File.GetLastWriteTime(filePath);
+                    if (_textureFileLastModifiedTimes.TryGetValue(filePath, out DateTime recordedTime))
+                    {
+                        if (currentModifiedTime > recordedTime)
+                        {
+                            _textureFileLastModifiedTimes[filePath] = currentModifiedTime;
+                            hasChanges = true;
+                        }
+                    }
+                    else
+                    {
+                        _textureFileLastModifiedTimes[filePath] = currentModifiedTime;
+                    }
+                }
+                if (hasChanges)
+                {
+                    LoadTranslationFiles();
+                    XuaLogger.AutoTranslator.Info("Texture files reloaded due to file changes.");
+                }
             }
             catch (Exception ex)
             {

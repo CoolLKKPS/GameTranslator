@@ -40,6 +40,7 @@ namespace GameTranslator
         private void OnDestroy()
         {
             TranslateConfig.Unload();
+            base.Logger.LogInfo("GameTranslator destroyed");
         }
 
         private void ConfigFile()
@@ -47,7 +48,8 @@ namespace GameTranslator
             TranslatePlugin.syncTranslationThreshold = base.Config.Bind<int>("ASync", "Sync Translation Threshold", 300, "Define the character threshold to not use async translation");
             TranslatePlugin.showAvailableText = base.Config.Bind<bool>("Debug", "Show Available Text", false, "Define whether to show available text");
             TranslatePlugin.showOtherDebug = base.Config.Bind<bool>("Debug", "Show Other Debug", false, "Define whether to show other debug");
-            TranslatePlugin.enablePollingCheck = base.Config.Bind<bool>("Debug", "Enable Polling Check", false, "If true, enables the 30-second polling fallback for file updates (solve LethalPerformance Patch_FileSystemWatcher compatibility).");
+            TranslatePlugin.enableFileWatcher = base.Config.Bind<bool>("Debug", "Enable File Watcher", false, "If true, enable file system watcher for file updates");
+            TranslatePlugin.enablePollingCheck = base.Config.Bind<bool>("Debug", "Enable Polling Check", false, "If true, enable the 10-seconds polling fallback for file updates");
             TranslatePlugin.replaceUnsupportedCharacters = base.Config.Bind<bool>("Debug", "Replace Unsupported Characters", false, "Define whether to replace unsupported characters with Unicode character u25A1");
             TranslatePlugin.cacheUnmodifiedTextures = base.Config.Bind<bool>("Debug", "Cache Unmodified Textures", false, "Define whether to cache textures that have not been modified");
             TranslatePlugin.enableGrabbableObjectPatch = base.Config.Bind<bool>("Debug", "Enable GrabbableObject Patch", true, "Define whether to patch GrabbableObject");
@@ -312,6 +314,8 @@ namespace GameTranslator
         public static ConfigEntry<bool> showAvailableText;
 
         public static ConfigEntry<bool> showOtherDebug;
+
+        public static ConfigEntry<bool> enableFileWatcher;
 
         public static ConfigEntry<bool> enablePollingCheck;
 

@@ -23,7 +23,7 @@ namespace GameTranslator
 
         public static void Load()
         {
-            TranslateConfig.hud = TranslateConfig.CreateNewConfig("HUD-Translate", false);
+            TranslateConfig.hud = TranslateConfig.CreateNewConfig("HUD-Translate");
             TranslateConfig.hud.shouldTranslate = TranslatePlugin.shouldTranslateHUD.Value;
             TranslateConfig.hudText = new NormalTextTranslator(TranslateConfig.hud.ConfigFileName + ".cfg");
             TranslateConfig.hudText.Load();
@@ -53,16 +53,19 @@ namespace GameTranslator
             TranslateConfig.interactiveTerminalAPI.shouldTranslate = TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value;
             TranslateConfig.interactiveTerminalAPIText = new NormalTextTranslator(TranslateConfig.interactiveTerminalAPI.ConfigFileName + ".cfg");
             TranslateConfig.interactiveTerminalAPIText.Load();
-            TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate", false);
+            TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate");
             TranslateConfig.normal.shouldTranslate = TranslatePlugin.shouldTranslateNormalText.Value;
             TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
             TranslateConfig.normalText.Load();
             TranslateConfig.cache = new TextureTranslationCache();
             TranslateConfig.cache.LoadTranslationFiles();
             string fullPath = Path.GetFullPath(TranslatePlugin.DefaultPath);
-            _fileWatcher = new SafeFileWatcher(fullPath);
-            _fileWatcher.DirectoryUpdated += OnDirectoryUpdated;
-            TranslatePlugin.logger.LogInfo("Tracking path " + fullPath);
+            if (TranslatePlugin.enableFileWatcher?.Value ?? false)
+            {
+                _fileWatcher = new SafeFileWatcher(fullPath);
+                _fileWatcher.DirectoryUpdated += OnDirectoryUpdated;
+                TranslatePlugin.logger.LogInfo("Tracking path " + fullPath);
+            }
             foreach (TranslateConfig.TranslateConfigFile config in TranslateConfig.TranslateConfigFile.configs)
             {
                 if (File.Exists(config.ConfigFilePath))
@@ -74,6 +77,7 @@ namespace GameTranslator
             if (TranslatePlugin.enablePollingCheck?.Value ?? false)
             {
                 _pollingTimer = new Timer(_ => OnDirectoryUpdated(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+                TranslatePlugin.logger.LogInfo("Polling check tracking path " + fullPath);
             }
         }
 
