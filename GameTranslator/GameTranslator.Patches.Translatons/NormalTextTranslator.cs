@@ -24,7 +24,7 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogWarning("An error occurred while initializing the translation file: " + fileName);
+                TranslatePlugin.logger.LogError("An error occurred while initializing the translation file: " + fileName);
                 TranslatePlugin.logger.LogError(ex);
             }
         }
@@ -55,7 +55,7 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogWarning("An error occurred while loading " + this.FileName + " file!");
+                TranslatePlugin.logger.LogError("An error occurred while loading " + this.FileName + " file!");
                 TranslatePlugin.logger.LogError(ex);
             }
         }
@@ -324,7 +324,7 @@ namespace GameTranslator.Patches.Translatons
                     catch (Exception ex)
                     {
                         string textSnippet = NormalTextTranslator.GetTextSnippet(text, 50);
-                        TranslatePlugin.logger.LogWarning("There is a problem with the translation method: " + textSnippet);
+                        TranslatePlugin.logger.LogError("There is a problem with the translation method: " + textSnippet);
                         TranslatePlugin.logger.LogError("Translation error: " + ex.Message + "\n" + ex.StackTrace);
                     }
                     text2 = text3;
