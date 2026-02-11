@@ -22,10 +22,10 @@ namespace GameTranslator
 
         private static void CreateInstance()
         {
-            var gameObject = new GameObject("___GameTranslator_Manager");
-            gameObject.hideFlags = HideFlags.HideAndDontSave;
+            var gameObject = new GameObject("GameTranslatorManager");
             _instance = gameObject.AddComponent<GameTranslatorManager>();
-            GameObject.DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject);
+            gameObject.hideFlags = HideFlags.HideAndDontSave;
         }
 
         private void Awake()

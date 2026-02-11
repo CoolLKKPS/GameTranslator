@@ -303,7 +303,7 @@ namespace GameTranslator
 
         private const string PLUGIN_NAME = "GameTranslator";
 
-        private const string PLUGIN_VERSION = "2.0.9";
+        private const string PLUGIN_VERSION = "2.1.0";
 
         public static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
 
