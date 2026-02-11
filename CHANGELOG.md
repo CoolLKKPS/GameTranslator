@@ -1,6 +1,6 @@
-## v2.1.0
+## v2.1.1
 
-- Thunderstore issue? Fixed GameObject been destroyed, but didn't happen on my side btw
+- Fixed OnDestroy issue
 
 ## v2.0.9
 

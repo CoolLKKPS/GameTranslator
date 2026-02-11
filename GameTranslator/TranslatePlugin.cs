@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 using XUnity.Common.Utilities;
 
 namespace GameTranslator
@@ -19,6 +20,10 @@ namespace GameTranslator
         {
             TranslatePlugin.logger = base.Logger;
             TranslatePlugin.Instance = this;
+            this.gameObject.hideFlags = HideFlags.HideAndDontSave;
+            DontDestroyOnLoad(this.gameObject);
+            GameObject gameObject = new GameObject("GameTranslator Manager");
+            gameObject.AddComponent<TranslationUpdater>();
             this.ConfigFile();
             HookingHelper.PatchAll(ImageHooks.All, false);
             HookingHelper.PatchAll(ImageHooks.Sprite, false);
@@ -33,14 +38,36 @@ namespace GameTranslator
                 GameTranslator.Patches.Utils.FontSupportChecker.InitializeFonts();
             }
             GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.Start();
-            GameTranslatorManager.CreateGameObject();
             base.Logger.LogInfo("GameTranslator is loaded");
         }
 
         private void OnDestroy()
         {
+            try
+            {
+                AsyncTranslationManager.Instance.Stop();
+            }
+            catch (Exception ex)
+            {
+                TranslatePlugin.logger?.LogError("Error in GameTranslatorManager OnDestroy: " + ex.Message);
+            }
             TranslateConfig.Unload();
             base.Logger.LogInfo("GameTranslator destroyed");
+        }
+
+        private class TranslationUpdater : MonoBehaviour
+        {
+            private void Update()
+            {
+                try
+                {
+                    GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ProcessMainThreadActions();
+                }
+                catch (Exception ex)
+                {
+                    TranslatePlugin.logger?.LogError("Error in TranslationUpdater Update: " + ex.Message);
+                }
+            }
         }
 
         private void ConfigFile()
@@ -303,7 +330,7 @@ namespace GameTranslator
 
         private const string PLUGIN_NAME = "GameTranslator";
 
-        private const string PLUGIN_VERSION = "2.1.0";
+        private const string PLUGIN_VERSION = "2.1.1";
 
         public static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
 
@@ -372,6 +399,5 @@ namespace GameTranslator
         public static string TexturesPath;
 
         public static bool shouldTranslate;
-
     }
 }
