@@ -37,7 +37,7 @@ namespace GameTranslator
             {
                 GameTranslator.Patches.Utils.FontSupportChecker.InitializeFonts();
             }
-            GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.Start();
+            AsyncTranslationManager.Instance.Start();
             base.Logger.LogInfo("GameTranslator is loaded");
         }
 
@@ -49,7 +49,7 @@ namespace GameTranslator
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger?.LogError("Error in GameTranslatorManager OnDestroy: " + ex.Message);
+                TranslatePlugin.logger?.LogError("Error in OnDestroy: " + ex.Message);
             }
             TranslateConfig.Unload();
             base.Logger.LogInfo("GameTranslator destroyed");
@@ -61,7 +61,7 @@ namespace GameTranslator
             {
                 try
                 {
-                    GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ProcessMainThreadActions();
+                    AsyncTranslationManager.Instance.ProcessMainThreadActions();
                 }
                 catch (Exception ex)
                 {
