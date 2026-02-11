@@ -49,7 +49,7 @@ namespace GameTranslator
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger?.LogError("Error in OnDestroy: " + ex.Message);
+                TranslatePlugin.logger?.LogError("Error in GameTranslatorManager OnDestroy: " + ex.Message);
             }
             TranslateConfig.Unload();
             base.Logger.LogInfo("GameTranslator destroyed");
