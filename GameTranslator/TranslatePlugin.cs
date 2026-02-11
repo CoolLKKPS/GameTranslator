@@ -33,7 +33,7 @@ namespace GameTranslator
                 GameTranslator.Patches.Utils.FontSupportChecker.InitializeFonts();
             }
             GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.Start();
-            GameTranslatorManager.EnsureExists();
+            GameTranslatorManager.CreateGameObject();
             base.Logger.LogInfo("GameTranslator is loaded");
         }
 

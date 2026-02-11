@@ -4,4 +4,8 @@
     <Product>$(AssemblyName)</Product>
     <Version>1.0.0</Version>
   </PropertyGroup>
+
+  <Target Name="PackAfterBuild" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\pack.ps1&quot; -SkipBuild" />
+  </Target>
 </Project>

@@ -7,7 +7,7 @@ namespace GameTranslator
     public class GameTranslatorManager : MonoBehaviour
     {
         private static GameTranslatorManager _instance;
-        
+
         public static GameTranslatorManager Instance
         {
             get
@@ -17,6 +17,14 @@ namespace GameTranslator
                     CreateInstance();
                 }
                 return _instance;
+            }
+        }
+
+        public static void CreateGameObject()
+        {
+            if (_instance == null)
+            {
+                CreateInstance();
             }
         }
 
@@ -35,7 +43,6 @@ namespace GameTranslator
                 Destroy(gameObject);
                 return;
             }
-            
             _instance = this;
             TranslatePlugin.logger?.LogInfo("GameTranslatorManager initialized");
         }
@@ -63,14 +70,6 @@ namespace GameTranslator
             catch (Exception ex)
             {
                 TranslatePlugin.logger?.LogError("Error in GameTranslatorManager OnDestroy: " + ex.Message);
-            }
-        }
-
-        public static void EnsureExists()
-        {
-            if (_instance == null)
-            {
-                CreateInstance();
             }
         }
     }
