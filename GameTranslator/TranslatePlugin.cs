@@ -20,10 +20,10 @@ namespace GameTranslator
         {
             TranslatePlugin.logger = base.Logger;
             TranslatePlugin.Instance = this;
-            this.gameObject.hideFlags = HideFlags.HideAndDontSave;
-            DontDestroyOnLoad(this.gameObject);
             GameObject gameObject = new GameObject("GameTranslator Manager");
             gameObject.AddComponent<TranslationUpdater>();
+            this.gameObject.hideFlags = HideFlags.HideAndDontSave;
+            DontDestroyOnLoad(this.gameObject);
             this.ConfigFile();
             HookingHelper.PatchAll(ImageHooks.All, false);
             HookingHelper.PatchAll(ImageHooks.Sprite, false);
