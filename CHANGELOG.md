@@ -1,6 +1,10 @@
+## v2.1.2
+
+- InteractiveTerminalAPI Patch performance improve, thanks hu_luo_bo_ya!
+
 ## v2.1.1
 
-- Fixed OnDestroy issue
+- Fixed OnDestroy issue (Enable HideGameObject in BepInEx config if you still encounter this issue)
 
 ## v2.0.9
 

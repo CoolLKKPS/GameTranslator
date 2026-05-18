@@ -80,8 +80,14 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
                     MethodInfo getTextMethod = type.GetMethod("GetText", BindingFlags.Public | BindingFlags.Instance);
                     if (getTextMethod != null)
                     {
-                        _harmony.Patch(getTextMethod, postfix: new HarmonyMethod(typeof(InteractiveTerminalAPIPatch).GetMethod("GetTextPostfix", BindingFlags.NonPublic | BindingFlags.Static)));
-                        TranslatePlugin.logger.LogInfo($"Patched {type.Name}.GetText method");
+                        try
+                        {
+                            _harmony.Patch(getTextMethod, postfix: new HarmonyMethod(typeof(InteractiveTerminalAPIPatch).GetMethod("GetTextPostfix", BindingFlags.NonPublic | BindingFlags.Static)));
+                            TranslatePlugin.logger.LogInfo($"Patched {type.Name}.GetText method");
+                        }
+                        catch
+                        {
+                        }
                     }
                 }
             }

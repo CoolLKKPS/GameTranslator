@@ -49,7 +49,7 @@ namespace GameTranslator
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger?.LogError("Error in GameTranslatorManager OnDestroy: " + ex.Message);
+                TranslatePlugin.logger?.LogError("Error in OnDestroy: " + ex.Message);
             }
             TranslateConfig.Unload();
             base.Logger.LogInfo("GameTranslator destroyed");
@@ -329,7 +329,7 @@ namespace GameTranslator
 
         private const string PLUGIN_NAME = "GameTranslator";
 
-        private const string PLUGIN_VERSION = "2.1.1";
+        private const string PLUGIN_VERSION = "2.1.2";
 
         public static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
 
