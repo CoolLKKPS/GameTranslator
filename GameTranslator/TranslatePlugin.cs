@@ -309,9 +309,8 @@ namespace GameTranslator
             {
                 if (TranslatePlugin.shouldTranslateInteractiveTerminalAPI != null && TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
                 {
-                    this.harmony.PatchAll(typeof(GameTranslator.Patches.InteractiveTerminalAPI.InteractiveTerminalAPIPatch));
+                    GameTranslator.Patches.InteractiveTerminalAPI.InteractiveTerminalAPIPatch.Initialize(this.harmony);
                     TranslatePlugin.logger?.LogInfo("InteractiveTerminalAPI patch applied successfully");
-                    GameTranslator.Patches.InteractiveTerminalAPI.InteractiveTerminalAPIPatch.Initialize();
                 }
                 else
                 {

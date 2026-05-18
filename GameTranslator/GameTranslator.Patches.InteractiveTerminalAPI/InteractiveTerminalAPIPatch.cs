@@ -8,13 +8,13 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
     {
         private static bool _isInteractiveTerminalAPIAvailable = false;
         private static Assembly _interactiveTerminalAPIAssembly = null;
-        private static readonly Harmony _harmony = new Harmony("GameTranslator.InteractiveTerminalAPI");
-        private static readonly FieldInfo _terminalModifyingText = typeof(Terminal).GetField("modifyingText", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        private static Harmony _harmony = null;
 
-        public static void Initialize()
+        public static void Initialize(Harmony harmony)
         {
             try
             {
+                _harmony = harmony;
                 _isInteractiveTerminalAPIAvailable = IsInteractiveTerminalAPIAvailable();
 
                 if (_isInteractiveTerminalAPIAvailable)
@@ -54,9 +54,7 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
                 if (!_isInteractiveTerminalAPIAvailable || _interactiveTerminalAPIAssembly == null)
                     return;
 
-                PatchTerminalApplicationMethods();
-                PatchTextElementMethods();
-                PatchScreenMethods();
+                PatchGetTextMethods();
             }
             catch (Exception ex)
             {
@@ -64,115 +62,36 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
             }
         }
 
-        private static void PatchTextElementMethods()
+        private static void PatchGetTextMethods()
         {
-            Type textElementType = _interactiveTerminalAPIAssembly.GetType("InteractiveTerminalAPI.UI.TextElement");
-            if (textElementType != null)
+            string[] typeNames = new string[]
             {
-                MethodInfo getTextMethod = textElementType.GetMethod("GetText", BindingFlags.Public | BindingFlags.Instance);
-                if (getTextMethod != null)
-                {
-                    _harmony.Patch(getTextMethod, prefix: new HarmonyMethod(typeof(InteractiveTerminalAPIPatch).GetMethod("GetTextPrefix", BindingFlags.NonPublic | BindingFlags.Static)));
-                    TranslatePlugin.logger.LogInfo("Patched TextElement.GetText method");
-                }
-            }
-        }
+                "InteractiveTerminalAPI.UI.TextElement",
+                "InteractiveTerminalAPI.UI.Cursor.CursorElement",
+                "InteractiveTerminalAPI.UI.Page.PageElement",
+                "InteractiveTerminalAPI.UI.Screen.BoxedScreen"
+            };
 
-        private static void PatchScreenMethods()
-        {
-            Type iScreenType = _interactiveTerminalAPIAssembly.GetType("InteractiveTerminalAPI.UI.Screen.IScreen");
-            if (iScreenType != null)
+            foreach (string typeName in typeNames)
             {
-                Type[] types = _interactiveTerminalAPIAssembly.GetTypes();
-                foreach (Type type in types)
+                Type type = _interactiveTerminalAPIAssembly.GetType(typeName);
+                if (type != null)
                 {
-                    if (iScreenType.IsAssignableFrom(type) && !type.IsInterface)
+                    MethodInfo getTextMethod = type.GetMethod("GetText", BindingFlags.Public | BindingFlags.Instance);
+                    if (getTextMethod != null)
                     {
-                        MethodInfo getTextMethod = type.GetMethod("GetText", BindingFlags.Public | BindingFlags.Instance);
-                        if (getTextMethod != null && getTextMethod.DeclaringType == type)
-                        {
-                            try
-                            {
-                                _harmony.Patch(getTextMethod, prefix: new HarmonyMethod(typeof(InteractiveTerminalAPIPatch).GetMethod("IScreenGetTextPrefix", BindingFlags.NonPublic | BindingFlags.Static)));
-                                TranslatePlugin.logger.LogInfo($"Patched {type.Name}.GetText method");
-                            }
-                            catch
-                            {
-                            }
-                        }
+                        _harmony.Patch(getTextMethod, postfix: new HarmonyMethod(typeof(InteractiveTerminalAPIPatch).GetMethod("GetTextPostfix", BindingFlags.NonPublic | BindingFlags.Static)));
+                        TranslatePlugin.logger.LogInfo($"Patched {type.Name}.GetText method");
                     }
                 }
             }
         }
 
-        private static void PatchTerminalApplicationMethods()
-        {
-            Type terminalApplicationType = _interactiveTerminalAPIAssembly.GetType("InteractiveTerminalAPI.UI.Application.TerminalApplication");
-            if (terminalApplicationType != null)
-            {
-                MethodInfo updateTextMethod = terminalApplicationType.GetMethod("UpdateText", BindingFlags.Public | BindingFlags.Instance);
-                if (updateTextMethod != null)
-                {
-                    _harmony.Patch(updateTextMethod, postfix: new HarmonyMethod(typeof(InteractiveTerminalAPIPatch).GetMethod("UpdateTextPostfix", BindingFlags.NonPublic | BindingFlags.Static)));
-                    TranslatePlugin.logger.LogInfo("Patched TerminalApplication.UpdateText method");
-                }
-            }
-        }
-
-        private static void GetTextPrefix(ref string __result)
+        private static void GetTextPostfix(ref string __result)
         {
             if (!string.IsNullOrEmpty(__result) && TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
             {
                 __result = TranslateInteractiveText(__result);
-            }
-        }
-
-        private static void IScreenGetTextPrefix(ref string __result)
-        {
-            if (!string.IsNullOrEmpty(__result) && TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
-            {
-                __result = TranslateInteractiveText(__result);
-            }
-        }
-
-        private static void UpdateTextPostfix(object __instance)
-        {
-            try
-            {
-                if (__instance == null || !TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
-                    return;
-
-                Type instanceType = __instance.GetType();
-                FieldInfo terminalField = instanceType.GetField("terminal", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (terminalField != null && _terminalModifyingText != null)
-                {
-                    object terminal = terminalField.GetValue(__instance);
-                    if (terminal is Terminal term && term.screenText != null)
-                    {
-                        bool isModifyingText = (bool)_terminalModifyingText.GetValue(term);
-                        if (!isModifyingText)
-                        {
-                            string currentText = term.screenText.text;
-                            if (!string.IsNullOrEmpty(currentText))
-                            {
-                                string translatedText = TranslateInteractiveText(currentText);
-                                if (translatedText != currentText)
-                                {
-                                    _terminalModifyingText.SetValue(term, true);
-                                    term.screenText.text = translatedText;
-                                    term.currentText = translatedText;
-                                    term.screenText.interactable = false;
-                                    term.screenText.DeactivateInputField();
-                                    _terminalModifyingText.SetValue(term, false);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                TranslatePlugin.logger.LogError("Error in UpdateTextPostfix: " + ex.Message);
             }
         }
 
@@ -190,7 +109,13 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
 
                 if (TranslateConfig.interactiveTerminalAPI != null && TranslateConfig.interactiveTerminalAPI.shouldTranslate)
                 {
-                    return TranslateConfig.replaceByMap(text, TranslateConfig.interactiveTerminalAPI);
+                    string translated = TranslateConfig.replaceByMap(text, TranslateConfig.interactiveTerminalAPI);
+                    if (TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value &&
+                        GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"InteractiveTerminalAPI_translated:{translated}"))
+                    {
+                        TranslatePlugin.LogInfo($"[Debug] InteractiveTerminalAPI translated: '{translated}'");
+                    }
+                    return translated;
                 }
                 return text;
             }
@@ -199,11 +124,6 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
                 TranslatePlugin.logger.LogError("Error translating InteractiveTerminalAPI text: " + ex.Message);
                 return text;
             }
-        }
-
-        public static string TranslateText(string text)
-        {
-            return TranslateInteractiveText(text);
         }
     }
 }
