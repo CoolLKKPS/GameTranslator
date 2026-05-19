@@ -66,12 +66,11 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
         {
             string[] typeNames = new string[]
             {
-                "InteractiveTerminalAPI.UI.TextElement",
-                "InteractiveTerminalAPI.UI.Cursor.CursorElement",
+                // "InteractiveTerminalAPI.UI.TextElement",
+                // "InteractiveTerminalAPI.UI.Cursor.CursorElement",
                 "InteractiveTerminalAPI.UI.Page.PageElement",
                 "InteractiveTerminalAPI.UI.Screen.BoxedScreen"
             };
-
             foreach (string typeName in typeNames)
             {
                 Type type = _interactiveTerminalAPIAssembly.GetType(typeName);
@@ -85,8 +84,9 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
                             _harmony.Patch(getTextMethod, postfix: new HarmonyMethod(typeof(InteractiveTerminalAPIPatch).GetMethod("GetTextPostfix", BindingFlags.NonPublic | BindingFlags.Static)));
                             TranslatePlugin.logger.LogInfo($"Patched {type.Name}.GetText method");
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            TranslatePlugin.logger.LogWarning($"Failed to patch {type.Name}.GetText: {ex}");
                         }
                     }
                 }
