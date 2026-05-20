@@ -20,8 +20,7 @@ namespace GameTranslator
         {
             TranslatePlugin.logger = base.Logger;
             TranslatePlugin.Instance = this;
-            GameObject gameObject = new GameObject("GameTranslator Manager");
-            gameObject.AddComponent<TranslationUpdater>();
+            this.gameObject.AddComponent<TranslationUpdater>();
             this.gameObject.hideFlags = HideFlags.HideAndDontSave;
             DontDestroyOnLoad(this.gameObject);
             this.ConfigFile();
@@ -329,7 +328,7 @@ namespace GameTranslator
 
         private const string PLUGIN_NAME = "GameTranslator";
 
-        private const string PLUGIN_VERSION = "2.1.2";
+        private const string PLUGIN_VERSION = "2.1.3";
 
         public static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
 

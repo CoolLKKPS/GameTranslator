@@ -11,7 +11,7 @@ namespace GameTranslator.Patches.Translatons
     {
         private readonly TranslationManager _translationManager;
         private readonly ConcurrentQueue<Action> _mainThreadActions;
-        private readonly HashSet<string> _immediatelyTranslating;
+        private readonly ConcurrentDictionary<string, byte> _immediatelyTranslating;
         private float _batchOperationSecondCounter = 0;
         private readonly Dictionary<string, TextStabilizationContext> _stabilizationContexts;
         private bool _textHooksEnabled = true;
@@ -23,7 +23,7 @@ namespace GameTranslator.Patches.Translatons
         {
             _translationManager = new TranslationManager();
             _mainThreadActions = new ConcurrentQueue<Action>();
-            _immediatelyTranslating = new HashSet<string>();
+            _immediatelyTranslating = new ConcurrentDictionary<string, byte>();
             _stabilizationContexts = new Dictionary<string, TextStabilizationContext>();
             _translationManager.JobCompleted += OnTranslationJobCompleted;
             _translationManager.JobFailed += OnTranslationJobFailed;
@@ -93,9 +93,8 @@ namespace GameTranslator.Patches.Translatons
                 if (_translationManager?.PrimaryEndpoint != null)
                 {
                     var isTranslatable = normalText == null || normalText.IsTranslatable(originalText, false);
-                    if (!_immediatelyTranslating.Contains(originalText))
+                    if (_immediatelyTranslating.TryAdd(originalText, 0))
                     {
-                        _immediatelyTranslating.Add(originalText);
                         if (ShouldStabilizeText(ui, originalText))
                         {
                             StartTextStabilization(ui, originalText, info, normalText, config);
@@ -120,6 +119,7 @@ namespace GameTranslator.Patches.Translatons
             catch (Exception e)
             {
                 TranslatePlugin.logger.LogError($"An unexpected error occurred in QueueTranslation: {e.Message}");
+                TranslatePlugin.logger.LogError(e);
             }
         }
 
@@ -158,7 +158,7 @@ namespace GameTranslator.Patches.Translatons
                         try
                         {
                             _stabilizationContexts.Remove(GetStabilizationKey(ui, context.OriginalText));
-                            _immediatelyTranslating.Remove(context.OriginalText);
+                            _immediatelyTranslating.TryRemove(context.OriginalText, out _);
                         }
                         catch (Exception ex)
                         {
@@ -171,13 +171,33 @@ namespace GameTranslator.Patches.Translatons
                         try
                         {
                             _stabilizationContexts.Remove(GetStabilizationKey(ui, context.OriginalText));
-                            _immediatelyTranslating.Remove(context.OriginalText);
+                            _immediatelyTranslating.TryRemove(context.OriginalText, out _);
                         }
                         catch (Exception ex)
                         {
                             TranslatePlugin.logger.LogError($"Error cleaning up stabilization context: {ex.Message}");
                         }
                     }));
+            }
+            else
+            {
+                // Non MonoBehaviour Fallback
+                _stabilizationContexts.Remove(key);
+                if (_translationManager?.PrimaryEndpoint != null)
+                {
+                    var isTranslatable = normalText == null || normalText.IsTranslatable(text, false);
+                    var job = new TranslationJob(ui, text, true, isTranslatable);
+                    job.Associate(text, ui, info, normalText, config, true, true);
+                    _translationManager.PrimaryEndpoint.EnqueueTranslation(
+                        ui,
+                        text,
+                        info,
+                        normalText,
+                        config,
+                        isTranslatable,
+                        true
+                    );
+                }
             }
         }
 
@@ -268,6 +288,7 @@ namespace GameTranslator.Patches.Translatons
                 catch (Exception ex)
                 {
                     TranslatePlugin.logger.LogError($"Error in main thread action: {ex.Message}");
+                    TranslatePlugin.logger.LogError(ex);
                 }
             }
         }
@@ -302,7 +323,7 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                _immediatelyTranslating.Remove(job.OriginalText);
+                _immediatelyTranslating.TryRemove(job.OriginalText, out _);
                 if (!string.IsNullOrEmpty(job.TranslatedText))
                 {
                     foreach (var ui in job.AssociatedUIs)
@@ -319,6 +340,7 @@ namespace GameTranslator.Patches.Translatons
             catch (Exception ex)
             {
                 TranslatePlugin.logger.LogError($"Error handling translation job completion: {ex.Message}");
+                TranslatePlugin.logger.LogError(ex);
             }
         }
 
@@ -326,13 +348,14 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                _immediatelyTranslating.Remove(job.OriginalText);
+                _immediatelyTranslating.TryRemove(job.OriginalText, out _);
 
                 TranslatePlugin.logger.LogWarning($"Translation failed for '{job.OriginalText}': {job.ErrorMessage}");
             }
             catch (Exception ex)
             {
                 TranslatePlugin.logger.LogError($"Error handling translation job failure: {ex.Message}");
+                TranslatePlugin.logger.LogError(ex);
             }
         }
 
@@ -366,6 +389,7 @@ namespace GameTranslator.Patches.Translatons
             catch (System.Exception ex)
             {
                 TranslatePlugin.logger.LogError($"Failed to safely update UI for text '{originalText}': {ex.Message}");
+                TranslatePlugin.logger.LogError(ex);
             }
         }
 
