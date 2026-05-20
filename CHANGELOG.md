@@ -1,3 +1,9 @@
+## v2.1.3
+
+- Finally fixed OnDestroy issue
+- Added async translation fallback for non MonoBehaviour (even that might never be used)
+- Added more error logs
+
 ## v2.1.2
 
 - InteractiveTerminalAPI Patch performance improve, thanks hu_luo_bo_ya!
