@@ -93,26 +93,24 @@ namespace GameTranslator.Patches.Translatons
                 if (_translationManager?.PrimaryEndpoint != null)
                 {
                     var isTranslatable = normalText == null || normalText.IsTranslatable(originalText, false);
-                    if (_immediatelyTranslating.TryAdd(originalText, 0))
+                    if (ShouldStabilizeText(ui, originalText))
                     {
-                        if (ShouldStabilizeText(ui, originalText))
+                        if (_immediatelyTranslating.TryAdd(originalText, 0))
                         {
                             StartTextStabilization(ui, originalText, info, normalText, config);
                         }
-                        else
-                        {
-                            var job = new TranslationJob(ui, originalText, true, isTranslatable);
-                            job.Associate(originalText, ui, info, normalText, config, true, true);
-                            _translationManager.PrimaryEndpoint.EnqueueTranslation(
-                                ui,
-                                originalText,
-                                info,
-                                normalText,
-                                config,
-                                isTranslatable,
-                                true
-                            );
-                        }
+                    }
+                    else
+                    {
+                        _translationManager.PrimaryEndpoint.EnqueueTranslation(
+                            ui,
+                            originalText,
+                            info,
+                            normalText,
+                            config,
+                            isTranslatable,
+                            true
+                        );
                     }
                 }
             }
@@ -131,6 +129,7 @@ namespace GameTranslator.Patches.Translatons
                 return false;
             }
             return text.Length > 100;
+            // return text.Length > TranslatePlugin.syncTranslationThreshold.Value;
         }
 
         private void StartTextStabilization(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
@@ -149,7 +148,7 @@ namespace GameTranslator.Patches.Translatons
             };
             string key = GetStabilizationKey(ui, text);
             _stabilizationContexts[key] = context;
-            if (ui is MonoBehaviour behaviour)
+            if (ui is MonoBehaviour behaviour && behaviour.gameObject.activeInHierarchy)
             {
                 behaviour.StartCoroutine(WaitForTextStablization(ui, info, context.Delay, context.MaxTries, 0,
                     stabilizedText =>
@@ -181,23 +180,9 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                // Non MonoBehaviour Fallback
+                // GameObject is inactive or not a MonoBehaviour
                 _stabilizationContexts.Remove(key);
-                if (_translationManager?.PrimaryEndpoint != null)
-                {
-                    var isTranslatable = normalText == null || normalText.IsTranslatable(text, false);
-                    var job = new TranslationJob(ui, text, true, isTranslatable);
-                    job.Associate(text, ui, info, normalText, config, true, true);
-                    _translationManager.PrimaryEndpoint.EnqueueTranslation(
-                        ui,
-                        text,
-                        info,
-                        normalText,
-                        config,
-                        isTranslatable,
-                        true
-                    );
-                }
+                _immediatelyTranslating.TryRemove(text, out _);
             }
         }
 

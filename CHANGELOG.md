@@ -1,7 +1,7 @@
 ## v2.1.3
 
 - Finally fixed OnDestroy issue
-- Added async translation fallback for non MonoBehaviour (even that might never be used)
+- Async translation now will remove translation job when the GameObject is inactive
 - Added more error logs
 
 ## v2.1.2
@@ -10,7 +10,7 @@
 
 ## v2.1.1
 
-- Fixed OnDestroy issue (Enable HideGameObject in BepInEx config if you still encounter this issue)
+- Fixed OnDestroy issue (Nope!)
 
 ## v2.0.9
 

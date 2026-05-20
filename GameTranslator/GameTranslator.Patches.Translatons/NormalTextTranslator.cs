@@ -265,7 +265,7 @@ namespace GameTranslator.Patches.Translatons
                     string text3 = text;
                     try
                     {
-                        if (!this._failedRegexLookups.Contains(text3))
+                        if (!this._failedRegexLookups.ContainsKey(text3))
                         {
                             bool regexMatched = false;
                             List<RegexTranslation> regexesToRemove = new List<RegexTranslation>();
@@ -311,7 +311,7 @@ namespace GameTranslator.Patches.Translatons
 
                             if (!regexMatched)
                             {
-                                this._failedRegexLookups.Add(text3);
+                                this._failedRegexLookups.TryAdd(text3, 0);
 
                                 if (this._failedRegexLookups.Count > 10000)
                                 {
@@ -536,7 +536,7 @@ namespace GameTranslator.Patches.Translatons
 
         public HashSet<string> _registeredSplitterRegexes = new HashSet<string>();
 
-        private HashSet<string> _failedRegexLookups = new HashSet<string>();
+        private ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
 
         private Dictionary<int, ScopedTranslationData> _scopedTranslations = new Dictionary<int, ScopedTranslationData>();
 
