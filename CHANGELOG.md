@@ -1,3 +1,7 @@
+## v2.1.4
+
+- ASync Translation Reliability Improve
+
 ## v2.1.3
 
 - Finally fixed OnDestroy issue
