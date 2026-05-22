@@ -1,3 +1,8 @@
+## v2.1.5
+
+- ASync Translation Reliability Improve x2, for some mods similar like FinallyCorrectKeys
+- Instead removing \\u200B that user can never see in UI, i more like to make more accurate translation
+
 ## v2.1.4
 
 - ASync Translation Reliability Improve
