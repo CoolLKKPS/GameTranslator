@@ -65,9 +65,16 @@ namespace GameTranslator.Patches.Translatons
             if (!_textHooksEnabled || _temporarilyDisabled) return;
             try
             {
-                if (info != null && info.IsTranslated)
+                if (info != null)
                 {
-                    info.Reset(originalText);
+                    if (info.IsTranslated)
+                    {
+                        info.Reset(originalText);
+                    }
+                    else
+                    {
+                        info.OriginalText = originalText;
+                    }
                 }
                 var cachedTranslation = GetCachedTranslation(originalText, config);
                 if (cachedTranslation != null)
