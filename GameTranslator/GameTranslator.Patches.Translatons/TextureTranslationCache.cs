@@ -473,7 +473,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     uint num = lookup[(int)bytes[i]];
                     array[2 * i] = (char)num;
-                    array[2 * i + 1] = (char)(num >> 16);
+                    array[(2 * i) + 1] = (char)(num >> 16);
                 }
                 return new string(array);
             }

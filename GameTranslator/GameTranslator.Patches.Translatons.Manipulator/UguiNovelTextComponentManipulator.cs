@@ -8,7 +8,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
     {
         public UguiNovelTextComponentManipulator(Type type)
         {
-            this._type = type;
+            this._type = type; // I know this unnecessary
             this._property = type.CachedProperty(UguiNovelTextComponentManipulator.TextPropertyName);
         }
 
@@ -27,8 +27,8 @@ namespace GameTranslator.Patches.Translatons.Manipulator
 
         private static readonly string TextPropertyName = "text";
 
-        private readonly Type _type;
-
         private readonly CachedProperty _property;
+
+        private readonly Type _type; // I know this unnecessary
     }
 }

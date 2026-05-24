@@ -78,6 +78,9 @@ namespace GameTranslator
             TranslatePlugin.enablePollingCheck = base.Config.Bind<bool>("Debug", "Enable Polling Check", false, "If true, enable the 10-seconds polling fallback for file updates");
             TranslatePlugin.replaceUnsupportedCharacters = base.Config.Bind<bool>("Debug", "Replace Unsupported Characters", false, "Define whether to replace unsupported characters with Unicode character u25A1");
             TranslatePlugin.cacheUnmodifiedTextures = base.Config.Bind<bool>("Debug", "Cache Unmodified Textures", false, "Define whether to cache textures that have not been modified");
+            TranslatePlugin.stabilizationMinTextLength = base.Config.Bind<int>("Debug", "Stabilization Min Text Length", 100, "Define minimum text length to trigger stabilization. Set to 0 to disable stabilization");
+            TranslatePlugin.stabilizationDelay = base.Config.Bind<float>("Debug", "Stabilization Delay", 0.9f, "Define delay in seconds between stabilization checks. Must be greater than 0");
+            TranslatePlugin.stabilizationMaxRetries = base.Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
             TranslatePlugin.enableGrabbableObjectPatch = base.Config.Bind<bool>("Debug", "Enable GrabbableObject Patch", true, "Define whether to patch GrabbableObject");
             TranslatePlugin.enableHUDManagerPatch = base.Config.Bind<bool>("Debug", "Enable HUDManager Patch", true, "Define whether to patch HUDManager");
             TranslatePlugin.enableTerminalPatch = base.Config.Bind<bool>("Debug", "Enable Terminal Patch", true, "Define whether to patch Terminal");
@@ -328,7 +331,7 @@ namespace GameTranslator
 
         private const string PLUGIN_NAME = "GameTranslator";
 
-        private const string PLUGIN_VERSION = "2.1.5";
+        private const string PLUGIN_VERSION = "2.1.6";
 
         public static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
 
@@ -347,6 +350,12 @@ namespace GameTranslator
         public static ConfigEntry<bool> replaceUnsupportedCharacters;
 
         public static ConfigEntry<bool> cacheUnmodifiedTextures;
+
+        public static ConfigEntry<int> stabilizationMinTextLength;
+
+        public static ConfigEntry<float> stabilizationDelay;
+
+        public static ConfigEntry<int> stabilizationMaxRetries;
 
         public static ConfigEntry<bool> enableGrabbableObjectPatch;
 

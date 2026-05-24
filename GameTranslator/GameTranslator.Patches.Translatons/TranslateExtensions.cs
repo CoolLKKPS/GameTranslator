@@ -98,7 +98,7 @@ namespace GameTranslator.Patches.Translatons
                         }
                         else if (num >= array.Length)
                         {
-                            int[] array2 = new int[array.Length * 3 / 2 + 4];
+                            int[] array2 = new int[(array.Length * 3 / 2) + 4];
                             Array.Copy(array, array2, array.Length);
                             array = array2;
                         }

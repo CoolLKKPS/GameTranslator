@@ -119,7 +119,10 @@ namespace GameTranslator.Patches.Utils
             return false;
         }
 
-        private static bool IsGUIContentUnsafe(object ui) => ui is GUIContent;
+        private static bool IsGUIContentUnsafe(object ui)
+        {
+            return ui is GUIContent;
+        }
 
         private static bool SetTextOnGUIContentSafe(object ui, string text)
         {

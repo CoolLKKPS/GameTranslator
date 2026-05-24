@@ -123,6 +123,8 @@ namespace GameTranslator.Patches
 
         private static string lastChat = "";
 
+        // These might not be needed, but I'll keep them here just in case.
+
         private static readonly BindingFlags All = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
         private static MethodInfo CanTipDisplay = typeof(HUDManager).GetMethod("CanTipDisplay", HUDManagerPatcher.All);

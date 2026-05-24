@@ -14,9 +14,7 @@ namespace GameTranslator.Patches.Translatons
         private readonly ConcurrentDictionary<string, byte> _immediatelyTranslating;
         private readonly Dictionary<string, TextStabilizationContext> _stabilizationContexts;
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, byte>> _pendingStabilizationUIs;
-        private bool _textHooksEnabled = true;
         private bool _temporarilyDisabled = false;
-        // private float _batchOperationSecondCounter = 0;
 
         public static AsyncTranslationManager Instance { get; } = new AsyncTranslationManager();
 
@@ -47,6 +45,7 @@ namespace GameTranslator.Patches.Translatons
             _stabilizationContexts.Clear();
         }
 
+        // This is for other devs for debugging, might not useful
         public bool IsTemporarilyDisabled()
         {
             return _temporarilyDisabled;
@@ -62,7 +61,7 @@ namespace GameTranslator.Patches.Translatons
         public void QueueTranslation(object ui, string originalText, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
             if (string.IsNullOrEmpty(originalText) || string.IsNullOrWhiteSpace(originalText)) return;
-            if (!_textHooksEnabled || _temporarilyDisabled) return;
+            if (_temporarilyDisabled) return;
             try
             {
                 if (info != null)
@@ -150,8 +149,9 @@ namespace GameTranslator.Patches.Translatons
             {
                 return false;
             }
-            return text.Length > 100;
-            // return text.Length > TranslatePlugin.syncTranslationThreshold.Value;
+            int threshold = TranslatePlugin.stabilizationMinTextLength?.Value ?? 100;
+            if (threshold == 0) return false;
+            return text.Length > threshold;
         }
 
         private void StartTextStabilization(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, string immKey)
@@ -164,9 +164,9 @@ namespace GameTranslator.Patches.Translatons
                 NormalText = normalText,
                 Config = config,
                 StartTime = Time.realtimeSinceStartup,
-                MaxTries = 60,
+                MaxTries = (TranslatePlugin.stabilizationMaxRetries?.Value ?? 60) == 0 ? int.MaxValue : (TranslatePlugin.stabilizationMaxRetries?.Value ?? 60),
                 CurrentTries = 0,
-                Delay = 0.9f
+                Delay = (TranslatePlugin.stabilizationDelay?.Value > 0f ? TranslatePlugin.stabilizationDelay.Value : 0.9f)
             };
             string key = GetStabilizationKey(ui, text);
             _stabilizationContexts[key] = context;
@@ -301,6 +301,8 @@ namespace GameTranslator.Patches.Translatons
         }
 
         /*
+        private float _batchOperationSecondCounter = 0;
+
         private void IncrementBatchOperations()
         {
             _batchOperationSecondCounter += Time.deltaTime;
