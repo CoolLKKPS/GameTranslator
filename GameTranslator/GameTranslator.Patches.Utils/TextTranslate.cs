@@ -284,7 +284,11 @@ namespace GameTranslator.Patches.Utils
                 if (text3 != null)
                 {
                     text3 = TranslateConfig.replaceByMap(text3, config);
-                    this.SetTranslatedText(ui, text3, text, info);
+                    if (info != null)
+                    {
+                        info.OriginalText = text;
+                        info.SetTranslatedText(text3);
+                    }
                 }
             }
             return text3;

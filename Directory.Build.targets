@@ -39,7 +39,7 @@
 			<HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/UnityEngine.UI.dll</HintPath>
 		</Reference>
 		<Reference Include="XUnity.Common">
-			<HintPath>D:\Runtime dependencies (local)\BepInEx\core\Hayrizan-XUnity_AutoTranslator\XUnity.Common.dll</HintPath>
+			<HintPath>$(SolutionRoot)lib\XUnity.Common.dll</HintPath>
 		</Reference>
 		<Reference Include="InteractiveTerminalAPI">
 			<HintPath>D:\Runtime dependencies (local)\BepInEx\plugins\WhiteSpike-Interactive_Terminal_API\InteractiveTerminalAPI\InteractiveTerminalAPI.dll</HintPath>

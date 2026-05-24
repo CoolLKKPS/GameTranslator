@@ -18,7 +18,7 @@ $changelogPath = Join-Path $root "CHANGELOG.md"
 $thunderstoreDir = Join-Path $root "Thunderstore"
 $tempDir = Join-Path $root "temp_package"
 
-$xunityDllPath = "D:\Runtime dependencies (local)\BepInEx\core\Hayrizan-XUnity_AutoTranslator\XUnity.Common.dll"
+$xunityDllPath = Join-Path $root "lib\XUnity.Common.dll"
 
 $manifest = Get-Content $manifestPath | ConvertFrom-Json
 $version = $manifest.version_number

@@ -152,6 +152,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProUGUIHook),
                 typeof(GameTranslator.Patches.Hooks.TextArea2DHook),
                 typeof(GameTranslator.Patches.Hooks.TextFieldHook),
+                typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextMeshHook),
                 typeof(GameTranslator.Patches.Hooks.Texture2DHook),

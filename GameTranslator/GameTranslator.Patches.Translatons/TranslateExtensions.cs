@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 using XUnity.Common.Constants;
 using XUnity.Common.Extensions;
 using XUnity.Common.Harmony;
@@ -502,7 +503,8 @@ namespace GameTranslator.Patches.Translatons
                    (UnityTypes.TextArea2D != null && UnityTypes.TextArea2D.IsAssignableFrom(type)) ||
                    (UnityTypes.UguiNovelText != null && UnityTypes.UguiNovelText.IsAssignableFrom(type)) ||
                    (UnityTypes.UILabel != null && UnityTypes.UILabel.IsAssignableFrom(type)) ||
-                   (UnityTypes.TextMesh != null && UnityTypes.TextMesh.IsAssignableFrom(type));
+                   (UnityTypes.TextMesh != null && UnityTypes.TextMesh.IsAssignableFrom(type)) ||
+                   (TextElementType != null && TextElementType.IsAssignableFrom(type));
         }
 
         public static Component GetFirstComponentInSelfOrAncestor(this GameObject go, Type type)
@@ -645,6 +647,8 @@ namespace GameTranslator.Patches.Translatons
         }
 
         private static readonly Dictionary<Type, ITextComponentManipulator> Manipulators = new Dictionary<Type, ITextComponentManipulator>();
+
+        private static readonly Type TextElementType = typeof(TextElement);
 
         public static FieldInfo m_ChunkOffset = typeof(StringBuilder).GetField("m_ChunkOffset", BindingFlags.Instance | BindingFlags.NonPublic);
 
