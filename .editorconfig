@@ -1,6 +1,8 @@
 root = true
 
 [*.cs]
+dotnet_analyzer_diagnostic.category-Style.severity = warning
+
 tab_width = 4
 indent_style = space
 
@@ -43,3 +45,8 @@ dotnet_diagnostic.IDE0051.severity = none
 dotnet_diagnostic.IDE0060.severity = none
 dotnet_diagnostic.IDE0018.severity = none
 dotnet_diagnostic.IDE0290.severity = none
+
+dotnet_diagnostic.IDE0004.severity = suggestion
+dotnet_diagnostic.IDE0040.severity = suggestion
+dotnet_diagnostic.IDE0052.severity = suggestion
+dotnet_diagnostic.IDE0058.severity = suggestion

@@ -1,3 +1,8 @@
+## v2.1.6
+
+- Added debug config and remove hardcoded value
+- Added UIElements tiny support
+
 ## v2.1.5
 
 - ASync Translation Reliability Improve x2, for some mods similar like FinallyCorrectKeys
