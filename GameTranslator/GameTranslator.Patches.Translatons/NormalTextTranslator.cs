@@ -39,19 +39,22 @@ namespace GameTranslator.Patches.Translatons
             }
             try
             {
-                this.CleanupCurrentFileRegexCache();
-                this._defaultRegexes.Clear();
-                this._translations.Clear();
-                this._reverseTranslations.Clear();
-                this._partialTranslations.Clear();
-                this._tokenTranslations.Clear();
-                this._reverseTokenTranslations.Clear();
-                this._splitterRegexes.Clear();
-                this._registeredRegexes.Clear();
-                this._registeredSplitterRegexes.Clear();
-                this._failedRegexLookups.Clear();
-                this.LoadTranslationsInStream(this.FilePath, this.FileName, false, true);
-                this.PrecompileAndCacheRegexes();
+                lock (this._regexLock)
+                {
+                    this.CleanupCurrentFileRegexCache();
+                    this._defaultRegexes.Clear();
+                    this._translations.Clear();
+                    this._reverseTranslations.Clear();
+                    this._partialTranslations.Clear();
+                    this._tokenTranslations.Clear();
+                    this._reverseTokenTranslations.Clear();
+                    this._splitterRegexes.Clear();
+                    this._registeredRegexes.Clear();
+                    this._registeredSplitterRegexes.Clear();
+                    this._failedRegexLookups.Clear();
+                    this.LoadTranslationsInStream(this.FilePath, this.FileName, false, true);
+                    this.PrecompileAndCacheRegexes();
+                }
             }
             catch (Exception ex)
             {
@@ -270,21 +273,25 @@ namespace GameTranslator.Patches.Translatons
                             bool regexMatched = false;
                             List<RegexTranslation> regexesToRemove = new List<RegexTranslation>();
 
-                            using (List<RegexTranslationSplitter>.Enumerator enumerator = this._splitterRegexes.GetEnumerator())
+                            RegexTranslationSplitter[] splitterSnapshot;
+                            RegexTranslation[] regexSnapshot;
+                            lock (this._regexLock)
                             {
-                                while (enumerator.MoveNext())
-                                {
-                                    RegexTranslationSplitter splitter = enumerator.Current;
-                                    string text4 = "splitter_" + splitter.Original;
-                                    NormalTextTranslator._regexCache.GetOrAdd(text4, (string _) => new Regex(splitter.Original, RegexOptions.Multiline | _regexCompiledSupportedFlag | RegexOptions.Singleline));
-                                    NormalTextTranslator._regexCacheLastAccess[text4] = DateTime.Now;
-                                    text3 = this.SplitterTranslate(text3, splitter, false);
-                                }
+                                splitterSnapshot = this._splitterRegexes.ToArray();
+                                regexSnapshot = this._defaultRegexes.ToArray();
                             }
 
-                            for (int i = 0; i < this._defaultRegexes.Count; i++)
+                            foreach (RegexTranslationSplitter splitter in splitterSnapshot)
                             {
-                                RegexTranslation regexTrans = this._defaultRegexes[i];
+                                string text4 = "splitter_" + splitter.Original;
+                                NormalTextTranslator._regexCache.GetOrAdd(text4, (string _) => new Regex(splitter.Original, RegexOptions.Multiline | _regexCompiledSupportedFlag | RegexOptions.Singleline));
+                                NormalTextTranslator._regexCacheLastAccess[text4] = DateTime.Now;
+                                text3 = this.SplitterTranslate(text3, splitter, false);
+                            }
+
+                            for (int i = 0; i < regexSnapshot.Length; i++)
+                            {
+                                RegexTranslation regexTrans = regexSnapshot[i];
                                 string text5 = "default_" + regexTrans.Original;
                                 Regex orAdd = NormalTextTranslator._regexCache.GetOrAdd(text5, (string _) => new Regex(regexTrans.Original, RegexOptions.Multiline | _regexCompiledSupportedFlag | RegexOptions.Singleline));
                                 NormalTextTranslator._regexCacheLastAccess[text5] = DateTime.Now;
@@ -304,9 +311,15 @@ namespace GameTranslator.Patches.Translatons
                                 }
                             }
 
-                            foreach (var regexToRemove in regexesToRemove)
+                            if (regexesToRemove.Count > 0)
                             {
-                                this._defaultRegexes.Remove(regexToRemove);
+                                lock (this._regexLock)
+                                {
+                                    foreach (var regexToRemove in regexesToRemove)
+                                    {
+                                        this._defaultRegexes.Remove(regexToRemove);
+                                    }
+                                }
                             }
 
                             if (!regexMatched)
@@ -527,6 +540,8 @@ namespace GameTranslator.Patches.Translatons
         public Dictionary<string, string> _reverseTokenTranslations = new Dictionary<string, string>();
 
         private HashSet<string> _partialTranslations = new HashSet<string>();
+
+        private readonly object _regexLock = new object();
 
         public List<RegexTranslation> _defaultRegexes = new List<RegexTranslation>();
 
