@@ -157,13 +157,20 @@ namespace GameTranslator.Patches.Utils
 
             if (info != null && info.IsTranslated)
             {
-                if (!info.OriginalText.Equals(text) || info.ChangeTime != TextTranslate.ChangeTime)
+                if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
+                {
+                    if (info.ChangeTime != TextTranslate.ChangeTime)
+                    {
+                        info.Reset(text);
+                    }
+                    else
+                    {
+                        return info.TranslatedText;
+                    }
+                }
+                else
                 {
                     info.Reset(text);
-                }
-                else if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
-                {
-                    return info.TranslatedText;
                 }
             }
 
@@ -260,13 +267,20 @@ namespace GameTranslator.Patches.Utils
 
             if (info != null && info.IsTranslated)
             {
-                if (!info.OriginalText.Equals(text) || info.ChangeTime != TextTranslate.ChangeTime)
+                if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
+                {
+                    if (info.ChangeTime != TextTranslate.ChangeTime)
+                    {
+                        info.Reset(text);
+                    }
+                    else
+                    {
+                        return info.TranslatedText;
+                    }
+                }
+                else
                 {
                     info.Reset(text);
-                }
-                else if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
-                {
-                    return info.TranslatedText;
                 }
             }
 
