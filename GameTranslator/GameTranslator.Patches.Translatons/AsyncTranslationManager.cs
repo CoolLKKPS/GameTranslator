@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace GameTranslator.Patches.Translatons
@@ -435,7 +436,15 @@ namespace GameTranslator.Patches.Translatons
                 {
                     translatedText = normalText.TryTranslate(translatedText);
                 }
-                translatedText = TranslateConfig.replaceByMap(translatedText, config);
+                if (config.normal.Count > 0)
+                {
+                    StringBuffer buffer = new StringBuffer(translatedText);
+                    foreach (KeyValuePair<string, string> kv in config.normal.OrderByDescending((KeyValuePair<string, string> kv) => kv.Key.Length))
+                    {
+                        buffer.ReplaceFull(kv.Key, kv.Value);
+                    }
+                    translatedText = buffer.ToString();
+                }
             }
             catch (Exception ex)
             {

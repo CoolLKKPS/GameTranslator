@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using GameTranslator.Patches.Translatons;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace GameTranslator.Patches.Utils
@@ -297,7 +298,15 @@ namespace GameTranslator.Patches.Utils
                 }
                 if (text3 != null)
                 {
-                    text3 = TranslateConfig.replaceByMap(text3, config);
+                    if (config.normal.Count > 0)
+                    {
+                        StringBuffer buffer = new StringBuffer(text3);
+                        foreach (KeyValuePair<string, string> kv in config.normal.OrderByDescending((KeyValuePair<string, string> kv) => kv.Key.Length))
+                        {
+                            buffer.ReplaceFull(kv.Key, kv.Value);
+                        }
+                        text3 = buffer.ToString();
+                    }
                     if (info != null)
                     {
                         info.OriginalText = text;

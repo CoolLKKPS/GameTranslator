@@ -1,3 +1,9 @@
+## v2.1.7
+
+- Fixed the issue when reloading translation files sometimes cause thread exception
+- Fixed the issue when original text not equal to translated text will re-translate translated text again
+- Fixed the issue where regex will do twice in certain cases
+
 ## v2.1.6
 
 - Added debug config and remove hardcoded value
