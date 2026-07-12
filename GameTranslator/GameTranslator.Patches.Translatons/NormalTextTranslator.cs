@@ -340,12 +340,6 @@ namespace GameTranslator.Patches.Translatons
 
         public string TryTranslate(string text, int scope = -1)
         {
-            return TryTranslateInternal(text, scope, out _);
-        }
-
-        internal string TryTranslateInternal(string text, int scope, out bool isFromScope)
-        {
-            isFromScope = false;
             if (string.IsNullOrEmpty(text))
             {
                 return text;
@@ -354,7 +348,6 @@ namespace GameTranslator.Patches.Translatons
             if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
                 && scoped.Translations.TryGetValue(text, out var scopedResult))
             {
-                isFromScope = true;
                 return scopedResult;
             }
 
@@ -463,12 +456,6 @@ namespace GameTranslator.Patches.Translatons
                 }
             }
             return text2;
-        }
-
-        public string TryTranslateWithScope(string text, object ui)
-        {
-            int scope = ui != null ? TranslationScopeHelper.GetScope(ui) : -1;
-            return TryTranslate(text, scope);
         }
 
         public static string getRegex(string pattern)
@@ -682,6 +669,12 @@ namespace GameTranslator.Patches.Translatons
             public List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
             public HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
             public HashSet<string> FailedRegexLookups { get; set; } = new HashSet<string>();
+        }
+
+        public bool IsScopedTranslation(string text, int scope)
+        {
+            return scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
+                && scoped.Translations.ContainsKey(text);
         }
 
         public ScopedTranslationData GetOrCreateScopedData(int scope)

@@ -288,18 +288,18 @@ namespace GameTranslator.Patches.Utils
             string text3 = null;
             if ((normalText == null || normalText.IsTranslatable(text, false, TranslationScopeHelper.GetScope(ui))) && (ignoreComponentState || ui.IsComponentActive()))
             {
-                bool fromScope = false;
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
                 {
                     if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"available:{text}"))
                     {
                         TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'");
                     }
-                    text3 = normalText.TryTranslateInternal(text, TranslationScopeHelper.GetScope(ui), out fromScope);
+                    int scope = TranslationScopeHelper.GetScope(ui);
+                    text3 = normalText.TryTranslate(text, scope);
                 }
                 if (text3 != null)
                 {
-                    if (!fromScope && config.normal.Count > 0)
+                    if (!normalText.IsScopedTranslation(text, TranslationScopeHelper.GetScope(ui)) && config.normal.Count > 0)
                     {
                         StringBuffer buffer = new StringBuffer(text3);
                         foreach (KeyValuePair<string, string> kv in config.normal.OrderByDescending((KeyValuePair<string, string> kv) => kv.Key.Length))
