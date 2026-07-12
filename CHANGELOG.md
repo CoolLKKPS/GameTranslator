@@ -1,8 +1,10 @@
 ## v2.1.7
 
+- Added Scope feature
 - Fixed the issue when reloading translation files sometimes cause thread exception
 - Fixed the issue when original text not equal to translated text will re-translate translated text again
 - Fixed the issue where regex will do twice in certain cases
+- Additional code cleanup
 
 ## v2.1.6
 

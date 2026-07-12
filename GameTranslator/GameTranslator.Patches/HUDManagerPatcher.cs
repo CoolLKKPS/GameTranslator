@@ -118,13 +118,13 @@ namespace GameTranslator.Patches
 
         public static FieldInfo nodesOnScreen = typeof(HUDManager).GetField("nodesOnScreen", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
-        public static Dictionary<string, string> originToTranslated = new Dictionary<string, string>();
-
-        public static HashSet<string> translatedItems = new HashSet<string>();
-
         private static string lastChat = "";
 
         // These might not be needed, but I'll keep them here just in case.
+
+        public static Dictionary<string, string> originToTranslated = new Dictionary<string, string>();
+
+        public static HashSet<string> translatedItems = new HashSet<string>();
 
         private static readonly BindingFlags All = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
