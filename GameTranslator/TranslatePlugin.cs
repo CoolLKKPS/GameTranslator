@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using XUnity.Common.Utilities;
 
 namespace GameTranslator
@@ -37,6 +38,13 @@ namespace GameTranslator
                 GameTranslator.Patches.Utils.FontSupportChecker.InitializeFonts();
             }
             AsyncTranslationManager.Instance.Start();
+            SceneManager.activeSceneChanged += (Scene from, Scene to) =>
+            {
+                if (TranslatePlugin.showAvailableText.Value)
+                {
+                    TranslatePlugin.logger.LogInfo($"[Scope] Active scene changed: '{to.name}' (buildIndex={to.buildIndex})");
+                }
+            };
             base.Logger.LogInfo("GameTranslator is loaded");
         }
 
