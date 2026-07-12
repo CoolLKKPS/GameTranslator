@@ -87,7 +87,7 @@ namespace GameTranslator.Patches.Translatons
                 }
                 if (originalText.Length <= TranslatePlugin.syncTranslationThreshold.Value)
                 {
-                    var translatedText = TranslateText(originalText, normalText, config);
+                    var translatedText = TranslateText(originalText, normalText, config, TranslationScopeHelper.GetScope(ui));
                     if (!string.IsNullOrEmpty(translatedText) && !translatedText.Equals(originalText))
                     {
                         string cacheKey = GetCacheKey(originalText, config);
@@ -426,7 +426,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        private string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
+        private string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
             if (string.IsNullOrEmpty(text)) return text;
             string translatedText = text;
@@ -434,7 +434,7 @@ namespace GameTranslator.Patches.Translatons
             {
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false))
                 {
-                    translatedText = normalText.TryTranslate(translatedText);
+                    translatedText = normalText.TryTranslate(translatedText, scope);
                 }
                 if (config.normal.Count > 0)
                 {

@@ -52,6 +52,7 @@ namespace GameTranslator.Patches.Translatons
                     this._registeredRegexes.Clear();
                     this._registeredSplitterRegexes.Clear();
                     this._failedRegexLookups.Clear();
+                    this._scopedTranslations.Clear();
                     this.LoadTranslationsInStream(this.FilePath, true);
                     this.PrecompileAndCacheRegexes();
                 }
@@ -71,82 +72,132 @@ namespace GameTranslator.Patches.Translatons
             }
             using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
             {
+                int currentScope = -1;
                 foreach (string text in streamReader.ReadToEnd().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    if (!text.TrimStart().StartsWith("#") && !text.TrimStart().StartsWith("//"))
+                    string trimmed = text.TrimStart();
+                    if (trimmed.StartsWith("#") || trimmed.StartsWith("//"))
                     {
-                        try
+                        continue;
+                    }
+                    if (trimmed.StartsWith("[s:") && trimmed.EndsWith("]"))
+                    {
+                        string scopeStr = trimmed.Substring(3, trimmed.Length - 4);
+                        if (int.TryParse(scopeStr, out int parsedScope) && parsedScope >= 0)
                         {
-                            string[] array2 = TextHelper.ReadTranslationLineAndDecode(text);
-                            if (array2 != null)
+                            currentScope = parsedScope;
+                            GetOrCreateScopedData(currentScope);
+                        }
+                        else
+                        {
+                            currentScope = -1;
+                        }
+                        continue;
+                    }
+                    try
+                    {
+                        string[] array2 = TextHelper.ReadTranslationLineAndDecode(text);
+                        if (array2 != null)
+                        {
+                            string text2 = array2[0];
+                            string text3 = array2[1];
+                            if (!string.IsNullOrEmpty(text2) && !string.IsNullOrEmpty(text3))
                             {
-                                string text2 = array2[0];
-                                string text3 = array2[1];
-                                if (!string.IsNullOrEmpty(text2) && !string.IsNullOrEmpty(text3))
+                                if (text2.StartsWith("sr:"))
                                 {
-                                    if (text2.StartsWith("sr:"))
+                                    try
                                     {
-                                        try
+                                        RegexTranslationSplitter regexTranslationSplitter = new RegexTranslationSplitter(text2, text3);
+                                        if (currentScope >= 0)
                                         {
-                                            RegexTranslationSplitter regexTranslationSplitter = new RegexTranslationSplitter(text2, text3);
+                                            var scoped = _scopedTranslations[currentScope];
+                                            if (!scoped.RegisteredSplitterRegexes.Contains(regexTranslationSplitter.Original))
+                                            {
+                                                scoped.RegisteredSplitterRegexes.Add(regexTranslationSplitter.Original);
+                                                scoped.SplitterRegexes.Add(regexTranslationSplitter);
+                                            }
+                                        }
+                                        else
+                                        {
                                             this.AddTranslationSplitterRegex(regexTranslationSplitter);
-                                            continue;
                                         }
-                                        catch (Exception ex)
-                                        {
-                                            ManualLogSource logger = TranslatePlugin.logger;
-                                            string[] array3 = new string[5];
-                                            array3[0] = "An error occurred while constructing the regexTranslationSplitter: '";
-                                            array3[1] = text;
-                                            array3[2] = "'.";
-                                            array3[3] = Environment.NewLine;
-                                            int num = 4;
-                                            Exception ex2 = ex;
-                                            array3[num] = ((ex2 != null) ? ex2.ToString() : null);
-                                            logger.LogWarning(string.Concat(array3));
-                                            continue;
-                                        }
+                                        continue;
                                     }
-                                    if (text2.StartsWith("r:"))
+                                    catch (Exception ex)
                                     {
-                                        try
-                                        {
-                                            RegexTranslation regexTranslation = new RegexTranslation(text2, text3);
-                                            this.AddTranslationRegex(regexTranslation);
-                                            continue;
-                                        }
-                                        catch (Exception ex3)
-                                        {
-                                            ManualLogSource logger2 = TranslatePlugin.logger;
-                                            string[] array4 = new string[5];
-                                            array4[0] = "An error occurred while constructing the regexTranslation: '";
-                                            array4[1] = text;
-                                            array4[2] = "'.";
-                                            array4[3] = Environment.NewLine;
-                                            int num2 = 4;
-                                            Exception ex4 = ex3;
-                                            array4[num2] = ((ex4 != null) ? ex4.ToString() : null);
-                                            logger2.LogWarning(string.Concat(array4));
-                                            continue;
-                                        }
+                                        ManualLogSource logger = TranslatePlugin.logger;
+                                        string[] array3 = new string[5];
+                                        array3[0] = "An error occurred while constructing the regexTranslationSplitter: '";
+                                        array3[1] = text;
+                                        array3[2] = "'.";
+                                        array3[3] = Environment.NewLine;
+                                        int num = 4;
+                                        Exception ex2 = ex;
+                                        array3[num] = ((ex2 != null) ? ex2.ToString() : null);
+                                        logger.LogWarning(string.Concat(array3));
+                                        continue;
                                     }
+                                }
+                                if (text2.StartsWith("r:"))
+                                {
+                                    try
+                                    {
+                                        RegexTranslation regexTranslation = new RegexTranslation(text2, text3);
+                                        if (currentScope >= 0)
+                                        {
+                                            var scoped = _scopedTranslations[currentScope];
+                                            if (!scoped.RegisteredRegexes.Contains(regexTranslation.Original))
+                                            {
+                                                scoped.RegisteredRegexes.Add(regexTranslation.Original);
+                                                scoped.DefaultRegexes.Add(regexTranslation);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            this.AddTranslationRegex(regexTranslation);
+                                        }
+                                        continue;
+                                    }
+                                    catch (Exception ex3)
+                                    {
+                                        ManualLogSource logger2 = TranslatePlugin.logger;
+                                        string[] array4 = new string[5];
+                                        array4[0] = "An error occurred while constructing the regexTranslation: '";
+                                        array4[1] = text;
+                                        array4[2] = "'.";
+                                        array4[3] = Environment.NewLine;
+                                        int num2 = 4;
+                                        Exception ex4 = ex3;
+                                        array4[num2] = ((ex4 != null) ? ex4.ToString() : null);
+                                        logger2.LogWarning(string.Concat(array4));
+                                        continue;
+                                    }
+                                }
+                                if (currentScope >= 0)
+                                {
+                                    var scoped = _scopedTranslations[currentScope];
+                                    scoped.Translations[text2] = text3;
+                                    scoped.ReverseTranslations[text3] = text2;
+                                }
+                                else
+                                {
                                     this.AddTranslation(text2, text3);
                                 }
                             }
                         }
-                        catch (Exception ex5)
-                        {
-                            ManualLogSource logger3 = TranslatePlugin.logger;
-                            string[] array5 = new string[5];
-                            array5[0] = "An error occurred while reading the translation: '";
-                            array5[1] = text;
-                            array5[2] = "'.";
-                            array5[3] = Environment.NewLine;
-                            int num3 = 4;
-                            Exception ex6 = ex5;
-                            array5[num3] = ((ex6 != null) ? ex6.ToString() : null);
-                            logger3.LogWarning(string.Concat(array5));
-                        }
+                    }
+                    catch (Exception ex5)
+                    {
+                        ManualLogSource logger3 = TranslatePlugin.logger;
+                        string[] array5 = new string[5];
+                        array5[0] = "An error occurred while reading the translation: '";
+                        array5[1] = text;
+                        array5[2] = "'.";
+                        array5[3] = Environment.NewLine;
+                        int num3 = 4;
+                        Exception ex6 = ex5;
+                        array5[num3] = ((ex6 != null) ? ex6.ToString() : null);
+                        logger3.LogWarning(string.Concat(array5));
                     }
                 }
             }
@@ -237,11 +288,17 @@ namespace GameTranslator.Patches.Translatons
             return text;
         }
 
-        public string TryTranslate(string text)
+        public string TryTranslate(string text, int scope = -1)
         {
             if (string.IsNullOrEmpty(text))
             {
                 return text;
+            }
+
+            if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
+                && scoped.Translations.TryGetValue(text, out var scopedResult))
+            {
+                return scopedResult;
             }
 
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -316,6 +373,12 @@ namespace GameTranslator.Patches.Translatons
                 }
             }
             return text2;
+        }
+
+        public string TryTranslateWithScope(string text, object ui)
+        {
+            int scope = ui != null ? TranslationScopeHelper.GetScope(ui) : -1;
+            return TryTranslate(text, scope);
         }
 
         public static string getRegex(string pattern)
@@ -517,6 +580,37 @@ namespace GameTranslator.Patches.Translatons
         public HashSet<string> _registeredSplitterRegexes = new HashSet<string>();
 
         private ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
+
+        private Dictionary<int, ScopedTranslationData> _scopedTranslations = new Dictionary<int, ScopedTranslationData>();
+
+        public class ScopedTranslationData
+        {
+            public Dictionary<string, string> Translations { get; set; } = new Dictionary<string, string>();
+            public Dictionary<string, string> ReverseTranslations { get; set; } = new Dictionary<string, string>();
+            public List<RegexTranslation> DefaultRegexes { get; set; } = new List<RegexTranslation>();
+            public HashSet<string> RegisteredRegexes { get; set; } = new HashSet<string>();
+            public List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
+            public HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
+            public HashSet<string> FailedRegexLookups { get; set; } = new HashSet<string>();
+        }
+
+        public ScopedTranslationData GetOrCreateScopedData(int scope)
+        {
+            if (!_scopedTranslations.TryGetValue(scope, out var scopedData))
+            {
+                scopedData = new ScopedTranslationData();
+                _scopedTranslations[scope] = scopedData;
+            }
+            return scopedData;
+        }
+
+        public void ClearScopedFailedRegexLookups(int scope)
+        {
+            if (_scopedTranslations.TryGetValue(scope, out var scopedData))
+            {
+                scopedData.FailedRegexLookups.Clear();
+            }
+        }
 
         public string FileName;
 

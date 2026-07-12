@@ -89,6 +89,7 @@ namespace GameTranslator.Patches.Translatons
             }
 
             var newJob = new TranslationJob(ui, key, true, isTranslatable);
+            newJob.Scope = TranslationScopeHelper.GetScope(ui);
             newJob.Associate(key, ui, translationInfo, normalText, config, true, allowFallback);
 
             if (_unstartedJobs.TryAdd(jobKey, newJob))
@@ -145,7 +146,7 @@ namespace GameTranslator.Patches.Translatons
                     return;
                 }
 
-                var translatedText = await Task.Run(() => TranslateText(job.OriginalText, job.NormalText, job.Config));
+                var translatedText = await Task.Run(() => TranslateText(job.OriginalText, job.NormalText, job.Config, job.Scope));
 
                 if (!string.IsNullOrEmpty(translatedText) && !translatedText.Equals(job.OriginalText))
                 {
@@ -230,7 +231,7 @@ namespace GameTranslator.Patches.Translatons
             TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{untranslatedText}' (Total failures: {_failedTranslations[untranslatedText]})");
         }
 
-        private string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
+        private string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
             if (string.IsNullOrEmpty(text)) return text;
 
@@ -240,7 +241,7 @@ namespace GameTranslator.Patches.Translatons
             {
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false))
                 {
-                    translatedText = normalText.TryTranslate(translatedText);
+                    translatedText = normalText.TryTranslate(translatedText, scope);
                 }
                 if (config.normal.Count > 0)
                 {

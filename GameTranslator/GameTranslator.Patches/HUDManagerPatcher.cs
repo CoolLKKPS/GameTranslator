@@ -27,7 +27,7 @@ namespace GameTranslator.Patches
 
                 if (HUDManagerPatcher.lastChat.Length != currentChatText.Length)
                 {
-                    string translatedText = TranslateConfig.hudText.TryTranslate(currentChatText);
+                    string translatedText = TranslateConfig.hudText.TryTranslateWithScope(currentChatText, __instance);
                     if (!string.IsNullOrEmpty(translatedText) && translatedText != currentChatText)
                     {
                         __instance.chatText.text = translatedText;
@@ -75,7 +75,7 @@ namespace GameTranslator.Patches
                 string text = chatText.text;
                 if (!string.IsNullOrEmpty(text))
                 {
-                    string text2 = TranslateConfig.hudText.TryTranslate(text);
+                    string text2 = TranslateConfig.hudText.TryTranslateWithScope(text, __instance);
                     if (!string.IsNullOrEmpty(text2) && !text2.Equals(text))
                     {
                         chatText.text = text2;
@@ -95,8 +95,8 @@ namespace GameTranslator.Patches
         {
             if (TranslatePlugin.shouldTranslateHUD.Value)
             {
-                headerText = TranslateConfig.hudText.TryTranslate(headerText);
-                bodyText = TranslateConfig.hudText.TryTranslate(bodyText);
+                headerText = TranslateConfig.hudText.TryTranslateWithScope(headerText, __instance);
+                bodyText = TranslateConfig.hudText.TryTranslateWithScope(bodyText, __instance);
             }
             return true;
         }
@@ -108,7 +108,7 @@ namespace GameTranslator.Patches
         {
             if (TranslatePlugin.shouldTranslateHUD.Value)
             {
-                displayText = TranslateConfig.hudText.TryTranslate(displayText);
+                displayText = TranslateConfig.hudText.TryTranslateWithScope(displayText, __instance);
             }
             return true;
         }

@@ -294,7 +294,7 @@ namespace GameTranslator.Patches.Utils
                     {
                         TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'");
                     }
-                    text3 = normalText.TryTranslate(text);
+                    text3 = normalText.TryTranslate(text, TranslationScopeHelper.GetScope(ui));
                 }
                 if (text3 != null)
                 {

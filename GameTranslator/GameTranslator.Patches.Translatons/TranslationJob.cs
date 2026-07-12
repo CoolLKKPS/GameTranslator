@@ -44,6 +44,7 @@ namespace GameTranslator.Patches.Translatons
         public TranslationEndpointManager Endpoint { get; internal set; }
         public UntranslatedTextInfo UntranslatedTextInfo { get; set; }
         public long StartVersion { get; set; }
+        public int Scope { get; set; } = -1;
 
         public bool ShouldPersistTranslation
         {
