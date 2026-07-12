@@ -236,14 +236,15 @@ namespace GameTranslator.Patches.Translatons
             if (string.IsNullOrEmpty(text)) return text;
 
             string translatedText = text;
+            bool fromScope = false;
 
             try
             {
-                if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false))
+                if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false, scope))
                 {
-                    translatedText = normalText.TryTranslate(translatedText, scope);
+                    translatedText = normalText.TryTranslateInternal(translatedText, scope, out fromScope);
                 }
-                if (config.normal.Count > 0)
+                if (!fromScope && config.normal.Count > 0)
                 {
                     StringBuffer buffer = new StringBuffer(translatedText);
                     foreach (KeyValuePair<string, string> kv in config.normal.OrderByDescending((KeyValuePair<string, string> kv) => kv.Key.Length))

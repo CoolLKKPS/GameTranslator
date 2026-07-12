@@ -72,26 +72,56 @@ namespace GameTranslator.Patches.Translatons
             }
             using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
             {
-                int currentScope = -1;
+                var activeLevels = new HashSet<int>();
                 foreach (string text in streamReader.ReadToEnd().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     string trimmed = text.TrimStart();
-                    if (trimmed.StartsWith("#") || trimmed.StartsWith("//"))
+                    if (trimmed.StartsWith("//"))
                     {
                         continue;
                     }
-                    if (trimmed.StartsWith("[s:") && trimmed.EndsWith("]"))
+                    if (trimmed.StartsWith("#set level "))
                     {
-                        string scopeStr = trimmed.Substring(3, trimmed.Length - 4);
-                        if (int.TryParse(scopeStr, out int parsedScope) && parsedScope >= 0)
+                        string levelsStr = trimmed.Substring(11).Trim();
+                        if (int.TryParse(levelsStr, out int singleLevel) && singleLevel >= 0)
                         {
-                            currentScope = parsedScope;
-                            GetOrCreateScopedData(currentScope);
+                            activeLevels.Add(singleLevel);
+                            GetOrCreateScopedData(singleLevel);
                         }
                         else
                         {
-                            currentScope = -1;
+                            foreach (string part in levelsStr.Split(','))
+                            {
+                                if (int.TryParse(part.Trim(), out int level) && level >= 0)
+                                {
+                                    activeLevels.Add(level);
+                                    GetOrCreateScopedData(level);
+                                }
+                            }
                         }
+                        continue;
+                    }
+                    if (trimmed.StartsWith("#unset level "))
+                    {
+                        string levelsStr = trimmed.Substring(13).Trim();
+                        if (int.TryParse(levelsStr, out int singleLevel))
+                        {
+                            activeLevels.Remove(singleLevel);
+                        }
+                        else
+                        {
+                            foreach (string part in levelsStr.Split(','))
+                            {
+                                if (int.TryParse(part.Trim(), out int level))
+                                {
+                                    activeLevels.Remove(level);
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                    if (trimmed.StartsWith("#"))
+                    {
                         continue;
                     }
                     try
@@ -108,13 +138,16 @@ namespace GameTranslator.Patches.Translatons
                                     try
                                     {
                                         RegexTranslationSplitter regexTranslationSplitter = new RegexTranslationSplitter(text2, text3);
-                                        if (currentScope >= 0)
+                                        if (activeLevels.Count > 0)
                                         {
-                                            var scoped = _scopedTranslations[currentScope];
-                                            if (!scoped.RegisteredSplitterRegexes.Contains(regexTranslationSplitter.Original))
+                                            foreach (int level in activeLevels)
                                             {
-                                                scoped.RegisteredSplitterRegexes.Add(regexTranslationSplitter.Original);
-                                                scoped.SplitterRegexes.Add(regexTranslationSplitter);
+                                                var scoped = _scopedTranslations[level];
+                                                if (!scoped.RegisteredSplitterRegexes.Contains(regexTranslationSplitter.Original))
+                                                {
+                                                    scoped.RegisteredSplitterRegexes.Add(regexTranslationSplitter.Original);
+                                                    scoped.SplitterRegexes.Add(regexTranslationSplitter);
+                                                }
                                             }
                                         }
                                         else
@@ -143,13 +176,16 @@ namespace GameTranslator.Patches.Translatons
                                     try
                                     {
                                         RegexTranslation regexTranslation = new RegexTranslation(text2, text3);
-                                        if (currentScope >= 0)
+                                        if (activeLevels.Count > 0)
                                         {
-                                            var scoped = _scopedTranslations[currentScope];
-                                            if (!scoped.RegisteredRegexes.Contains(regexTranslation.Original))
+                                            foreach (int level in activeLevels)
                                             {
-                                                scoped.RegisteredRegexes.Add(regexTranslation.Original);
-                                                scoped.DefaultRegexes.Add(regexTranslation);
+                                                var scoped = _scopedTranslations[level];
+                                                if (!scoped.RegisteredRegexes.Contains(regexTranslation.Original))
+                                                {
+                                                    scoped.RegisteredRegexes.Add(regexTranslation.Original);
+                                                    scoped.DefaultRegexes.Add(regexTranslation);
+                                                }
                                             }
                                         }
                                         else
@@ -173,11 +209,14 @@ namespace GameTranslator.Patches.Translatons
                                         continue;
                                     }
                                 }
-                                if (currentScope >= 0)
+                                if (activeLevels.Count > 0)
                                 {
-                                    var scoped = _scopedTranslations[currentScope];
-                                    scoped.Translations[text2] = text3;
-                                    scoped.ReverseTranslations[text3] = text2;
+                                    foreach (int level in activeLevels)
+                                    {
+                                        var scoped = _scopedTranslations[level];
+                                        scoped.Translations[text2] = text3;
+                                        scoped.ReverseTranslations[text3] = text2;
+                                    }
                                 }
                                 else
                                 {
@@ -230,9 +269,14 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        private bool IsTranslation(string translation)
+        private bool IsTranslation(string translation, int scope = -1)
         {
-            return this._reverseTranslations.ContainsKey(translation);
+            if (this._reverseTranslations.ContainsKey(translation))
+                return true;
+            if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
+                && scoped.ReverseTranslations.ContainsKey(translation))
+                return true;
+            return false;
         }
 
         private bool IsTokenTranslation(string translation)
@@ -240,9 +284,9 @@ namespace GameTranslator.Patches.Translatons
             return this._reverseTokenTranslations.ContainsKey(translation);
         }
 
-        public bool IsTranslatable(string text, bool isToken)
+        public bool IsTranslatable(string text, bool isToken, int scope = -1)
         {
-            bool flag = !this.IsTranslation(text);
+            bool flag = !this.IsTranslation(text, scope);
             if (isToken && flag)
             {
                 flag = !this.IsTokenTranslation(text);
@@ -250,7 +294,7 @@ namespace GameTranslator.Patches.Translatons
             return flag;
         }
 
-        public string SplitterTranslate(string text, RegexTranslationSplitter splitter)
+        public string SplitterTranslate(string text, RegexTranslationSplitter splitter, int scope = -1)
         {
             if (!string.IsNullOrEmpty(text))
             {
@@ -260,6 +304,7 @@ namespace GameTranslator.Patches.Translatons
                     try
                     {
                         Func<string, string> translationFunc = null;
+                        int capturedScope = scope;
                         return splitter.CompiledRegex.Replace(text, delegate (Match match)
                         {
                             if (translationFunc == null)
@@ -267,6 +312,11 @@ namespace GameTranslator.Patches.Translatons
                                 translationFunc = delegate (string groupValue)
                                 {
                                     string text2;
+                                    if (capturedScope >= 0 && _scopedTranslations.TryGetValue(capturedScope, out var s)
+                                        && s.Translations.TryGetValue(groupValue, out text2))
+                                    {
+                                        return text2;
+                                    }
                                     if (this._translations.TryGetValue(groupValue, out text2))
                                     {
                                         return text2;
@@ -290,6 +340,12 @@ namespace GameTranslator.Patches.Translatons
 
         public string TryTranslate(string text, int scope = -1)
         {
+            return TryTranslateInternal(text, scope, out _);
+        }
+
+        internal string TryTranslateInternal(string text, int scope, out bool isFromScope)
+        {
+            isFromScope = false;
             if (string.IsNullOrEmpty(text))
             {
                 return text;
@@ -298,6 +354,7 @@ namespace GameTranslator.Patches.Translatons
             if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
                 && scoped.Translations.TryGetValue(text, out var scopedResult))
             {
+                isFromScope = true;
                 return scopedResult;
             }
 
@@ -311,7 +368,11 @@ namespace GameTranslator.Patches.Translatons
                     string text3 = text;
                     try
                     {
-                        if (!this._failedRegexLookups.ContainsKey(text3))
+                        bool skipRegex = scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedCheck)
+                            ? scopedCheck.FailedRegexLookups.Contains(text3)
+                            : this._failedRegexLookups.ContainsKey(text3);
+
+                        if (!skipRegex)
                         {
                             bool regexMatched = false;
 
@@ -319,13 +380,31 @@ namespace GameTranslator.Patches.Translatons
                             RegexTranslation[] regexSnapshot;
                             lock (this._regexLock)
                             {
-                                splitterSnapshot = this._splitterRegexes.ToArray();
-                                regexSnapshot = this._defaultRegexes.ToArray();
+                                if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedSplitter)
+                                    && scopedSplitter.SplitterRegexes.Count > 0)
+                                {
+                                    splitterSnapshot = scopedSplitter.SplitterRegexes
+                                        .Concat(this._splitterRegexes).ToArray();
+                                }
+                                else
+                                {
+                                    splitterSnapshot = this._splitterRegexes.ToArray();
+                                }
+                                if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedRegex)
+                                    && scopedRegex.DefaultRegexes.Count > 0)
+                                {
+                                    regexSnapshot = scopedRegex.DefaultRegexes
+                                        .Concat(this._defaultRegexes).ToArray();
+                                }
+                                else
+                                {
+                                    regexSnapshot = this._defaultRegexes.ToArray();
+                                }
                             }
 
                             foreach (RegexTranslationSplitter splitter in splitterSnapshot)
                             {
-                                text3 = this.SplitterTranslate(text3, splitter);
+                                text3 = this.SplitterTranslate(text3, splitter, scope);
                             }
 
                             for (int i = 0; i < regexSnapshot.Length; i++)
@@ -344,12 +423,23 @@ namespace GameTranslator.Patches.Translatons
 
                             if (!regexMatched)
                             {
-                                this._failedRegexLookups.TryAdd(text3, 0);
-
-                                if (this._failedRegexLookups.Count > 10000)
+                                if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedFail))
                                 {
-                                    this._failedRegexLookups.Clear();
-                                    TranslatePlugin.logger.LogInfo("Failed regex lookup cache reached limit, cleared");
+                                    scopedFail.FailedRegexLookups.Add(text3);
+                                    if (scopedFail.FailedRegexLookups.Count > 10000)
+                                    {
+                                        scopedFail.FailedRegexLookups.Clear();
+                                        TranslatePlugin.logger.LogInfo($"Scoped failed regex lookup cache reached limit for scope {scope}, cleared");
+                                    }
+                                }
+                                else
+                                {
+                                    this._failedRegexLookups.TryAdd(text3, 0);
+                                    if (this._failedRegexLookups.Count > 10000)
+                                    {
+                                        this._failedRegexLookups.Clear();
+                                        TranslatePlugin.logger.LogInfo("Failed regex lookup cache reached limit, cleared");
+                                    }
                                 }
                             }
                         }
