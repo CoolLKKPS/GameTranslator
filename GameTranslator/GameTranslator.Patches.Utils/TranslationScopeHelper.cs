@@ -45,9 +45,17 @@ namespace GameTranslator.Patches.Utils
             return TranslationScopeHelper.GetActiveSceneIdBySceneManager();
         }
 
+        private static int _lastLoggedScope = -2;
+
         private static int GetActiveSceneIdBySceneManager()
         {
-            return SceneManager.GetActiveScene().buildIndex;
+            int buildIndex = SceneManager.GetActiveScene().buildIndex;
+            if (buildIndex != _lastLoggedScope && TranslatePlugin.showAvailableText.Value)
+            {
+                _lastLoggedScope = buildIndex;
+                TranslatePlugin.logger.LogInfo($"[Scope] Active scene changed: '{SceneManager.GetActiveScene().name}' (buildIndex={buildIndex})");
+            }
+            return buildIndex;
         }
 
         public static void RegisterSceneLoadCallback(Action<int> sceneLoaded)
