@@ -1,4 +1,5 @@
 using GameTranslator.Patches.Translatons;
+using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -361,18 +362,25 @@ namespace GameTranslator.Patches
         {
             try
             {
-                if ((TerminalPatch.info == null || !TerminalPatch.info.IsTranslated) && TerminalPatch.info != null && !TerminalPatch.info.IsTranslated && TranslatePlugin.shouldTranslateTerimal.Value)
+                if (TerminalPatch.info != null && TranslatePlugin.shouldTranslateTerimal.Value)
                 {
-                    if (TranslatePlugin.showAvailableText.Value && !string.IsNullOrEmpty(__instance.currentText) &&
-                        GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"terminal:{__instance.currentText}"))
+                    if (TerminalPatch.info.ChangeTime != TextTranslate.ChangeTime)
                     {
-                        TranslatePlugin.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'");
+                        TerminalPatch.info.Reset(__instance.currentText);
                     }
+                    if (!TerminalPatch.info.IsTranslated)
+                    {
+                        if (TranslatePlugin.showAvailableText.Value && !string.IsNullOrEmpty(__instance.currentText) &&
+                            GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"terminal:{__instance.currentText}"))
+                        {
+                            TranslatePlugin.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'");
+                        }
 
-                    string text = TranslateConfig.replaceByMap(__instance.currentText, TranslateConfig.terminal);
-                    TerminalPatch.info.SetTranslatedText(text);
-                    TerminalPatch.SetText(TerminalPatch.info.TranslatedText, __instance);
-                    TerminalPatch.info.OriginalText = __instance.currentText;
+                        string text = TranslateConfig.replaceByMap(__instance.currentText, TranslateConfig.terminal);
+                        TerminalPatch.info.SetTranslatedText(text);
+                        TerminalPatch.SetText(TerminalPatch.info.TranslatedText, __instance);
+                        TerminalPatch.info.OriginalText = __instance.currentText;
+                    }
                 }
             }
             catch (Exception ex)

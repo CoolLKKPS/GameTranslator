@@ -1,3 +1,4 @@
+using GameTranslator.Patches;
 using GameTranslator.Patches.Translatons;
 using GameTranslator.Patches.Utils;
 using System;
@@ -89,6 +90,8 @@ namespace GameTranslator
             cache = null;
             _pollingTimer?.Dispose();
             _pollingTimer = null;
+            GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
+            GrabbableObjectPatcher.ClearCache();
         }
 
         private static void OnDirectoryUpdated()
@@ -143,6 +146,8 @@ namespace GameTranslator
                     if (hasChanges)
                     {
                         TranslatePlugin.logger.LogInfo("Translate files reloaded due to file changes.");
+                        GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
+                        GrabbableObjectPatcher.ClearCache();
                     }
                 }
                 catch (Exception ex)
@@ -152,18 +157,18 @@ namespace GameTranslator
             }
         }
 
+        private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should)
+        {
+            TranslatePlugin.logger.LogInfo("GameTranslator is loading config file call " + fileName);
+            return new TranslateConfig.TranslateConfigFile(fileName, true, should);
+        }
+
         public static void show(TranslateConfig.TranslateConfigFile file)
         {
             foreach (string text in file.normal.Keys)
             {
                 TranslatePlugin.LogInfo(text + "=" + file.normal[text]);
             }
-        }
-
-        private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should)
-        {
-            TranslatePlugin.logger.LogInfo("GameTranslator is loading config file call " + fileName);
-            return new TranslateConfig.TranslateConfigFile(fileName, true, should);
         }
 
         public static bool IsStringContainsEnglish(string input)
@@ -202,7 +207,6 @@ namespace GameTranslator
                 }
                 if (file.translatePairs.ContainsKey(text))
                 {
-                    file._translatePairLastAccess.TryAdd(text, DateTime.Now);
                     file._translatePairLastAccess[text] = DateTime.Now;
                     return file.translatePairs[text];
                 }
@@ -210,14 +214,21 @@ namespace GameTranslator
                 NormalTextTranslator moduleTranslator = TranslateConfig.GetModuleTranslator(file);
                 if (moduleTranslator != null)
                 {
-                    foreach (RegexTranslationSplitter regexTranslationSplitter in moduleTranslator._splitterRegexes)
+                    RegexTranslationSplitter[] splitterSnapshot;
+                    RegexTranslation[] regexSnapshot;
+                    lock (moduleTranslator._regexLock)
                     {
-                        string text2 = moduleTranslator.SplitterTranslate(stringBuffer.ToString(), regexTranslationSplitter, false);
+                        splitterSnapshot = moduleTranslator._splitterRegexes.ToArray();
+                        regexSnapshot = moduleTranslator._defaultRegexes.ToArray();
+                    }
+                    foreach (RegexTranslationSplitter regexTranslationSplitter in splitterSnapshot)
+                    {
+                        string text2 = moduleTranslator.SplitterTranslate(stringBuffer.ToString(), regexTranslationSplitter);
                         stringBuffer.Clear().Append(text2);
                     }
-                    foreach (RegexTranslation regexTranslation in moduleTranslator._defaultRegexes)
+                    foreach (RegexTranslation regexTranslation in regexSnapshot)
                     {
-                        if (regexTranslation.CompiledRegex != null && regexTranslation.CompiledRegex.IsMatch(stringBuffer.ToString()))
+                        if (regexTranslation.CompiledRegex.IsMatch(stringBuffer.ToString()))
                         {
                             string text3 = regexTranslation.CompiledRegex.Replace(stringBuffer.ToString(), regexTranslation.Translation);
                             stringBuffer.Clear().Append(text3);
@@ -372,13 +383,8 @@ namespace GameTranslator
             public TranslateConfigFile(string configName, bool saveOnInit, bool shouldLoad)
             {
                 this.ConfigFileName = configName;
-                this.ConfigFilePath = TranslatePlugin.DefaultPath + configName + ".cfg";
+                this.ConfigFilePath = Path.GetFullPath(TranslatePlugin.DefaultPath + configName + ".cfg");
                 this.shouldLoad = shouldLoad;
-                if (this.ConfigFilePath == null)
-                {
-                    throw new ArgumentNullException("configPath");
-                }
-                this.ConfigFilePath = Path.GetFullPath(this.ConfigFilePath);
                 if (this.shouldLoad && File.Exists(this.ConfigFilePath))
                 {
                     this.Reload();
@@ -395,6 +401,7 @@ namespace GameTranslator
                 this.translatePairs.Clear();
                 this._translatePairLastAccess.Clear();
                 this.normal.Clear();
+                this.special.Clear();
                 this.regexTranslations.Clear();
                 this.splitterRegexTranslations.Clear();
                 List<string> list = new List<string>();
@@ -472,12 +479,6 @@ namespace GameTranslator
             public void Log(string text)
             {
                 this.logs.Add(text);
-                string directoryName = Path.GetDirectoryName(this.ConfigFilePath);
-                if (directoryName == null)
-                {
-                    Directory.CreateDirectory(directoryName);
-                }
-                new List<string>().Add("##" + this.ConfigFileName);
                 File.WriteAllLines(this.ConfigFilePath, this.logs);
             }
 

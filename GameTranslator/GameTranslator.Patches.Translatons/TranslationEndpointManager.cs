@@ -286,5 +286,11 @@ namespace GameTranslator.Patches.Translatons
                 Manager?.InvokeJobFailed(job);
             }
         }
+
+        public void ClearTranslationCaches()
+        {
+            _translationCache.Clear();
+            _failedTranslations.Clear();
+        }
     }
 }

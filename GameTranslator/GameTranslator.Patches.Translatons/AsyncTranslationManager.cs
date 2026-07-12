@@ -485,6 +485,7 @@ namespace GameTranslator.Patches.Translatons
         public void ClearCache()
         {
             _translationManager?.ClearAllJobs();
+            _translationManager?.PrimaryEndpoint?.ClearTranslationCaches();
             _stabilizationContexts.Clear();
             _immediatelyTranslating.Clear();
             _pendingStabilizationUIs.Clear();
