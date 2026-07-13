@@ -20,7 +20,6 @@ namespace GameTranslator.Patches.Translatons
             {
                 this.FileName = fileName;
                 this.FilePath = Path.Combine(TranslatePlugin.DefaultPath, fileName);
-                NormalTextTranslator.keyValuePairs.TryAdd(this.FileName, this);
             }
             catch (Exception ex)
             {
@@ -660,29 +659,29 @@ namespace GameTranslator.Patches.Translatons
 
         private ConcurrentDictionary<string, string> _partialTranslations = new ConcurrentDictionary<string, string>();
 
-        public class ScopedTranslationData
+        internal class ScopedTranslationData
         {
-            public ConcurrentDictionary<string, string> Translations { get; set; } = new ConcurrentDictionary<string, string>();
-            public ConcurrentDictionary<string, string> ReverseTranslations { get; set; } = new ConcurrentDictionary<string, string>();
-            public List<RegexTranslation> DefaultRegexes { get; set; } = new List<RegexTranslation>();
-            public HashSet<string> RegisteredRegexes { get; set; } = new HashSet<string>();
-            public List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
-            public HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
-            public ConcurrentDictionary<string, byte> FailedRegexLookups { get; set; } = new ConcurrentDictionary<string, byte>();
+            internal ConcurrentDictionary<string, string> Translations { get; set; } = new ConcurrentDictionary<string, string>();
+            internal ConcurrentDictionary<string, string> ReverseTranslations { get; set; } = new ConcurrentDictionary<string, string>();
+            internal List<RegexTranslation> DefaultRegexes { get; set; } = new List<RegexTranslation>();
+            internal HashSet<string> RegisteredRegexes { get; set; } = new HashSet<string>();
+            internal List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
+            internal HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
+            internal ConcurrentDictionary<string, byte> FailedRegexLookups { get; set; } = new ConcurrentDictionary<string, byte>();
         }
 
-        public bool IsScopedTranslation(string text, int scope)
+        internal bool IsScopedTranslation(string text, int scope)
         {
             return scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
                 && scoped.Translations.ContainsKey(text);
         }
 
-        public ScopedTranslationData GetOrCreateScopedData(int scope)
+        internal ScopedTranslationData GetOrCreateScopedData(int scope)
         {
             return _scopedTranslations.GetOrAdd(scope, _ => new ScopedTranslationData());
         }
 
-        public void ClearScopedFailedRegexLookups(int scope)
+        internal void ClearScopedFailedRegexLookups(int scope)
         {
             if (_scopedTranslations.TryGetValue(scope, out var scopedData))
             {
@@ -701,8 +700,6 @@ namespace GameTranslator.Patches.Translatons
         private static DateTime _lastRegexCacheCleanupTime = DateTime.Now;
 
         private static readonly TimeSpan REGEX_CACHE_CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
-
-        public static ConcurrentDictionary<string, NormalTextTranslator> keyValuePairs = new ConcurrentDictionary<string, NormalTextTranslator>();
 
         private static RegexOptions _regexCompiledSupportedFlag = RegexOptions.None;
 
