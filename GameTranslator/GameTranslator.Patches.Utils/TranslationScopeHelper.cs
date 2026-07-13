@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using XUnity.Common.Constants;
@@ -8,6 +9,15 @@ namespace GameTranslator.Patches.Utils
 {
     internal static class TranslationScopeHelper
     {
+        internal static readonly ConcurrentDictionary<string, int> SceneNameToBuildIndex = new ConcurrentDictionary<string, int>();
+
+        internal static bool TryResolveScopeName(string name, out int scope)
+        {
+            if (int.TryParse(name, out scope) && scope >= 0)
+                return true;
+            return SceneNameToBuildIndex.TryGetValue(name, out scope);
+        }
+
         public static int GetScope(object ui)
         {
             if (TranslationScopeHelper.EnableTranslationScoping)

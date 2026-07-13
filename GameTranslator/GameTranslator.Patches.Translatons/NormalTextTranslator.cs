@@ -82,7 +82,7 @@ namespace GameTranslator.Patches.Translatons
                     if (trimmed.StartsWith("#set level "))
                     {
                         string levelsStr = trimmed.Substring(11).Trim();
-                        if (int.TryParse(levelsStr, out int singleLevel) && singleLevel >= 0)
+                        if (TranslationScopeHelper.TryResolveScopeName(levelsStr, out int singleLevel))
                         {
                             activeLevels.Add(singleLevel);
                             GetOrCreateScopedData(singleLevel);
@@ -91,7 +91,7 @@ namespace GameTranslator.Patches.Translatons
                         {
                             foreach (string part in levelsStr.Split(','))
                             {
-                                if (int.TryParse(part.Trim(), out int level) && level >= 0)
+                                if (TranslationScopeHelper.TryResolveScopeName(part.Trim(), out int level))
                                 {
                                     activeLevels.Add(level);
                                     GetOrCreateScopedData(level);
@@ -103,7 +103,7 @@ namespace GameTranslator.Patches.Translatons
                     if (trimmed.StartsWith("#unset level "))
                     {
                         string levelsStr = trimmed.Substring(13).Trim();
-                        if (int.TryParse(levelsStr, out int singleLevel))
+                        if (TranslationScopeHelper.TryResolveScopeName(levelsStr, out int singleLevel))
                         {
                             activeLevels.Remove(singleLevel);
                         }
@@ -111,7 +111,7 @@ namespace GameTranslator.Patches.Translatons
                         {
                             foreach (string part in levelsStr.Split(','))
                             {
-                                if (int.TryParse(part.Trim(), out int level))
+                                if (TranslationScopeHelper.TryResolveScopeName(part.Trim(), out int level))
                                 {
                                     activeLevels.Remove(level);
                                 }
@@ -681,7 +681,8 @@ namespace GameTranslator.Patches.Translatons
             return _scopedTranslations.GetOrAdd(scope, _ => new ScopedTranslationData());
         }
 
-        internal void ClearScopedFailedRegexLookups(int scope)
+        // Debug uses
+        public void ClearScopedFailedRegexLookups(int scope)
         {
             if (_scopedTranslations.TryGetValue(scope, out var scopedData))
             {

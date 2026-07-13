@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using GameTranslator.Patches.Hooks.texture;
 using GameTranslator.Patches.Translatons;
+using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,7 @@ namespace GameTranslator
             AsyncTranslationManager.Instance.Start();
             SceneManager.activeSceneChanged += (Scene from, Scene to) =>
             {
+                TranslationScopeHelper.SceneNameToBuildIndex[to.name] = to.buildIndex;
                 if (TranslatePlugin.showAvailableText.Value)
                 {
                     TranslatePlugin.logger.LogInfo($"[Scope] Active scene changed: '{to.name}' (buildIndex={to.buildIndex})");
