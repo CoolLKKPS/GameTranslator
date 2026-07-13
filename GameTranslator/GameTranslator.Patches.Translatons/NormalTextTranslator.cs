@@ -46,13 +46,13 @@ namespace GameTranslator.Patches.Translatons
                     this._translations.Clear();
                     this._reverseTranslations.Clear();
                     this._partialTranslations.Clear();
-                    this._tokenTranslations.Clear();
-                    this._reverseTokenTranslations.Clear();
                     this._splitterRegexes.Clear();
                     this._registeredRegexes.Clear();
                     this._registeredSplitterRegexes.Clear();
                     this._failedRegexLookups.Clear();
                     this._scopedTranslations.Clear();
+                    this._tokenTranslations.Clear();
+                    this._reverseTokenTranslations.Clear();
                     this.LoadTranslationsInStream(this.FilePath, true);
                     this.PrecompileAndCacheRegexes();
                 }
@@ -362,7 +362,7 @@ namespace GameTranslator.Patches.Translatons
                     try
                     {
                         bool skipRegex = scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedCheck)
-                            ? scopedCheck.FailedRegexLookups.Contains(text3)
+                            ? scopedCheck.FailedRegexLookups.ContainsKey(text3)
                             : this._failedRegexLookups.ContainsKey(text3);
 
                         if (!skipRegex)
@@ -418,7 +418,7 @@ namespace GameTranslator.Patches.Translatons
                             {
                                 if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedFail))
                                 {
-                                    scopedFail.FailedRegexLookups.Add(text3);
+                                    scopedFail.FailedRegexLookups.TryAdd(text3, 0);
                                     if (scopedFail.FailedRegexLookups.Count > 10000)
                                     {
                                         scopedFail.FailedRegexLookups.Clear();
@@ -636,39 +636,39 @@ namespace GameTranslator.Patches.Translatons
             return stringBuilder.ToString();
         }
 
-        public Dictionary<string, string> _translations = new Dictionary<string, string>();
+        private ConcurrentDictionary<string, string> _translations = new ConcurrentDictionary<string, string>();
 
-        public Dictionary<string, string> _reverseTranslations = new Dictionary<string, string>();
-
-        public Dictionary<string, string> _tokenTranslations = new Dictionary<string, string>();
-
-        public Dictionary<string, string> _reverseTokenTranslations = new Dictionary<string, string>();
-
-        private HashSet<string> _partialTranslations = new HashSet<string>();
+        private ConcurrentDictionary<string, string> _reverseTranslations = new ConcurrentDictionary<string, string>();
 
         internal readonly object _regexLock = new object();
 
-        public List<RegexTranslation> _defaultRegexes = new List<RegexTranslation>();
+        internal List<RegexTranslation> _defaultRegexes = new List<RegexTranslation>();
 
         private HashSet<string> _registeredRegexes = new HashSet<string>();
 
-        public List<RegexTranslationSplitter> _splitterRegexes = new List<RegexTranslationSplitter>();
+        internal List<RegexTranslationSplitter> _splitterRegexes = new List<RegexTranslationSplitter>();
 
-        public HashSet<string> _registeredSplitterRegexes = new HashSet<string>();
+        private HashSet<string> _registeredSplitterRegexes = new HashSet<string>();
 
         private ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
 
-        private Dictionary<int, ScopedTranslationData> _scopedTranslations = new Dictionary<int, ScopedTranslationData>();
+        private ConcurrentDictionary<int, ScopedTranslationData> _scopedTranslations = new ConcurrentDictionary<int, ScopedTranslationData>();
+
+        private ConcurrentDictionary<string, string> _tokenTranslations = new ConcurrentDictionary<string, string>();
+
+        private ConcurrentDictionary<string, string> _reverseTokenTranslations = new ConcurrentDictionary<string, string>();
+
+        private ConcurrentDictionary<string, string> _partialTranslations = new ConcurrentDictionary<string, string>();
 
         public class ScopedTranslationData
         {
-            public Dictionary<string, string> Translations { get; set; } = new Dictionary<string, string>();
-            public Dictionary<string, string> ReverseTranslations { get; set; } = new Dictionary<string, string>();
+            public ConcurrentDictionary<string, string> Translations { get; set; } = new ConcurrentDictionary<string, string>();
+            public ConcurrentDictionary<string, string> ReverseTranslations { get; set; } = new ConcurrentDictionary<string, string>();
             public List<RegexTranslation> DefaultRegexes { get; set; } = new List<RegexTranslation>();
             public HashSet<string> RegisteredRegexes { get; set; } = new HashSet<string>();
             public List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
             public HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
-            public HashSet<string> FailedRegexLookups { get; set; } = new HashSet<string>();
+            public ConcurrentDictionary<string, byte> FailedRegexLookups { get; set; } = new ConcurrentDictionary<string, byte>();
         }
 
         public bool IsScopedTranslation(string text, int scope)
@@ -679,12 +679,7 @@ namespace GameTranslator.Patches.Translatons
 
         public ScopedTranslationData GetOrCreateScopedData(int scope)
         {
-            if (!_scopedTranslations.TryGetValue(scope, out var scopedData))
-            {
-                scopedData = new ScopedTranslationData();
-                _scopedTranslations[scope] = scopedData;
-            }
-            return scopedData;
+            return _scopedTranslations.GetOrAdd(scope, _ => new ScopedTranslationData());
         }
 
         public void ClearScopedFailedRegexLookups(int scope)

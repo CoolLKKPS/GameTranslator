@@ -322,7 +322,7 @@ namespace GameTranslator
                         .ToList<string>();
                     foreach (string text in list)
                     {
-                        translateConfigFile.translatePairs.Remove(text);
+                        translateConfigFile.translatePairs.TryRemove(text, out _);
                         DateTime dateTime;
                         translateConfigFile._translatePairLastAccess.TryRemove(text, out dateTime);
                     }
@@ -549,21 +549,21 @@ namespace GameTranslator
 
             public bool shouldLoad = true;
 
-            public IDictionary<string, string> normal = new Dictionary<string, string>();
+            public IDictionary<string, string> normal = new ConcurrentDictionary<string, string>();
 
-            public IDictionary<string, string> special = new Dictionary<string, string>();
+            public IDictionary<string, string> special = new ConcurrentDictionary<string, string>();
 
             public static HashSet<TranslateConfig.TranslateConfigFile> configs = new HashSet<TranslateConfig.TranslateConfigFile>();
 
-            public Dictionary<string, string> translatePairs = new Dictionary<string, string>();
+            public ConcurrentDictionary<string, string> translatePairs = new ConcurrentDictionary<string, string>();
 
             private List<string> logs = new List<string>();
 
-            public List<RegexTranslation> regexTranslations = new List<RegexTranslation>();
-
-            public List<RegexTranslationSplitter> splitterRegexTranslations = new List<RegexTranslationSplitter>();
-
             private static Regex _regex;
+
+            internal List<RegexTranslation> regexTranslations = new List<RegexTranslation>();
+
+            internal List<RegexTranslationSplitter> splitterRegexTranslations = new List<RegexTranslationSplitter>();
 
             internal readonly ConcurrentDictionary<string, DateTime> _translatePairLastAccess = new ConcurrentDictionary<string, DateTime>();
         }
