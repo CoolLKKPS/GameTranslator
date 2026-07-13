@@ -74,7 +74,7 @@ namespace GameTranslator.Patches.Translatons
             bool isTranslatable,
             bool allowFallback = true)
         {
-            var jobKey = GetJobKey(key, config);
+            var jobKey = GetJobKey(key, config, TranslationScopeHelper.GetScope(ui));
 
             if (_unstartedJobs.TryGetValue(jobKey, out var existingUnstartedJob))
             {
@@ -138,7 +138,7 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                if (!CanTranslate(job.OriginalText))
+                if (!CanTranslate(job.OriginalText, job.Scope))
                 {
                     job.State = TranslationJobState.Failed;
                     job.ErrorMessage = "Translation failed due to too many previous failures.";
@@ -152,7 +152,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     job.TranslatedText = translatedText;
                     job.State = TranslationJobState.Succeeded;
-                    var cacheKey = GetCacheKey(job.OriginalText, job.Config);
+                    var cacheKey = GetCacheKey(job.OriginalText, job.Config, job.Scope);
                     AddTranslationToCache(cacheKey, translatedText);
                     Manager?.InvokeJobCompleted(job);
                 }
@@ -177,7 +177,7 @@ namespace GameTranslator.Patches.Translatons
                         {
                             job.State = TranslationJobState.Failed;
                             job.ErrorMessage = "Max retries exceeded.";
-                            RegisterTranslationFailure(job.OriginalText);
+                            RegisterTranslationFailure(job.OriginalText, job.Scope);
                             Manager?.InvokeJobFailed(job);
                         }
                     }
@@ -204,9 +204,9 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        private bool CanTranslate(string untranslatedText)
+        private bool CanTranslate(string untranslatedText, int scope = -1)
         {
-            if (_failedTranslations.TryGetValue(untranslatedText, out var count))
+            if (_failedTranslations.TryGetValue($"{scope}:{untranslatedText}", out var count))
             {
                 return count < 3;
             }
@@ -225,10 +225,11 @@ namespace GameTranslator.Patches.Translatons
             return false;
         }
 
-        private void RegisterTranslationFailure(string untranslatedText)
+        private void RegisterTranslationFailure(string untranslatedText, int scope = -1)
         {
-            _failedTranslations.AddOrUpdate(untranslatedText, 1, (key, value) => (byte)(value + 1));
-            TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{untranslatedText}' (Total failures: {_failedTranslations[untranslatedText]})");
+            var failureKey = $"{scope}:{untranslatedText}";
+            _failedTranslations.AddOrUpdate(failureKey, 1, (k, value) => (byte)(value + 1));
+            TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{untranslatedText}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})");
         }
 
         private string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
@@ -246,7 +247,7 @@ namespace GameTranslator.Patches.Translatons
                 if (!normalText.IsScopedTranslation(text, scope) && config.normal.Count > 0)
                 {
                     StringBuffer buffer = new StringBuffer(translatedText);
-                    foreach (KeyValuePair<string, string> kv in config.normal.OrderByDescending((KeyValuePair<string, string> kv) => kv.Key.Length))
+                    foreach (KeyValuePair<string, string> kv in config.GetNormalOrderedByLength())
                     {
                         buffer.ReplaceFull(kv.Key, kv.Value);
                     }
@@ -262,14 +263,14 @@ namespace GameTranslator.Patches.Translatons
             return translatedText;
         }
 
-        private string GetJobKey(string text, TranslateConfig.TranslateConfigFile config)
+        private string GetJobKey(string text, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
-            return $"{config?.ConfigFileName ?? "global"}:{text}";
+            return $"{config?.ConfigFileName ?? "global"}:{scope}:{text}";
         }
 
-        private string GetCacheKey(string text, TranslateConfig.TranslateConfigFile config)
+        private string GetCacheKey(string text, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
-            return $"{config?.ConfigFileName ?? "global"}:{text}";
+            return $"{config?.ConfigFileName ?? "global"}:{scope}:{text}";
         }
 
         public void ClearAllJobs()

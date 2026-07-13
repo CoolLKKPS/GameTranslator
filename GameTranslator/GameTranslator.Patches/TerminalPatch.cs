@@ -1,5 +1,4 @@
 using GameTranslator.Patches.Translatons;
-using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -364,10 +363,12 @@ namespace GameTranslator.Patches
             {
                 if (TerminalPatch.info != null && TranslatePlugin.shouldTranslateTerimal.Value)
                 {
+                    /*
                     if (TerminalPatch.info.ChangeTime != TextTranslate.ChangeTime)
                     {
                         TerminalPatch.info.Reset(__instance.currentText);
                     }
+                    */
                     if (!TerminalPatch.info.IsTranslated)
                     {
                         if (TranslatePlugin.showAvailableText.Value && !string.IsNullOrEmpty(__instance.currentText) &&

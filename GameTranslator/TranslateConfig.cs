@@ -145,9 +145,9 @@ namespace GameTranslator
                     }
                     if (hasChanges)
                     {
-                        TranslatePlugin.logger.LogInfo("Translate files reloaded due to file changes.");
                         GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
                         GrabbableObjectPatcher.ClearCache();
+                        TranslatePlugin.logger.LogInfo("Translate files reloaded due to file changes.");
                     }
                 }
                 catch (Exception ex)
@@ -235,7 +235,7 @@ namespace GameTranslator
                         }
                     }
                 }
-                foreach (KeyValuePair<string, string> keyValuePair in file.normal.OrderByDescending((KeyValuePair<string, string> kv) => kv.Key.Length))
+                foreach (KeyValuePair<string, string> keyValuePair in file.GetNormalOrderedByLength())
                 {
                     stringBuffer.ReplaceFull(keyValuePair.Key, keyValuePair.Value);
                 }
@@ -404,9 +404,12 @@ namespace GameTranslator
                 this.special.Clear();
                 this.regexTranslations.Clear();
                 this.splitterRegexTranslations.Clear();
+                this._normalKeyLineOrder.Clear();
                 List<string> list = new List<string>();
-                foreach (string text in File.ReadAllLines(this.ConfigFilePath))
+                string[] lines = File.ReadAllLines(this.ConfigFilePath);
+                for (int i = 0; i < lines.Length; i++)
                 {
+                    string text = lines[i];
                     if (!text.StartsWith("#") && text.Contains("="))
                     {
                         string[] array2 = TranslateConfig.TranslateConfigFile.regex.Split(text);
@@ -454,6 +457,7 @@ namespace GameTranslator
                             else
                             {
                                 this.normal.Add(text2, text3);
+                                this._normalKeyLineOrder.TryAdd(text2, i);
                                 if (!this.special.ContainsKey(text3))
                                 {
                                     this.special.Add(text3, text2);
@@ -566,6 +570,16 @@ namespace GameTranslator
             internal List<RegexTranslationSplitter> splitterRegexTranslations = new List<RegexTranslationSplitter>();
 
             internal readonly ConcurrentDictionary<string, DateTime> _translatePairLastAccess = new ConcurrentDictionary<string, DateTime>();
+
+            internal readonly ConcurrentDictionary<string, int> _normalKeyLineOrder = new ConcurrentDictionary<string, int>();
+
+            internal IEnumerable<KeyValuePair<string, string>> GetNormalOrderedByLength()
+            {
+                var keyOrder = this._normalKeyLineOrder;
+                return this.normal
+                    .OrderByDescending(kv => kv.Key.Length)
+                    .ThenBy(kv => keyOrder.TryGetValue(kv.Key, out var line) ? line : int.MaxValue);
+            }
         }
     }
 }

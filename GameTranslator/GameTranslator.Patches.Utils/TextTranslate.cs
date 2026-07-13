@@ -3,7 +3,6 @@ using BepInEx.Logging;
 using GameTranslator.Patches.Translatons;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace GameTranslator.Patches.Utils
@@ -175,7 +174,7 @@ namespace GameTranslator.Patches.Utils
                 }
             }
 
-            string cachedTranslation = GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.GetCachedTranslation(text, config);
+            string cachedTranslation = GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.GetCachedTranslation(text, config, TranslationScopeHelper.GetScope(ui));
             if (cachedTranslation != null)
             {
                 if (TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached:{text}"))
@@ -231,7 +230,7 @@ namespace GameTranslator.Patches.Utils
                     var translatedText = TranslateImmediate(ui, text, info, normalText, config, ignoreComponentState);
                     if (translatedText != null)
                     {
-                        GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.GetCachedTranslation(text, config);
+                        GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.GetCachedTranslation(text, config, TranslationScopeHelper.GetScope(ui));
                         return translatedText;
                     }
                 }
@@ -302,7 +301,7 @@ namespace GameTranslator.Patches.Utils
                     if (!normalText.IsScopedTranslation(text, TranslationScopeHelper.GetScope(ui)) && config.normal.Count > 0)
                     {
                         StringBuffer buffer = new StringBuffer(text3);
-                        foreach (KeyValuePair<string, string> kv in config.normal.OrderByDescending((KeyValuePair<string, string> kv) => kv.Key.Length))
+                        foreach (KeyValuePair<string, string> kv in config.GetNormalOrderedByLength())
                         {
                             buffer.ReplaceFull(kv.Key, kv.Value);
                         }
