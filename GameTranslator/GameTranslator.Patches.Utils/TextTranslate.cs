@@ -161,6 +161,13 @@ namespace GameTranslator.Patches.Utils
                 {
                     if (info.ChangeTime != TextTranslate.ChangeTime)
                     {
+                        /*
+                        var retranslated = TranslateImmediate(ui, info.OriginalText, info, normalText, config, ignoreComponentState);
+                        if (retranslated != null)
+                        {
+                            return retranslated;
+                        }
+                        */
                         info.Reset(text);
                     }
                     else
@@ -230,7 +237,6 @@ namespace GameTranslator.Patches.Utils
                     var translatedText = TranslateImmediate(ui, text, info, normalText, config, ignoreComponentState);
                     if (translatedText != null)
                     {
-                        GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.GetCachedTranslation(text, config, TranslationScopeHelper.GetScope(ui));
                         return translatedText;
                     }
                 }

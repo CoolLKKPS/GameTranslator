@@ -198,7 +198,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     job.State = TranslationJobState.Failed;
                     job.ErrorMessage = ex.Message;
-                    RegisterTranslationFailure(job.OriginalText);
+                    RegisterTranslationFailure(job.OriginalText, job.Scope);
                     Manager?.InvokeJobFailed(job);
                 }
             }
@@ -244,7 +244,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     translatedText = normalText.TryTranslate(translatedText, scope);
                 }
-                if (!normalText.IsScopedTranslation(text, scope) && config.normal.Count > 0)
+                if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.normal.Count > 0)
                 {
                     StringBuffer buffer = new StringBuffer(translatedText);
                     foreach (KeyValuePair<string, string> kv in config._normalOrdered)

@@ -537,6 +537,10 @@ namespace GameTranslator.Patches.Translatons
         private void CleanupCurrentFileRegexCache()
         {
             List<string> list = this._defaultRegexes.Select((RegexTranslation r) => "default_" + r.Original).ToList<string>();
+            foreach (var scoped in _scopedTranslations.Values)
+            {
+                list.AddRange(scoped.DefaultRegexes.Select((RegexTranslation r) => "default_" + r.Original));
+            }
             int num = 0;
             foreach (string text in list)
             {

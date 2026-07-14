@@ -1,9 +1,10 @@
 ## v2.1.7
 
-- Added Scope feature
+- Added Scope feature, similar like AutoTranslator (between `#set level 2` and `#unset level 2` will only translate MainMenu)
 - Fixed the issue when reloading translation files sometimes cause thread exception
 - Fixed the issue when original text not equal to translated text will re-translate translated text again
 - Fixed the issue where regex will do twice in certain cases
+- Now same length text will sort by line
 - Additional code cleanup
 
 ## v2.1.6
