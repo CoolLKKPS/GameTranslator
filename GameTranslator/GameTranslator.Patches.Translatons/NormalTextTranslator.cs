@@ -82,7 +82,7 @@ namespace GameTranslator.Patches.Translatons
                     if (trimmed.StartsWith("#set level "))
                     {
                         string levelsStr = trimmed.Substring(11).Trim();
-                        if (TranslationScopeHelper.TryResolveScopeName(levelsStr, out int singleLevel))
+                        if (int.TryParse(levelsStr, out int singleLevel) && singleLevel >= 0)
                         {
                             activeLevels.Add(singleLevel);
                             GetOrCreateScopedData(singleLevel);
@@ -91,7 +91,7 @@ namespace GameTranslator.Patches.Translatons
                         {
                             foreach (string part in levelsStr.Split(','))
                             {
-                                if (TranslationScopeHelper.TryResolveScopeName(part.Trim(), out int level))
+                                if (int.TryParse(part.Trim(), out int level) && level >= 0)
                                 {
                                     activeLevels.Add(level);
                                     GetOrCreateScopedData(level);
@@ -103,7 +103,7 @@ namespace GameTranslator.Patches.Translatons
                     if (trimmed.StartsWith("#unset level "))
                     {
                         string levelsStr = trimmed.Substring(13).Trim();
-                        if (TranslationScopeHelper.TryResolveScopeName(levelsStr, out int singleLevel))
+                        if (int.TryParse(levelsStr, out int singleLevel))
                         {
                             activeLevels.Remove(singleLevel);
                         }
@@ -111,7 +111,7 @@ namespace GameTranslator.Patches.Translatons
                         {
                             foreach (string part in levelsStr.Split(','))
                             {
-                                if (TranslationScopeHelper.TryResolveScopeName(part.Trim(), out int level))
+                                if (int.TryParse(part.Trim(), out int level))
                                 {
                                     activeLevels.Remove(level);
                                 }
