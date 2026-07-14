@@ -301,7 +301,7 @@ namespace GameTranslator.Patches.Utils
                     if (!normalText.IsScopedTranslation(text, TranslationScopeHelper.GetScope(ui)) && config.normal.Count > 0)
                     {
                         StringBuffer buffer = new StringBuffer(text3);
-                        foreach (KeyValuePair<string, string> kv in config.GetNormalOrderedByLength())
+                        foreach (KeyValuePair<string, string> kv in config._normalOrdered)
                         {
                             buffer.ReplaceFull(kv.Key, kv.Value);
                         }

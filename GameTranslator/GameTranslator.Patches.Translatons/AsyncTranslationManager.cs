@@ -439,7 +439,7 @@ namespace GameTranslator.Patches.Translatons
                 if (!normalText.IsScopedTranslation(text, scope) && config.normal.Count > 0)
                 {
                     StringBuffer buffer = new StringBuffer(translatedText);
-                    foreach (KeyValuePair<string, string> kv in config.GetNormalOrderedByLength())
+                    foreach (KeyValuePair<string, string> kv in config._normalOrdered)
                     {
                         buffer.ReplaceFull(kv.Key, kv.Value);
                     }

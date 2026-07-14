@@ -235,7 +235,7 @@ namespace GameTranslator
                         }
                     }
                 }
-                foreach (KeyValuePair<string, string> keyValuePair in file.GetNormalOrderedByLength())
+                foreach (KeyValuePair<string, string> keyValuePair in file._normalOrdered)
                 {
                     stringBuffer.ReplaceFull(keyValuePair.Key, keyValuePair.Value);
                 }
@@ -404,7 +404,7 @@ namespace GameTranslator
                 this.special.Clear();
                 this.regexTranslations.Clear();
                 this.splitterRegexTranslations.Clear();
-                this._normalKeyLineOrder.Clear();
+                Dictionary<string, int> normalKeyLineOrder = new Dictionary<string, int>();
                 List<string> list = new List<string>();
                 string[] lines = File.ReadAllLines(this.ConfigFilePath);
                 for (int i = 0; i < lines.Length; i++)
@@ -457,7 +457,7 @@ namespace GameTranslator
                             else
                             {
                                 this.normal.Add(text2, text3);
-                                this._normalKeyLineOrder.TryAdd(text2, i);
+                                normalKeyLineOrder[text2] = i;
                                 if (!this.special.ContainsKey(text3))
                                 {
                                     this.special.Add(text3, text2);
@@ -474,6 +474,7 @@ namespace GameTranslator
                         }
                     }
                 }
+                this.GetNormalOrderedByLength(normalKeyLineOrder);
                 if (list.Count > 0)
                 {
                     File.AppendAllLines(Path.Combine(Path.GetDirectoryName(this.ConfigFilePath), this.ConfigFileName + "_errors.log"), list);
@@ -571,14 +572,14 @@ namespace GameTranslator
 
             internal readonly ConcurrentDictionary<string, DateTime> _translatePairLastAccess = new ConcurrentDictionary<string, DateTime>();
 
-            internal readonly ConcurrentDictionary<string, int> _normalKeyLineOrder = new ConcurrentDictionary<string, int>();
+            internal KeyValuePair<string, string>[] _normalOrdered = Array.Empty<KeyValuePair<string, string>>();
 
-            internal IEnumerable<KeyValuePair<string, string>> GetNormalOrderedByLength()
+            private void GetNormalOrderedByLength(Dictionary<string, int> lineOrder)
             {
-                var keyOrder = this._normalKeyLineOrder;
-                return this.normal
+                this._normalOrdered = this.normal
                     .OrderByDescending(kv => kv.Key.Length)
-                    .ThenBy(kv => keyOrder.TryGetValue(kv.Key, out var line) ? line : int.MaxValue);
+                    .ThenBy(kv => lineOrder.TryGetValue(kv.Key, out var line) ? line : int.MaxValue)
+                    .ToArray();
             }
         }
     }
