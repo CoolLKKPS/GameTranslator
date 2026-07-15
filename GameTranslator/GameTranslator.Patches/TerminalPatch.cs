@@ -290,11 +290,6 @@ namespace GameTranslator.Patches
             return t;
         }
 
-        public static TerminalKeyword Copy(TerminalKeyword oldOne)
-        {
-            return TerminalPatch.TransReflection<TerminalKeyword>(oldOne);
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch("LoadNewNode")]
         private static void changeNewNodeText(Terminal __instance, TerminalNode node)
@@ -422,7 +417,7 @@ namespace GameTranslator.Patches
                         }
                         else
                         {
-                            TerminalKeyword terminalKeyword2 = TerminalPatch.Copy(old);
+                            TerminalKeyword terminalKeyword2 = TerminalPatch.TransReflection<TerminalKeyword>(old);
                             terminalKeyword2.word = text;
                             this.keyValuePairs.Add(old.name + old.word, terminalKeyword2);
                             if (terminalKeyword2.compatibleNouns != null)

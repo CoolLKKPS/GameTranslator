@@ -331,22 +331,12 @@ namespace GameTranslator.Patches.Utils
             }
             int num = oldValue.Length;
             int num2 = newValue.Length;
-            for (int i = this.IndexOfWord(oldValue); i >= 0; i = this.IndexOfWord(oldValue, i + num2))
+            for (int i = this.IndexOfWord(oldValue, 0, this.length); i >= 0; i = this.IndexOfWord(oldValue, i + num2, this.length - (i + num2)))
             {
                 this.Remove(i, num);
                 this.Insert(i, newValue);
             }
             return this;
-        }
-
-        private int IndexOfWord(string str)
-        {
-            return this.IndexOfWord(str, 0, this.length);
-        }
-
-        private int IndexOfWord(string str, int startIndex)
-        {
-            return this.IndexOfWord(str, startIndex, this.length - startIndex);
         }
 
         public int IndexOfWord(string str, int startIndex, int count)

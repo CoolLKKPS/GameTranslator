@@ -16,13 +16,13 @@ namespace GameTranslator.Patches.Utils
                     Component component = ui as Component;
                     if (component != null && component)
                     {
-                        return TranslationScopeHelper.GetScopeFromComponent(component);
+                        return component.gameObject.scene.buildIndex;
                     }
                     if (ui is GUIContent)
                     {
                         return -1;
                     }
-                    return TranslationScopeHelper.GetActiveSceneId();
+                    return SceneManager.GetActiveScene().buildIndex;
                 }
                 catch (MissingMemberException ex)
                 {
@@ -32,21 +32,6 @@ namespace GameTranslator.Patches.Utils
                 return -1;
             }
             return -1;
-        }
-
-        private static int GetScopeFromComponent(Component component)
-        {
-            return component.gameObject.scene.buildIndex;
-        }
-
-        public static int GetActiveSceneId()
-        {
-            return TranslationScopeHelper.GetActiveSceneIdBySceneManager();
-        }
-
-        private static int GetActiveSceneIdBySceneManager()
-        {
-            return SceneManager.GetActiveScene().buildIndex;
         }
 
         /*
