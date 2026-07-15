@@ -24,10 +24,13 @@ namespace GameTranslator.Patches.Utils
                 _availableFonts.Clear();
                 _characterSupportCache.Clear();
                 _textCache.Clear();
-                var mainFont = FontCache.GetOrCreateFallbackFontTextMeshPro() as TMP_FontAsset;
-                if (mainFont != null)
+                if (TranslatePlugin.changeFont.Value)
                 {
-                    AddFont(mainFont);
+                    var mainFont = FontCache.GetOrCreateFallbackFontTextMeshPro() as TMP_FontAsset;
+                    if (mainFont != null)
+                    {
+                        AddFont(mainFont);
+                    }
                 }
                 var allFonts = Resources.FindObjectsOfTypeAll<TMP_FontAsset>();
                 foreach (var font in allFonts)
@@ -37,7 +40,10 @@ namespace GameTranslator.Patches.Utils
                         AddFont(font);
                     }
                 }
-                _isInitialized = true;
+                if (_availableFonts.Count > 0)
+                {
+                    _isInitialized = true;
+                }
                 TranslatePlugin.logger.LogInfo($"FontSupportChecker initialized with {_availableFonts.Count} fonts");
             }
         }
@@ -64,6 +70,7 @@ namespace GameTranslator.Patches.Utils
             lock (_lockObject)
             {
                 AddFont(font);
+                _isInitialized = true;
                 _characterSupportCache.Clear();
                 _textCache.Clear();
                 TranslatePlugin.logger.LogDebug($"Registered new font: {font.name}");

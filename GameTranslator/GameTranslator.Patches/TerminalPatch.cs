@@ -393,7 +393,7 @@ namespace GameTranslator.Patches
 
         private static TextTranslationInfo info;
 
-        private static HashSet<object> ig = new HashSet<object>();
+        public static HashSet<object> ig = new HashSet<object>();
 
         public class Translator
         {
