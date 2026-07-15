@@ -191,12 +191,14 @@ namespace GameTranslator.Patches.Utils
             return true;
         }
 
+        /*
         private bool IsTextureFormatCompatible(Texture2D texture, TranslateExtensions.ImageFormat format)
         {
             var textureFormat = texture.format;
             return format == TranslateExtensions.ImageFormat.PNG
                 || (format == TranslateExtensions.ImageFormat.TGA && (textureFormat == TextureFormat.ARGB32 || textureFormat == TextureFormat.RGBA32 || textureFormat == TextureFormat.RGB24));
         }
+        */
 
         public static TextureTranslate Instance = new TextureTranslate();
 

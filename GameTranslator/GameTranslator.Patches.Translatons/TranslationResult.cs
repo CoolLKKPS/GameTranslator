@@ -1,5 +1,6 @@
 ﻿namespace GameTranslator.Patches.Translatons
 {
+    /*
     public class TranslationResult
     {
         internal TranslationResult(string translatedText, string errorMessage)
@@ -14,4 +15,5 @@
 
         public string ErrorMessage { get; }
     }
+    */
 }

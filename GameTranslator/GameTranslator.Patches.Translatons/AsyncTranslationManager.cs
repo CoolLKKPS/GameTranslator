@@ -14,7 +14,6 @@ namespace GameTranslator.Patches.Translatons
         private readonly ConcurrentDictionary<string, byte> _immediatelyTranslating;
         private readonly Dictionary<string, TextStabilizationContext> _stabilizationContexts;
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, byte>> _pendingStabilizationUIs;
-        private bool _temporarilyDisabled = false;
 
         public static AsyncTranslationManager Instance { get; } = new AsyncTranslationManager();
 
@@ -45,23 +44,16 @@ namespace GameTranslator.Patches.Translatons
             _stabilizationContexts.Clear();
         }
 
-        // This is for other devs for debugging, might not useful
-        public bool IsTemporarilyDisabled()
-        {
-            return _temporarilyDisabled;
-        }
-
         public string GetCachedTranslation(string originalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
             if (_translationManager?.PrimaryEndpoint == null) return null;
-            string cacheKey = GetCacheKey(originalText, config, scope);
+            string cacheKey = TranslationEndpointManager.GetCacheKey(originalText, config, scope);
             return _translationManager.PrimaryEndpoint.TryGetTranslation(cacheKey, out var translation) ? translation : null;
         }
 
         public void QueueTranslation(object ui, string originalText, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
             if (string.IsNullOrEmpty(originalText) || string.IsNullOrWhiteSpace(originalText)) return;
-            if (_temporarilyDisabled) return;
             int scope = TranslationScopeHelper.GetScope(ui);
             try
             {
@@ -79,7 +71,7 @@ namespace GameTranslator.Patches.Translatons
                 var cachedTranslation = GetCachedTranslation(originalText, config, scope);
                 if (cachedTranslation != null)
                 {
-                    if (IsUIObjectValid(ui))
+                    if (TextTranslate.IsUIObjectValid(ui))
                     {
                         _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, cachedTranslation, originalText, info, TextTranslate.ChangeTime));
                     }
@@ -87,12 +79,12 @@ namespace GameTranslator.Patches.Translatons
                 }
                 if (originalText.Length <= TranslatePlugin.syncTranslationThreshold.Value)
                 {
-                    var translatedText = TranslateText(originalText, normalText, config, scope);
+                    var translatedText = TranslationEndpointManager.TranslateText(originalText, normalText, config, scope);
                     if (!string.IsNullOrEmpty(translatedText) && !translatedText.Equals(originalText))
                     {
-                        string cacheKey = GetCacheKey(originalText, config, scope);
+                        string cacheKey = TranslationEndpointManager.GetCacheKey(originalText, config, scope);
                         _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, translatedText);
-                        if (IsUIObjectValid(ui))
+                        if (TextTranslate.IsUIObjectValid(ui))
                         {
                             _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, translatedText, originalText, info, TextTranslate.ChangeTime));
                         }
@@ -104,7 +96,7 @@ namespace GameTranslator.Patches.Translatons
                     var isTranslatable = normalText == null || normalText.IsTranslatable(originalText, false, scope);
                     if (ShouldStabilizeText(ui, originalText))
                     {
-                        string immKey = GetCacheKey(originalText, config, scope);
+                        string immKey = TranslationEndpointManager.GetCacheKey(originalText, config, scope);
                         if (_immediatelyTranslating.TryAdd(immKey, 0))
                         {
                             StartTextStabilization(ui, originalText, info, normalText, config, immKey, scope);
@@ -112,7 +104,7 @@ namespace GameTranslator.Patches.Translatons
                         else
                         {
                             var cached = GetCachedTranslation(originalText, config, scope);
-                            if (cached != null && IsUIObjectValid(ui))
+                            if (cached != null && TextTranslate.IsUIObjectValid(ui))
                             {
                                 _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, cached, originalText, info, TextTranslate.ChangeTime));
                             }
@@ -328,13 +320,13 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                string immKey = GetCacheKey(job.OriginalText, job.Config, job.Scope);
+                string immKey = TranslationEndpointManager.GetCacheKey(job.OriginalText, job.Config, job.Scope);
                 _immediatelyTranslating.TryRemove(immKey, out _);
                 if (!string.IsNullOrEmpty(job.TranslatedText))
                 {
                     foreach (var ui in job.AssociatedUIs)
                     {
-                        if (IsUIObjectValid(ui))
+                        if (TextTranslate.IsUIObjectValid(ui))
                         {
                             _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, job.TranslatedText, job.OriginalText, job.TranslationInfo, job.StartVersion));
                         }
@@ -343,13 +335,13 @@ namespace GameTranslator.Patches.Translatons
                     {
                         foreach (var kvp in pendingSet)
                         {
-                            if (IsUIObjectValid(kvp.Key))
+                            if (TextTranslate.IsUIObjectValid(kvp.Key))
                             {
                                 _mainThreadActions.Enqueue(() => SafeUpdateUI(kvp.Key, job.TranslatedText, job.OriginalText, job.TranslationInfo, job.StartVersion));
                             }
                         }
                     }
-                    string cacheKey = GetCacheKey(job.OriginalText, job.Config, job.Scope);
+                    string cacheKey = TranslationEndpointManager.GetCacheKey(job.OriginalText, job.Config, job.Scope);
                     _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, job.TranslatedText);
                 }
             }
@@ -364,7 +356,7 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                string immKey = GetCacheKey(job.OriginalText, job.Config, job.Scope);
+                string immKey = TranslationEndpointManager.GetCacheKey(job.OriginalText, job.Config, job.Scope);
                 _immediatelyTranslating.TryRemove(immKey, out _);
                 _pendingStabilizationUIs.TryRemove(immKey, out _);
 
@@ -379,7 +371,7 @@ namespace GameTranslator.Patches.Translatons
 
         private void SafeUpdateUI(object ui, string translatedText, string originalText, object translationInfo, long expectedVersion)
         {
-            if (!IsUIObjectValid(ui)) return;
+            if (!TextTranslate.IsUIObjectValid(ui)) return;
 
             try
             {
@@ -426,62 +418,6 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        private string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
-        {
-            if (string.IsNullOrEmpty(text)) return text;
-            string translatedText = text;
-            try
-            {
-                if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false, scope))
-                {
-                    translatedText = normalText.TryTranslate(translatedText, scope);
-                }
-                if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.normal.Count > 0)
-                {
-                    StringBuffer buffer = new StringBuffer(translatedText);
-                    foreach (KeyValuePair<string, string> kv in config._normalOrdered)
-                    {
-                        buffer.ReplaceFull(kv.Key, kv.Value);
-                    }
-                    translatedText = buffer.ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                TranslatePlugin.logger.LogError($"Translation error for text '{text}': {ex.Message}");
-                return text;
-            }
-            return translatedText;
-        }
-
-        private bool IsUIObjectValid(object ui)
-        {
-            if (ui == null) return false;
-            try
-            {
-                if (ui is Component component && component)
-                {
-                    var go = component.gameObject;
-                    if (go)
-                    {
-                        if (component is Behaviour be)
-                        {
-                            return go.activeInHierarchy && be.enabled;
-                        }
-                        else
-                        {
-                            return go.activeInHierarchy;
-                        }
-                    }
-                }
-                return ui != null;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         public void ClearCache()
         {
             _translationManager?.ClearAllJobs();
@@ -490,11 +426,6 @@ namespace GameTranslator.Patches.Translatons
             _immediatelyTranslating.Clear();
             _pendingStabilizationUIs.Clear();
             TextTranslate.ChangeTime += 1L;
-        }
-
-        private string GetCacheKey(string originalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
-        {
-            return $"{config?.ConfigFileName ?? "global"}:{scope}:{originalText}";
         }
 
         private string GetStabilizationKey(object ui, string text)

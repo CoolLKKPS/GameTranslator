@@ -18,7 +18,7 @@ namespace GameTranslator.Patches.Hooks
         [HarmonyPatch("text", MethodType.Setter)]
         public static void Change(ref TextElement __instance, ref string value)
         {
-            TextTranslate.Instance.Hook_TextChanged(__instance, ref value);
+            TextTranslate.Instance.OnTranslateIncomingText(__instance, ref value);
         }
     }
 }

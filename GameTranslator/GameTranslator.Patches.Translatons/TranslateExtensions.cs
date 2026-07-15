@@ -2,8 +2,6 @@ using GameTranslator.Patches.Translatons.Manipulator;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,20 +17,6 @@ namespace GameTranslator.Patches.Translatons
         public static Type GetUnityType(this object obj)
         {
             return obj.GetType();
-        }
-
-        private static bool IsWordChar(char c)
-        {
-            return char.IsLetterOrDigit(c) || c == '_';
-        }
-
-        public static bool Contains(this string s, string value, bool ignoreCase = false)
-        {
-            if (!ignoreCase)
-            {
-                return s.IndexOf(value, StringComparison.Ordinal) >= 0;
-            }
-            return s.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public static string ToString(this char[] value, int startIndex, int count)
@@ -52,11 +36,7 @@ namespace GameTranslator.Patches.Translatons
             return new string(value, startIndex, count);
         }
 
-        public static StringBuilder ReplaceFull(this StringBuilder builder, string oldValue, string newValue)
-        {
-            return builder.ReplaceFull(oldValue, newValue, 0, builder.Length);
-        }
-
+        /*
         private static StringBuilder ReplaceFull(this StringBuilder builder, string oldValue, string newValue, int startIndex, int count)
         {
             int length = builder.Length;
@@ -157,6 +137,64 @@ namespace GameTranslator.Patches.Translatons
             }
             return text;
         }
+        
+        private static bool IsWordChar(char c)
+        {
+            return char.IsLetterOrDigit(c) || c == '_';
+        }
+
+        public static bool Contains(this string s, string value, bool ignoreCase = false)
+        {
+            if (!ignoreCase)
+            {
+                return s.IndexOf(value, StringComparison.Ordinal) >= 0;
+            }
+            return s.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        public static ImageTranslationInfo GetOrCreateImageTranslationInfo(this object obj, Texture2D originalTexture)
+        {
+            ImageTranslationInfo imageTranslationInfo;
+            if (obj == null)
+            {
+                imageTranslationInfo = null;
+            }
+            else
+            {
+                ImageTranslationInfo orCreateExtensionData = obj.GetOrCreateExtensionData<ImageTranslationInfo>();
+                if (orCreateExtensionData.Original == null)
+                {
+                    orCreateExtensionData.Initialize(originalTexture);
+                }
+                imageTranslationInfo = orCreateExtensionData;
+            }
+            return imageTranslationInfo;
+        }
+
+        public static bool IsKnownTextType(this object ui)
+        {
+            if (ui == null) return false;
+
+            var type = ui.GetUnityType();
+            return (UnityTypes.Text != null && UnityTypes.Text.IsAssignableFrom(type)) ||
+                   (UnityTypes.TextMeshPro != null && UnityTypes.TextMeshPro.IsAssignableFrom(type)) ||
+                   (UnityTypes.TextMeshProUGUI != null && UnityTypes.TextMeshProUGUI.IsAssignableFrom(type)) ||
+                   (UnityTypes.TextField != null && UnityTypes.TextField.IsAssignableFrom(type)) ||
+                   (UnityTypes.TextArea2D != null && UnityTypes.TextArea2D.IsAssignableFrom(type)) ||
+                   (UnityTypes.UguiNovelText != null && UnityTypes.UguiNovelText.IsAssignableFrom(type)) ||
+                   (UnityTypes.UILabel != null && UnityTypes.UILabel.IsAssignableFrom(type)) ||
+                   (UnityTypes.TextMesh != null && UnityTypes.TextMesh.IsAssignableFrom(type)) ||
+                   (TextElementType != null && TextElementType.IsAssignableFrom(type));
+        }
+
+        public static void TryRemoveCharacters(this TMP_FontAsset fontAsset, uint[] unicodes)
+        {
+            for (int i = 0; i < unicodes.Length; i++)
+            {
+                fontAsset.TryRemoveCharacter(unicodes[i]);
+            }
+        }
+        */
 
         public static bool EqualsIgnoreCase(this string value, string other)
         {
@@ -340,10 +378,11 @@ namespace GameTranslator.Patches.Translatons
             return new TextureDataResult(array, false, realtimeSinceStartup2 - realtimeSinceStartup);
         }
 
-        public static bool IsCompatible(this object texture, TranslateExtensions.ImageFormat dataType)
+        public static bool IsCompatible(this Texture2D texture, TranslateExtensions.ImageFormat dataType)
         {
-            TextureFormat format = ((Texture2D)texture).format;
-            return dataType == TranslateExtensions.ImageFormat.PNG || (dataType == TranslateExtensions.ImageFormat.TGA && (format == TextureFormat.ARGB32 || format == TextureFormat.RGBA32 || format == TextureFormat.RGB24));
+            var format = texture.format;
+            return dataType == TranslateExtensions.ImageFormat.PNG
+                || (dataType == TranslateExtensions.ImageFormat.TGA && (format == TextureFormat.ARGB32 || format == TextureFormat.RGBA32 || format == TextureFormat.RGB24));
         }
 
         public static bool IsKnownImageType(this object ui)
@@ -422,11 +461,6 @@ namespace GameTranslator.Patches.Translatons
             return textComponentManipulator;
         }
 
-        private static Sprite SafeCreateSprite(Sprite sprite, Texture2D texture)
-        {
-            return Sprite.Create(texture, new Rect(sprite.rect.x, sprite.rect.y, (float)texture.width, (float)texture.height), sprite.pivot);
-        }
-
         private static Sprite SafeCreateSprite(SpriteRenderer sr, Sprite sprite, Texture2D texture)
         {
             return Sprite.Create(texture, (sprite != null) ? sprite.rect : sr.sprite.rect, Vector2.zero);
@@ -452,59 +486,42 @@ namespace GameTranslator.Patches.Translatons
         public static bool ShouldIgnoreTextComponent(this object ui)
         {
             Component component = ui as Component;
-            bool flag;
             if (component == null || !component)
-            {
-                flag = false;
-            }
-            else
-            {
-                GameObject gameObject = component.gameObject;
-                Component component2;
-                if (UnityTypes.InputField != null)
-                {
-                    GameObject gameObject2 = component.gameObject;
-                    TypeContainer inputField = UnityTypes.InputField;
-                    component2 = gameObject2.GetFirstComponentInSelfOrAncestor((inputField != null) ? inputField.UnityType : null);
-                    if (component2 != null && UnityTypes.InputField_Properties.Placeholder != null)
-                    {
-                        Component component3 = (Component)UnityTypes.InputField_Properties.Placeholder.Get(component2);
-                        return !UnityObjectReferenceComparer.Default.Equals(component3, component);
-                    }
-                }
-                if (UnityTypes.TMP_InputField != null)
-                {
-                    GameObject gameObject3 = component.gameObject;
-                    TypeContainer tmp_InputField = UnityTypes.TMP_InputField;
-                    component2 = gameObject3.GetFirstComponentInSelfOrAncestor((tmp_InputField != null) ? tmp_InputField.UnityType : null);
-                    if (component2 != null && UnityTypes.TMP_InputField_Properties.Placeholder != null)
-                    {
-                        Component component4 = (Component)UnityTypes.TMP_InputField_Properties.Placeholder.Get(component2);
-                        return !UnityObjectReferenceComparer.Default.Equals(component4, component);
-                    }
-                }
-                GameObject gameObject4 = gameObject;
-                TypeContainer uiinput = UnityTypes.UIInput;
-                component2 = gameObject4.GetFirstComponentInSelfOrAncestor((uiinput != null) ? uiinput.UnityType : null);
-                flag = component2 != null;
-            }
-            return flag;
-        }
+                return false;
 
-        public static bool IsKnownTextType(this object ui)
-        {
-            if (ui == null) return false;
+            var tr = component.transform;
+            if (tr.name.IndexOf("XUAIGNORE", StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
 
-            var type = ui.GetUnityType();
-            return (UnityTypes.Text != null && UnityTypes.Text.IsAssignableFrom(type)) ||
-                   (UnityTypes.TextMeshPro != null && UnityTypes.TextMeshPro.IsAssignableFrom(type)) ||
-                   (UnityTypes.TextMeshProUGUI != null && UnityTypes.TextMeshProUGUI.IsAssignableFrom(type)) ||
-                   (UnityTypes.TextField != null && UnityTypes.TextField.IsAssignableFrom(type)) ||
-                   (UnityTypes.TextArea2D != null && UnityTypes.TextArea2D.IsAssignableFrom(type)) ||
-                   (UnityTypes.UguiNovelText != null && UnityTypes.UguiNovelText.IsAssignableFrom(type)) ||
-                   (UnityTypes.UILabel != null && UnityTypes.UILabel.IsAssignableFrom(type)) ||
-                   (UnityTypes.TextMesh != null && UnityTypes.TextMesh.IsAssignableFrom(type)) ||
-                   (TextElementType != null && TextElementType.IsAssignableFrom(type));
+            while (tr.parent != null)
+            {
+                tr = tr.parent;
+                if (tr.name.IndexOf("XUAIGNORETREE", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+            }
+
+            GameObject gameObject = component.gameObject;
+            Component component2;
+            if (UnityTypes.InputField != null)
+            {
+                component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.InputField.UnityType);
+                if (component2 != null && UnityTypes.InputField_Properties.Placeholder != null)
+                {
+                    Component component3 = (Component)UnityTypes.InputField_Properties.Placeholder.Get(component2);
+                    return !UnityObjectReferenceComparer.Default.Equals(component3, component);
+                }
+            }
+            if (UnityTypes.TMP_InputField != null)
+            {
+                component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.TMP_InputField.UnityType);
+                if (component2 != null && UnityTypes.TMP_InputField_Properties.Placeholder != null)
+                {
+                    Component component4 = (Component)UnityTypes.TMP_InputField_Properties.Placeholder.Get(component2);
+                    return !UnityObjectReferenceComparer.Default.Equals(component4, component);
+                }
+            }
+            component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.UIInput?.UnityType);
+            return component2 != null;
         }
 
         public static Component GetFirstComponentInSelfOrAncestor(this GameObject go, Type type)
@@ -540,25 +557,6 @@ namespace GameTranslator.Patches.Translatons
                 component = null;
             }
             return component;
-        }
-
-        public static ImageTranslationInfo GetOrCreateImageTranslationInfo(this object obj, Texture2D originalTexture)
-        {
-            ImageTranslationInfo imageTranslationInfo;
-            if (obj == null)
-            {
-                imageTranslationInfo = null;
-            }
-            else
-            {
-                ImageTranslationInfo orCreateExtensionData = obj.GetOrCreateExtensionData<ImageTranslationInfo>();
-                if (orCreateExtensionData.Original == null)
-                {
-                    orCreateExtensionData.Initialize(originalTexture);
-                }
-                imageTranslationInfo = orCreateExtensionData;
-            }
-            return imageTranslationInfo;
         }
 
         public static void Load()
@@ -631,34 +629,9 @@ namespace GameTranslator.Patches.Translatons
             ((List<TMP_Character>)TranslateExtensions.m_CharacterTable.GetValue(fontAsset)).RemoveAll((TMP_Character character) => character.unicode == unicode);
         }
 
-        public static void TryRemoveCharacters(this TMP_FontAsset fontAsset, uint[] unicodes)
-        {
-            for (int i = 0; i < unicodes.Length; i++)
-            {
-                fontAsset.TryRemoveCharacter(unicodes[i]);
-            }
-        }
-
-        public static bool IsCompatible(this Texture2D texture, TranslateExtensions.ImageFormat dataType)
-        {
-            var format = texture.format;
-            return dataType == TranslateExtensions.ImageFormat.PNG
-                || (dataType == TranslateExtensions.ImageFormat.TGA && (format == TextureFormat.ARGB32 || format == TextureFormat.RGBA32 || format == TextureFormat.RGB24));
-        }
-
         private static readonly Dictionary<Type, ITextComponentManipulator> Manipulators = new Dictionary<Type, ITextComponentManipulator>();
 
         private static readonly Type TextElementType = typeof(TextElement);
-
-        public static FieldInfo m_ChunkOffset = typeof(StringBuilder).GetField("m_ChunkOffset", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        public static FieldInfo m_ChunkLength = typeof(StringBuilder).GetField("m_ChunkLength", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        public static MethodInfo FindChunkForIndex = typeof(StringBuilder).GetMethod("FindChunkForIndex", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        public static MethodInfo ReplaceAllInChunk = typeof(StringBuilder).GetMethod("ReplaceAllInChunk", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        public static MethodInfo StartsWith = typeof(StringBuilder).GetMethod("StartsWith", BindingFlags.Instance | BindingFlags.NonPublic);
 
         private static List<TranslateExtensions.IPropertyMover> TexturePropertyMovers;
 
@@ -672,12 +645,6 @@ namespace GameTranslator.Patches.Translatons
 
         private static readonly string MarkAsChangedMethodName = "MarkAsChanged";
 
-        public static FieldInfo m_AtlasPopulationMode = typeof(TMP_FontAsset).GetField("m_AtlasPopulationMode", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-
-        public static FieldInfo m_SourceFontFile = typeof(TMP_FontAsset).GetField("m_SourceFontFile", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-
-        public static FieldInfo m_FaceInfo = typeof(TMP_FontAsset).GetField("m_FaceInfo", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-
         public static FieldInfo s_MissingCharacterList = typeof(TMP_FontAsset).GetField("s_MissingCharacterList", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         public static FieldInfo m_MissingUnicodesFromFontFile = typeof(TMP_FontAsset).GetField("m_MissingUnicodesFromFontFile", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
@@ -687,6 +654,24 @@ namespace GameTranslator.Patches.Translatons
         public static FieldInfo m_CharacterTable = typeof(TMP_FontAsset).GetField("m_CharacterTable", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         public static FieldInfo m_CharactersToAddLookup = typeof(TMP_FontAsset).GetField("m_CharactersToAddLookup", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+
+        /*
+        public static FieldInfo m_AtlasPopulationMode = typeof(TMP_FontAsset).GetField("m_AtlasPopulationMode", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+
+        public static FieldInfo m_SourceFontFile = typeof(TMP_FontAsset).GetField("m_SourceFontFile", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+
+        public static FieldInfo m_FaceInfo = typeof(TMP_FontAsset).GetField("m_FaceInfo", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+
+        public static FieldInfo m_ChunkOffset = typeof(StringBuilder).GetField("m_ChunkOffset", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        public static FieldInfo m_ChunkLength = typeof(StringBuilder).GetField("m_ChunkLength", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        public static MethodInfo FindChunkForIndex = typeof(StringBuilder).GetMethod("FindChunkForIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        public static MethodInfo ReplaceAllInChunk = typeof(StringBuilder).GetMethod("ReplaceAllInChunk", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        public static MethodInfo StartsWith = typeof(StringBuilder).GetMethod("StartsWith", BindingFlags.Instance | BindingFlags.NonPublic);
+        */
 
         public enum ImageFormat
         {

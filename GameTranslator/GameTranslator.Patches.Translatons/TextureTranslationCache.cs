@@ -380,6 +380,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
+        /*
         public void PreloadCommonTextures()
         {
             try
@@ -399,6 +400,7 @@ namespace GameTranslator.Patches.Translatons
                 XuaLogger.AutoTranslator.Error(ex, "Error during texture preloading");
             }
         }
+        */
 
         public void UpdateTextureStatistics(string key)
         {

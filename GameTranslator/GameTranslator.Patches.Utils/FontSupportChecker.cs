@@ -143,10 +143,12 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
+        /*
         public static string GetStats()
         {
             return $"Fonts: {_availableFonts.Count}, CharacterCache: {_characterSupportCache.Count}, TextCache: {_textCache.Count}";
         }
+        */
     }
 
     public class LRUCache<TKey, TValue>

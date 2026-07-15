@@ -1,7 +1,6 @@
-using System;
-
 namespace GameTranslator.Patches.Translatons
 {
+    /*
     [Flags]
     public enum TranslationType
     {
@@ -9,4 +8,5 @@ namespace GameTranslator.Patches.Translatons
         Full = 0x01,
         Token = 0x02
     }
+    */
 }

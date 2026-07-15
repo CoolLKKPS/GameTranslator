@@ -1,9 +1,6 @@
-using GameTranslator.Patches.Translatons;
-using System.Collections.Generic;
-using System.Text;
-
 namespace GameTranslator.Patches.Utils
 {
+    /*
     internal static class TemplatingHelper
     {
         public static bool ContainsUntemplatedCharacters(string text)
@@ -161,4 +158,5 @@ namespace GameTranslator.Patches.Utils
             }
         }
     }
+    */
 }

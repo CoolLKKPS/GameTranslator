@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using XUnity.Common.Constants;
 using XUnity.Common.Logging;
 
 namespace GameTranslator.Patches.Utils
@@ -50,14 +49,16 @@ namespace GameTranslator.Patches.Utils
             return SceneManager.GetActiveScene().buildIndex;
         }
 
+        /*
         public static void RegisterSceneLoadCallback(Action<int> sceneLoaded)
         {
             UnityTypes.SceneManager_Methods.add_sceneLoaded(delegate (Scene scene, LoadSceneMode mode)
             {
                 sceneLoaded(scene.buildIndex);
             });
-            SceneManagerLoader.EnableSceneLoadScanInternal(sceneLoaded);
+            // SceneManagerLoader.EnableSceneLoadScanInternal(sceneLoaded);
         }
+        */
 
         public static bool EnableTranslationScoping = true;
 

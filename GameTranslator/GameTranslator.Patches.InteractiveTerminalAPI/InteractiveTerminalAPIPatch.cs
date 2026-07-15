@@ -66,8 +66,6 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
         {
             string[] typeNames = new string[]
             {
-                // "InteractiveTerminalAPI.UI.TextElement",
-                // "InteractiveTerminalAPI.UI.Cursor.CursorElement",
                 "InteractiveTerminalAPI.UI.Page.PageElement",
                 "InteractiveTerminalAPI.UI.Screen.BoxedScreen"
             };

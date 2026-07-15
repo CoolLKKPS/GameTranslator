@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -81,6 +80,7 @@ namespace GameTranslator.Patches.Utils
             return font;
         }
 
+        /*
         public static string[] GetOSInstalledFontNames()
         {
             return Font.GetOSInstalledFontNames();
@@ -104,6 +104,7 @@ namespace GameTranslator.Patches.Utils
             }
             FontHelper._loadedBundles.Clear();
         }
+        */
 
         private static readonly List<AssetBundle> _loadedBundles = new List<AssetBundle>();
     }

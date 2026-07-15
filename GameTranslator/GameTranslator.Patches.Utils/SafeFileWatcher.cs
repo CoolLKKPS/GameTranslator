@@ -9,7 +9,6 @@ namespace GameTranslator.Patches.Utils
     {
         public event Action DirectoryUpdated;
 
-        private int _counter = 0;
         private FileSystemWatcher _watcher;
         private bool _disposed;
         private object _sync = new object();
@@ -36,21 +35,9 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        public void DisableWatcher()
-        {
-            if (_watcher != null)
-            {
-                _watcher.EnableRaisingEvents = false;
-                _watcher.Dispose();
-                _watcher = null;
-            }
-        }
-
-        public void RaiseEvent(object state)
-        {
-            DirectoryUpdated?.Invoke();
-        }
-
+        /*
+        private int _counter = 0;
+        
         public void Disable()
         {
             var counter = Interlocked.Increment(ref _counter);
@@ -61,6 +48,37 @@ namespace GameTranslator.Patches.Utils
         {
             var counter = Interlocked.Decrement(ref _counter);
             UpdateRaisingEvents(counter == 0);
+        }
+
+        public void DisableWatcher()
+        {
+            if (_watcher != null)
+            {
+                _watcher.EnableRaisingEvents = false;
+                _watcher.Dispose();
+                _watcher = null;
+            }
+        }
+        
+        private void UpdateRaisingEvents(bool enabled)
+        {
+            lock (_sync)
+            {
+                if (enabled)
+                {
+                    EnableWatcher();
+                }
+                else
+                {
+                    DisableWatcher();
+                }
+            }
+        }
+        */
+
+        public void RaiseEvent(object state)
+        {
+            DirectoryUpdated?.Invoke();
         }
 
         private void Watcher_Deleted(object sender, FileSystemEventArgs e)
@@ -79,21 +97,6 @@ namespace GameTranslator.Patches.Utils
         private void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
             _timer.Change(1000, Timeout.Infinite);
-        }
-
-        private void UpdateRaisingEvents(bool enabled)
-        {
-            lock (_sync)
-            {
-                if (enabled)
-                {
-                    EnableWatcher();
-                }
-                else
-                {
-                    DisableWatcher();
-                }
-            }
         }
 
         private void WaitForFile(FileInfo file)

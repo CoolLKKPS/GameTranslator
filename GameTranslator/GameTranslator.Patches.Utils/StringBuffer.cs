@@ -1,4 +1,3 @@
-using GameTranslator.Patches.Translatons;
 using System;
 
 namespace GameTranslator.Patches.Utils
@@ -94,20 +93,6 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        public StringBuffer Append(object obj)
-        {
-            StringBuffer stringBuffer;
-            if (obj == null)
-            {
-                stringBuffer = this;
-            }
-            else
-            {
-                stringBuffer = this.Append(obj.ToString());
-            }
-            return stringBuffer;
-        }
-
         public StringBuffer Append(string str)
         {
             StringBuffer stringBuffer;
@@ -122,28 +107,6 @@ namespace GameTranslator.Patches.Utils
                 str.CopyTo(0, this.value, this.length, num);
                 this.length += num;
                 stringBuffer = this;
-            }
-            return stringBuffer;
-        }
-
-        public StringBuffer Append(char c)
-        {
-            this.EnsureCapacity(this.length + 1);
-            this.value[this.length] = c;
-            this.length++;
-            return this;
-        }
-
-        public StringBuffer Insert(int index, object obj)
-        {
-            StringBuffer stringBuffer;
-            if (obj == null)
-            {
-                stringBuffer = this;
-            }
-            else
-            {
-                stringBuffer = this.Insert(index, obj.ToString());
             }
             return stringBuffer;
         }
@@ -171,19 +134,6 @@ namespace GameTranslator.Patches.Utils
             return stringBuffer;
         }
 
-        public StringBuffer Insert(int index, char c)
-        {
-            if (index < 0 || index > this.length)
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-            this.EnsureCapacity(this.length + 1);
-            Array.Copy(this.value, index, this.value, index + 1, this.length - index);
-            this.value[index] = c;
-            this.length++;
-            return this;
-        }
-
         public StringBuffer Remove(int startIndex, int length)
         {
             if (startIndex < 0 || startIndex > this.length)
@@ -200,6 +150,61 @@ namespace GameTranslator.Patches.Utils
             return this;
         }
 
+        /*
+        public StringBuffer Append(object obj)
+        {
+            StringBuffer stringBuffer;
+            if (obj == null)
+            {
+                stringBuffer = this;
+            }
+            else
+            {
+                stringBuffer = this.Append(obj.ToString());
+            }
+            return stringBuffer;
+        }
+        
+        public StringBuffer Append(char c)
+        {
+            this.EnsureCapacity(this.length + 1);
+            this.value[this.length] = c;
+            this.length++;
+            return this;
+        }
+
+        public StringBuffer Insert(int index, object obj)
+        {
+            StringBuffer stringBuffer;
+            if (obj == null)
+            {
+                stringBuffer = this;
+            }
+            else
+            {
+                stringBuffer = this.Insert(index, obj.ToString());
+            }
+            return stringBuffer;
+        }
+        
+        public StringBuffer Insert(int index, char c)
+        {
+            if (index < 0 || index > this.length)
+            {
+                throw new ArgumentOutOfRangeException("index");
+            }
+            this.EnsureCapacity(this.length + 1);
+            Array.Copy(this.value, index, this.value, index + 1, this.length - index);
+            this.value[index] = c;
+            this.length++;
+            return this;
+        }
+        
+        private static bool IsWordChar(char c)
+        {
+            return char.IsLetterOrDigit(c) || c == '_';
+        }
+        
         public StringBuffer Replace(char oldChar, char newChar)
         {
             for (int i = 0; i < this.length; i++)
@@ -308,6 +313,7 @@ namespace GameTranslator.Patches.Utils
         {
             return this.IndexOf(text) >= 0;
         }
+        */
 
         public StringBuffer ReplaceFull(string oldValue, string newValue)
         {
@@ -415,11 +421,6 @@ namespace GameTranslator.Patches.Utils
                     i++;
                 }
             }
-        }
-
-        private static bool IsWordChar(char c)
-        {
-            return char.IsLetter(c) || c == '_';
         }
 
         public StringBuffer Clear()

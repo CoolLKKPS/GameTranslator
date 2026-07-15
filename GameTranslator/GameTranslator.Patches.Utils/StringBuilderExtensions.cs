@@ -4,6 +4,7 @@ namespace GameTranslator.Patches.Utils
 {
     public static class StringBuilderExtensions
     {
+        /*
         public static bool EndsWithWhitespaceOrNewline(this StringBuilder builder)
         {
             if (builder.Length == 0) return true;
@@ -11,6 +12,7 @@ namespace GameTranslator.Patches.Utils
             var lastChar = builder[builder.Length - 1];
             return char.IsWhiteSpace(lastChar) || lastChar == '\n';
         }
+        */
 
         internal static StringBuilder Reverse(this StringBuilder text)
         {

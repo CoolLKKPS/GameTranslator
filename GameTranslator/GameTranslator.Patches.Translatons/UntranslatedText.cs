@@ -1,9 +1,6 @@
-using GameTranslator.Patches.Utils;
-using System.Linq;
-using System.Text;
-
 namespace GameTranslator.Patches.Translatons
 {
+    /*
     public class UntranslatedText
     {
         private static string PerformInternalTrimming(string text, bool whitespaceBetweenWords, ref StringBuilder builder)
@@ -378,4 +375,5 @@ namespace GameTranslator.Patches.Translatons
             return TemplatedOriginal_Text_InternallyTrimmed.GetHashCode();
         }
     }
+    */
 }

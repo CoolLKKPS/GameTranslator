@@ -2,7 +2,6 @@ using GameTranslator.Patches.Translatons;
 using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -92,12 +91,14 @@ namespace GameTranslator.Patches.Hooks
             }
         }
 
-        public static Dictionary<string, string> keys = new Dictionary<string, string>();
-
         public static FieldInfo s_Text = typeof(GUIContent).GetField("s_Text", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         public static FieldInfo s_TextImage = typeof(GUIContent).GetField("s_TextImage", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
+        /*
+        public static Dictionary<string, string> keys = new Dictionary<string, string>();
+
         public static FieldInfo m_Text = typeof(GUIContent).GetField("m_Text", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        */
     }
 }

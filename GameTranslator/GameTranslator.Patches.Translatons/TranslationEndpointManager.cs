@@ -74,7 +74,7 @@ namespace GameTranslator.Patches.Translatons
             bool isTranslatable,
             bool allowFallback = true)
         {
-            var jobKey = GetJobKey(key, config, TranslationScopeHelper.GetScope(ui));
+            var jobKey = GetCacheKey(key, config, TranslationScopeHelper.GetScope(ui));
 
             if (_unstartedJobs.TryGetValue(jobKey, out var existingUnstartedJob))
             {
@@ -232,7 +232,7 @@ namespace GameTranslator.Patches.Translatons
             TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{untranslatedText}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})");
         }
 
-        private string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
+        internal static string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
             if (string.IsNullOrEmpty(text)) return text;
 
@@ -244,7 +244,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     translatedText = normalText.TryTranslate(translatedText, scope);
                 }
-                if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.normal.Count > 0)
+                if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.shouldTranslate && config.normal.Count > 0)
                 {
                     StringBuffer buffer = new StringBuffer(translatedText);
                     foreach (KeyValuePair<string, string> kv in config._normalOrdered)
@@ -263,12 +263,7 @@ namespace GameTranslator.Patches.Translatons
             return translatedText;
         }
 
-        private string GetJobKey(string text, TranslateConfig.TranslateConfigFile config, int scope = -1)
-        {
-            return $"{config?.ConfigFileName ?? "global"}:{scope}:{text}";
-        }
-
-        private string GetCacheKey(string text, TranslateConfig.TranslateConfigFile config, int scope = -1)
+        internal static string GetCacheKey(string text, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
             return $"{config?.ConfigFileName ?? "global"}:{scope}:{text}";
         }

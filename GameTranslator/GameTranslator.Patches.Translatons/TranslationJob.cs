@@ -14,9 +14,11 @@ namespace GameTranslator.Patches.Translatons
             State = TranslationJobState.Pending;
             AssociatedUIs = new List<object>();
             RetryCount = 0;
+            /*
             Components = new List<KeyAnd<object>>();
             TranslationResults = new HashSet<KeyAnd<InternalTranslationResult>>();
             TranslationType = TranslationType.None;
+            */
             StartVersion = TextTranslate.ChangeTime;
         }
 
@@ -33,6 +35,18 @@ namespace GameTranslator.Patches.Translatons
         public TranslateConfig.TranslateConfigFile Config { get; set; }
         public int RetryCount { get; set; }
         public bool AllowFallback { get; set; } = true;
+        public long StartVersion { get; set; }
+        public int Scope { get; set; } = -1;
+
+        /*
+        public bool ShouldPersistTranslation
+        {
+            get
+            {
+                return (TranslationType & TranslationType.Full) == TranslationType.Full;
+            }
+        }
+
         public bool SaveResultGlobally
         {
             get => SaveResult;
@@ -43,16 +57,7 @@ namespace GameTranslator.Patches.Translatons
         public TranslationType TranslationType { get; set; }
         public TranslationEndpointManager Endpoint { get; internal set; }
         public UntranslatedTextInfo UntranslatedTextInfo { get; set; }
-        public long StartVersion { get; set; }
-        public int Scope { get; set; } = -1;
-
-        public bool ShouldPersistTranslation
-        {
-            get
-            {
-                return (TranslationType & TranslationType.Full) == TranslationType.Full;
-            }
-        }
+        */
 
         public void Associate(string originalText, object ui, object info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool saveResult, bool allowFallback)
         {
@@ -67,6 +72,7 @@ namespace GameTranslator.Patches.Translatons
             AllowFallback = allowFallback;
             SaveResult = SaveResult || saveResult;
 
+            /*
             if (ui != null && !ui.IsSpammingComponent())
             {
                 var untranslatedText = new UntranslatedText(originalText, false, false, false, false, false);
@@ -74,9 +80,11 @@ namespace GameTranslator.Patches.Translatons
             }
 
             TranslationType |= TranslationType.Full;
+            */
         }
     }
 
+    /*
     public class KeyAnd<T>
     {
         public KeyAnd(UntranslatedText key, T item)
@@ -88,4 +96,5 @@ namespace GameTranslator.Patches.Translatons
         public UntranslatedText Key { get; set; }
         public T Item { get; set; }
     }
+    */
 }

@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-
 namespace GameTranslator.Patches.Translatons
 {
+    /*
     public class UntranslatedTextInfo
     {
         internal UntranslatedTextInfo(string untranslatedText)
@@ -24,4 +23,5 @@ namespace GameTranslator.Patches.Translatons
 
         public List<string> ContextAfter { get; }
     }
+    */
 }

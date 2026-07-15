@@ -13,7 +13,7 @@ namespace GameTranslator.Patches.Hooks
         [HarmonyPatch("SetTextInternal")]
         public static void SetTextInternal(ref TMP_Text __instance, ref string sourceText)
         {
-            TextTranslate.Instance.Hook_TextChanged(__instance, ref sourceText);
+            TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
         }
 
@@ -25,7 +25,7 @@ namespace GameTranslator.Patches.Hooks
         })]
         public static void SetText(ref TMP_Text __instance, ref string sourceText, bool syncTextInputBox)
         {
-            TextTranslate.Instance.Hook_TextChanged(__instance, ref sourceText);
+            TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
         }
 
@@ -44,7 +44,7 @@ namespace GameTranslator.Patches.Hooks
         })]
         public static void SetText(ref TMP_Text __instance, ref string sourceText, float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7)
         {
-            TextTranslate.Instance.Hook_TextChanged(__instance, ref sourceText);
+            TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
         }
 
@@ -58,7 +58,7 @@ namespace GameTranslator.Patches.Hooks
         public static void SetText(ref TMP_Text __instance, ref StringBuilder sourceText, int start, int length)
         {
             string text = sourceText.ToString();
-            TextTranslate.Instance.Hook_TextChanged(__instance, ref text);
+            TextTranslate.Instance.OnTranslateIncomingText(__instance, ref text);
             ReplaceUnsupportedCharacters(ref text, __instance);
             sourceText = new StringBuilder(text);
         }
@@ -67,7 +67,7 @@ namespace GameTranslator.Patches.Hooks
         [HarmonyPatch("text", MethodType.Setter)]
         public static void Change(ref TMP_Text __instance, ref string value)
         {
-            TextTranslate.Instance.Hook_TextChanged(__instance, ref value);
+            TextTranslate.Instance.OnTranslateIncomingText(__instance, ref value);
             ReplaceUnsupportedCharacters(ref value, __instance);
         }
 

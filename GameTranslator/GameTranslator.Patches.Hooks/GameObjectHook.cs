@@ -20,7 +20,7 @@ namespace GameTranslator.Patches.Hooks
                 {
                     if (component.IsComponentActive())
                     {
-                        TextTranslate.Instance.Hook_TextChanged(component);
+                        TextTranslate.Instance.OnComponentTextChanged(component);
                     }
                 }
             }
@@ -36,7 +36,7 @@ namespace GameTranslator.Patches.Hooks
                 {
                     if (component.IsComponentActive())
                     {
-                        TextTranslate.Instance.Hook_TextChanged(component);
+                        TextTranslate.Instance.OnComponentTextChanged(component);
                     }
                 }
             }

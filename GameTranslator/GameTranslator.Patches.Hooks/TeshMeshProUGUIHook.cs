@@ -1,8 +1,6 @@
 using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using TMPro;
 
@@ -32,7 +30,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {
@@ -40,12 +38,14 @@ namespace GameTranslator.Patches.Hooks
             }
         }
 
+        /*
         public static bool ShouldTranslate(string text)
         {
             return text.Length >= TranslateConfig.text.shouldTranslateMinLength - 4 && text.Any(new Func<char, bool>(char.IsLetter));
         }
 
         public static Dictionary<string, string> keys = new Dictionary<string, string>();
+        */
     }
 
     [HarmonyPatch(typeof(TextMeshPro))]
@@ -57,7 +57,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {
@@ -85,7 +85,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {
@@ -112,7 +112,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {
@@ -139,7 +139,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {
@@ -166,7 +166,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {
@@ -193,7 +193,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {
@@ -220,7 +220,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {
@@ -247,7 +247,7 @@ namespace GameTranslator.Patches.Hooks
         {
             try
             {
-                TextTranslate.Instance.Hook_TextChanged(__instance);
+                TextTranslate.Instance.OnComponentTextChanged(__instance);
             }
             catch (Exception ex)
             {

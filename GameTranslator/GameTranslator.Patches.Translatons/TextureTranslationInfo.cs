@@ -57,16 +57,6 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        public void CreateOriginalTexture()
-        {
-            if (!this.Original.IsAlive && this._originalData != null)
-            {
-                Texture2D texture2D = TextureTranslationInfo.CreateEmptyTexture2D(this._textureFormat);
-                texture2D.LoadImageEx(this._originalData, TranslateExtensions.ImageFormat.PNG, null);
-                this.SetOriginal(texture2D);
-            }
-        }
-
         public string GetKey()
         {
             if (this.Original.Target == null)
@@ -75,6 +65,17 @@ namespace GameTranslator.Patches.Translatons
             }
             this.SetupHashAndData(this.Original.Target);
             return this._key;
+        }
+
+        /*
+        public void CreateOriginalTexture()
+        {
+            if (!this.Original.IsAlive && this._originalData != null)
+            {
+                Texture2D texture2D = TextureTranslationInfo.CreateEmptyTexture2D(this._textureFormat);
+                texture2D.LoadImageEx(this._originalData, TranslateExtensions.ImageFormat.PNG, null);
+                this.SetOriginal(texture2D);
+            }
         }
 
         public byte[] GetOriginalData()
@@ -97,6 +98,7 @@ namespace GameTranslator.Patches.Translatons
             }
             return array;
         }
+        */
 
         public static void AddDuplicateName(string name)
         {

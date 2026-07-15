@@ -69,76 +69,63 @@ namespace GameTranslator.Patches.Utils
                 TranslatePlugin.logger.LogInfo($"[Debug] Cleaned up {keysToRemove.Count} old debug cache entries");
             }
         }
-        internal void Hook_TextChanged(object ui)
+        private static bool IsTerminalIgnoredUI(object ui)
         {
-            if (TranslatePlugin.enableTerminalPatch != null && TranslatePlugin.enableTerminalPatch.Value)
+            if (TranslatePlugin.enableTerminalPatch == null || !TranslatePlugin.enableTerminalPatch.Value)
+                return false;
+            try
             {
-                try
+                var terminalPatchType = Type.GetType("GameTranslator.Patches.TerminalPatch, GameTranslator");
+                if (terminalPatchType != null)
                 {
-                    var terminalPatchType = Type.GetType("GameTranslator.Patches.TerminalPatch, GameTranslator");
-                    if (terminalPatchType != null)
+                    var igField = terminalPatchType.GetField("ig", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    if (igField != null)
                     {
-                        var igField = terminalPatchType.GetField("ig", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                        if (igField != null)
+                        var igValue = igField.GetValue(null) as System.Collections.Generic.HashSet<object>;
+                        if (igValue != null && igValue.Contains(ui))
                         {
-                            var igValue = igField.GetValue(null) as System.Collections.Generic.HashSet<object>;
-                            if (igValue != null && igValue.Contains(ui))
-                            {
-                                return;
-                            }
+                            return true;
                         }
                     }
                 }
-                catch
-                {
-                }
             }
-            TextTranslationInfo orCreateTextTranslationInfo = ui.GetOrCreateTextTranslationInfo();
-            bool flag = this.DiscoverComponent(ui, orCreateTextTranslationInfo);
-            if (TranslatePlugin.shouldTranslateSpecialText.Value || TranslatePlugin.shouldTranslateNormalText.Value)
+            catch
             {
-                string currentText = ui.GetText(orCreateTextTranslationInfo);
-                string translatedText = this.TranslateOrQueue(ui, currentText, orCreateTextTranslationInfo, TranslateConfig.normalText, TranslateConfig.text, flag);
-                if (!string.IsNullOrEmpty(translatedText) && !translatedText.Equals(currentText) && IsUIObjectValid(ui))
-                {
-                    this.SetText(ui, translatedText, true, currentText, orCreateTextTranslationInfo);
-                }
+            }
+            return false;
+        }
+
+        private bool TryTranslateChangedText(object ui, ref string text, out string translated, out TextTranslationInfo info)
+        {
+            translated = null;
+            info = null;
+            if (IsTerminalIgnoredUI(ui))
+                return false;
+            info = ui.GetOrCreateTextTranslationInfo();
+            bool componentState = this.DiscoverComponent(ui, info);
+            if (!TranslatePlugin.shouldTranslateSpecialText.Value && !TranslatePlugin.shouldTranslateNormalText.Value)
+                return false;
+            if (text == null)
+                text = ui.GetText(info);
+            translated = this.TranslateOrQueue(ui, text, info, TranslateConfig.normalText, TranslateConfig.text, componentState);
+            return !string.IsNullOrEmpty(translated) && !translated.Equals(text) && IsUIObjectValid(ui);
+        }
+
+        internal void OnComponentTextChanged(object ui)
+        {
+            string currentText = null;
+            if (TryTranslateChangedText(ui, ref currentText, out var translated, out var info))
+            {
+                this.SetText(ui, translated, true, currentText, info);
             }
         }
 
-        internal void Hook_TextChanged(object ui, ref string value)
+        internal void OnTranslateIncomingText(object ui, ref string value)
         {
-            if (TranslatePlugin.enableTerminalPatch != null && TranslatePlugin.enableTerminalPatch.Value)
+            string text = value;
+            if (TryTranslateChangedText(ui, ref text, out var translated, out _))
             {
-                try
-                {
-                    var terminalPatchType = Type.GetType("GameTranslator.Patches.TerminalPatch, GameTranslator");
-                    if (terminalPatchType != null)
-                    {
-                        var igField = terminalPatchType.GetField("ig", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                        if (igField != null)
-                        {
-                            var igValue = igField.GetValue(null) as System.Collections.Generic.HashSet<object>;
-                            if (igValue != null && igValue.Contains(ui))
-                            {
-                                return;
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                }
-            }
-            TextTranslationInfo orCreateTextTranslationInfo = ui.GetOrCreateTextTranslationInfo();
-            bool flag = this.DiscoverComponent(ui, orCreateTextTranslationInfo);
-            if (TranslatePlugin.shouldTranslateSpecialText.Value || TranslatePlugin.shouldTranslateNormalText.Value)
-            {
-                string translatedText = this.TranslateOrQueue(ui, value, orCreateTextTranslationInfo, TranslateConfig.normalText, TranslateConfig.text, flag);
-                if (!string.IsNullOrEmpty(translatedText) && !translatedText.Equals(value) && IsUIObjectValid(ui))
-                {
-                    value = translatedText;
-                }
+                value = translated;
             }
         }
 
@@ -304,7 +291,7 @@ namespace GameTranslator.Patches.Utils
                 }
                 if (text3 != null)
                 {
-                    if (!normalText.IsScopedTranslation(text, TranslationScopeHelper.GetScope(ui)) && config.normal.Count > 0)
+                    if (!normalText.IsScopedTranslation(text, TranslationScopeHelper.GetScope(ui)) && config.shouldTranslate && config.normal.Count > 0)
                     {
                         StringBuffer buffer = new StringBuffer(text3);
                         foreach (KeyValuePair<string, string> kv in config._normalOrdered)
@@ -398,7 +385,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        private bool IsUIObjectValid(object ui)
+        internal static bool IsUIObjectValid(object ui)
         {
             if (ui == null) return false;
 

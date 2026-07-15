@@ -1,8 +1,6 @@
-using System;
-using System.Collections;
-
 namespace GameTranslator.Patches.Translatons
 {
+    /*
     public class InternalTranslationResult : IEnumerator
     {
         private readonly Action<TranslationResult> _onCompleted;
@@ -22,25 +20,6 @@ namespace GameTranslator.Patches.Translatons
         public string ErrorMessage { get; private set; }
 
         public bool HasError => ErrorMessage != null;
-
-        internal void SetCompleted(string translatedText)
-        {
-            if (!IsCompleted)
-            {
-                IsCompleted = true;
-                SetCompletedInternal(translatedText);
-            }
-        }
-
-        internal void SetEmptyResponse()
-        {
-            SetError("Received empty response.");
-        }
-
-        internal void SetErrorWithMessage(string errorMessage)
-        {
-            SetError(errorMessage);
-        }
 
         private void SetError(string errorMessage)
         {
@@ -89,5 +68,25 @@ namespace GameTranslator.Patches.Translatons
         public void Reset()
         {
         }
+
+        internal void SetCompleted(string translatedText)
+        {
+            if (!IsCompleted)
+            {
+                IsCompleted = true;
+                SetCompletedInternal(translatedText);
+            }
+        }
+
+        internal void SetEmptyResponse()
+        {
+            SetError("Received empty response.");
+        }
+
+        internal void SetErrorWithMessage(string errorMessage)
+        {
+            SetError(errorMessage);
+        }
     }
+    */
 }

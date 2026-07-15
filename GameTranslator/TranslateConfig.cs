@@ -163,6 +163,7 @@ namespace GameTranslator
             return new TranslateConfig.TranslateConfigFile(fileName, true, should);
         }
 
+        /*
         public static void show(TranslateConfig.TranslateConfigFile file)
         {
             foreach (string text in file.normal.Keys)
@@ -185,6 +186,7 @@ namespace GameTranslator
         {
             return Regex.Replace(raw, pattern, result);
         }
+        */
 
         public static string replaceByMap(string text, TranslateConfig.TranslateConfigFile file)
         {

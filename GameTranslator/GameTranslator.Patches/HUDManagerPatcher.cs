@@ -1,11 +1,7 @@
 using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
-using UnityEngine;
 
 namespace GameTranslator.Patches
 {
@@ -39,6 +35,7 @@ namespace GameTranslator.Patches
             }
         }
 
+        /*
         private static void fadeText(TextMeshProUGUI text, ref bool fade, float duration, float newAlpha)
         {
             float a = text.color.a;
@@ -53,6 +50,7 @@ namespace GameTranslator.Patches
             text.enabled = false;
             fade = false;
         }
+        */
 
         [HarmonyPostfix]
         [HarmonyPatch("AddChatMessage")]
@@ -114,13 +112,12 @@ namespace GameTranslator.Patches
             return true;
         }
 
+        private static string lastChat = "";
+
+        /*
         public static FieldInfo scanNodes = typeof(HUDManager).GetField("scanNodes", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         public static FieldInfo nodesOnScreen = typeof(HUDManager).GetField("nodesOnScreen", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-
-        private static string lastChat = "";
-
-        // These might not be needed, but I'll keep them here just in case.
 
         public static Dictionary<string, string> originToTranslated = new Dictionary<string, string>();
 
@@ -137,5 +134,6 @@ namespace GameTranslator.Patches
         private static MethodInfo TipsPanelTimer = typeof(HUDManager).GetMethod("TipsPanelTimer", HUDManagerPatcher.All);
 
         private static FieldInfo tipsPanelCoroutine = typeof(HUDManager).GetField("tipsPanelCoroutine", HUDManagerPatcher.All);
+        */
     }
 }

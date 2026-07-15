@@ -6,11 +6,6 @@ namespace GameTranslator.Patches.Utils
 {
     internal static class TextHelper
     {
-        public static string Encode(string text)
-        {
-            return TextHelper.EscapeNewlines(text);
-        }
-
         public static string[] ReadTranslationLineAndDecode(string str)
         {
             string[] array;
@@ -143,6 +138,12 @@ namespace GameTranslator.Patches.Utils
             return array;
         }
 
+        /*
+        public static string Encode(string text)
+        {
+            return TextHelper.EscapeNewlines(text);
+        }
+
         internal static string EscapeNewlines(string str)
         {
             string text;
@@ -217,5 +218,6 @@ namespace GameTranslator.Patches.Utils
             }
             return text;
         }
+        */
     }
 }

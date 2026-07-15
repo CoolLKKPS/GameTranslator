@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -457,6 +456,7 @@ namespace GameTranslator.Patches.Translatons
             return text2;
         }
 
+        /*
         public static string getRegex(string pattern)
         {
             if (string.IsNullOrEmpty(pattern))
@@ -477,6 +477,7 @@ namespace GameTranslator.Patches.Translatons
             int num = int.Parse(match.Groups[1].Value);
             return "{" + (num - 1).ToString() + "}";
         }
+        */
 
         private static void CheckAndCleanupRegexCache()
         {
@@ -683,15 +684,6 @@ namespace GameTranslator.Patches.Translatons
         internal ScopedTranslationData GetOrCreateScopedData(int scope)
         {
             return _scopedTranslations.GetOrAdd(scope, _ => new ScopedTranslationData());
-        }
-
-        // Debug uses
-        public void ClearScopedFailedRegexLookups(int scope)
-        {
-            if (_scopedTranslations.TryGetValue(scope, out var scopedData))
-            {
-                scopedData.FailedRegexLookups.Clear();
-            }
         }
 
         public string FileName;

@@ -71,12 +71,12 @@ namespace GameTranslator.Patches
             {
                 for (int j = playerWord.Length; j > 0; j--)
                 {
-                    if (TerminalPatch.getChineseCMD(options[i].noun.word).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
+                    if (TerminalPatch.GetCmd(options[i].noun.word, true).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
                     {
                         __result = options[i].result;
                         return;
                     }
-                    if (TerminalPatch.getPinyinCMD(options[i].noun.word).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
+                    if (TerminalPatch.GetCmd(options[i].noun.word, false).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
                     {
                         __result = options[i].result;
                         return;
@@ -91,12 +91,12 @@ namespace GameTranslator.Patches
         {
             for (int i = 0; i < __instance.terminalNodes.allKeywords.Length; i++)
             {
-                if (TerminalPatch.getChineseCMD(__instance.terminalNodes.allKeywords[i].word).EqualsIgnoreCase(playerWord))
+                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).EqualsIgnoreCase(playerWord))
                 {
                     __result = __instance.terminalNodes.allKeywords[i];
                     return;
                 }
-                if (TerminalPatch.getPinyinCMD(__instance.terminalNodes.allKeywords[i].word).EqualsIgnoreCase(playerWord))
+                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).EqualsIgnoreCase(playerWord))
                 {
                     __result = __instance.terminalNodes.allKeywords[i];
                     return;
@@ -124,7 +124,7 @@ namespace GameTranslator.Patches
             TerminalAccessibleObject[] array = global::UnityEngine.Object.FindObjectsOfType<TerminalAccessibleObject>();
             for (int i = 0; i < array.Length; i++)
             {
-                if (TerminalPatch.getChineseCMD(array[i].objectCode).EqualsIgnoreCase(word) || TerminalPatch.getPinyinCMD(array[i].objectCode).EqualsIgnoreCase(word))
+                if (TerminalPatch.GetCmd(array[i].objectCode, true).EqualsIgnoreCase(word) || TerminalPatch.GetCmd(array[i].objectCode, false).EqualsIgnoreCase(word))
                 {
                     Debug.Log("Found accessible terminal object with corresponding string, calling function");
                     __instance.GetType().GetField("broadcastedCodeThisFrame", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(TranslateConfig.terminal, true);
@@ -151,12 +151,12 @@ namespace GameTranslator.Patches
                     if (!__instance.terminalNodes.allKeywords[i].isVerb || !(bool)TerminalPatch.hasGottenVerb.GetValue(__instance))
                     {
                         bool accessTerminalObjects = __instance.terminalNodes.allKeywords[i].accessTerminalObjects;
-                        if (TerminalPatch.getChineseCMD(__instance.terminalNodes.allKeywords[i].word).EqualsIgnoreCase(playerWord))
+                        if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).EqualsIgnoreCase(playerWord))
                         {
                             __result = __instance.terminalNodes.allKeywords[i];
                             return;
                         }
-                        if (TerminalPatch.getPinyinCMD(__instance.terminalNodes.allKeywords[i].word).EqualsIgnoreCase(playerWord))
+                        if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).EqualsIgnoreCase(playerWord))
                         {
                             __result = __instance.terminalNodes.allKeywords[i];
                             return;
@@ -165,11 +165,11 @@ namespace GameTranslator.Patches
                         {
                             for (int j = playerWord.Length; j > specificityRequired; j--)
                             {
-                                if (TerminalPatch.getChineseCMD(__instance.terminalNodes.allKeywords[i].word).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
+                                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
                                 {
                                     terminalKeyword = __instance.terminalNodes.allKeywords[i];
                                 }
-                                if (TerminalPatch.getPinyinCMD(__instance.terminalNodes.allKeywords[i].word).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
+                                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
                                 {
                                     terminalKeyword = __instance.terminalNodes.allKeywords[i];
                                 }
@@ -249,71 +249,35 @@ namespace GameTranslator.Patches
             }
         }
 
-        private static bool HaveChineseCMD(string name)
+        private static bool HaveCmd(string name, bool useC)
         {
-            return TranslateConfig.cmd_zh.normal.ContainsKey(name);
+            return (useC ? TranslateConfig.cmd_zh : TranslateConfig.cmd_py).normal.ContainsKey(name);
         }
 
-        private static bool HavePinyinCMD(string name)
+        private static string GetCmd(string name, bool useC)
         {
-            return TranslateConfig.cmd_py.normal.ContainsKey(name);
-        }
-
-        private static string getChineseCMD(string name)
-        {
-            string text;
-            if (TranslatePlugin.TerimalCanUseChinese.Value && TranslateConfig.cmd_zh.normal.ContainsKey(name))
+            if (useC)
             {
-                text = TranslateConfig.cmd_zh.normal[name];
+                if (TranslatePlugin.TerimalCanUseChinese.Value && TranslateConfig.cmd_zh.normal.ContainsKey(name))
+                    return TranslateConfig.cmd_zh.normal[name];
             }
             else
             {
-                text = "";
+                if (TranslatePlugin.TerimalCanUsePinyinAbbreviation.Value && TranslateConfig.cmd_py.normal.ContainsKey(name))
+                    return TranslateConfig.cmd_py.normal[name];
             }
-            return text;
+            return "";
         }
 
-        private static string getPinyinCMD(string name)
+        /*
+        private static string GetOriginByCmd(string name, bool useC)
         {
-            string text;
-            if (TranslatePlugin.TerimalCanUsePinyinAbbreviation.Value && TranslateConfig.cmd_py.normal.ContainsKey(name))
-            {
-                text = TranslateConfig.cmd_py.normal[name];
-            }
-            else
-            {
-                text = "";
-            }
-            return text;
+            var dict = useC ? TranslateConfig.cmd_zh.special : TranslateConfig.cmd_py.special;
+            if (dict.ContainsKey(name))
+                return dict[name];
+            return name;
         }
-
-        private static string getOrginByChineseCMD(string name)
-        {
-            string text;
-            if (TranslateConfig.cmd_zh.special.ContainsKey(name))
-            {
-                text = TranslateConfig.cmd_zh.special[name];
-            }
-            else
-            {
-                text = name;
-            }
-            return text;
-        }
-
-        private static string getOrginByPinyinCMD(string name)
-        {
-            string text;
-            if (TranslateConfig.cmd_py.special.ContainsKey(name))
-            {
-                text = TranslateConfig.cmd_py.special[name];
-            }
-            else
-            {
-                text = name;
-            }
-            return text;
-        }
+        */
 
         private static T TransReflection<T>(T tIn)
         {
@@ -363,12 +327,6 @@ namespace GameTranslator.Patches
             {
                 if (TerminalPatch.info != null && TranslatePlugin.shouldTranslateTerimal.Value)
                 {
-                    /*
-                    if (TerminalPatch.info.ChangeTime != TextTranslate.ChangeTime)
-                    {
-                        TerminalPatch.info.Reset(__instance.currentText);
-                    }
-                    */
                     if (!TerminalPatch.info.IsTranslated)
                     {
                         if (TranslatePlugin.showAvailableText.Value && !string.IsNullOrEmpty(__instance.currentText) &&
@@ -421,9 +379,10 @@ namespace GameTranslator.Patches
             TerminalPatch.info.MustIgnore = true;
         }
 
-        public static FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-
+        // hasGottenNoun no longer need but will keep
         public static FieldInfo hasGottenNoun = typeof(Terminal).GetField("hasGottenNoun", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+
+        public static FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         public static bool shouldTranslate = false;
 
@@ -448,14 +407,14 @@ namespace GameTranslator.Patches
                 TerminalKeyword terminalKeyword;
                 if (!this.keyValuePairs.ContainsKey(old.name + old.word))
                 {
-                    if ((useC && !TerminalPatch.HaveChineseCMD(old.word)) || (!useC && !TerminalPatch.HavePinyinCMD(old.word)))
+                    if (!TerminalPatch.HaveCmd(old.word, useC))
                     {
                         this.keyValuePairs.Add(old.name + old.word, old);
                         terminalKeyword = old;
                     }
                     else
                     {
-                        string text = (useC ? TerminalPatch.getChineseCMD(old.word) : TerminalPatch.getPinyinCMD(old.word));
+                        string text = TerminalPatch.GetCmd(old.word, useC);
                         if (text == old.word)
                         {
                             this.keyValuePairs.Add(old.name + old.word, old);

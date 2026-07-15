@@ -123,6 +123,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
+        /*
         public void UnchangeFont(object ui)
         {
             if (ui != null)
@@ -137,6 +138,7 @@ namespace GameTranslator.Patches.Translatons
         }
 
         private Action<object> _unfont;
+        */
 
         private bool _initialized;
 

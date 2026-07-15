@@ -115,6 +115,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
         }
 
+        /*
         private static DefaultTextComponentManipulator.TypeAndMethod GetTextPropertySetterInParent(Type type)
         {
             Type type2 = type.BaseType;
@@ -142,6 +143,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
             return null;
         }
+        */
 
         public static Action<object> SetCurText = null;
 
