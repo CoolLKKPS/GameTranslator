@@ -2,7 +2,7 @@ using System;
 
 namespace GameTranslator.Patches.Utils
 {
-    public class StringBuffer
+    internal class StringBuffer
     {
         public StringBuffer()
         {

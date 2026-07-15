@@ -135,12 +135,12 @@ namespace GameTranslator
             TranslateExtensions.Load();
         }
 
-        public static List<char> getShouldRemoveChars()
+        internal static List<char> getShouldRemoveChars()
         {
             return TranslatePlugin.shouldRemoveChar.Value.ToCharArray().ToList<char>();
         }
 
-        public static void LogInfo(string info)
+        internal static void LogInfo(string info)
         {
             if (TranslatePlugin.logger != null)
             {
@@ -338,11 +338,13 @@ namespace GameTranslator
 
         private const string PLUGIN_GUID = "GameTranslator";
 
-        private const string PLUGIN_NAME = "GameTranslator";
+        internal const string PLUGIN_NAME = "GameTranslator";
 
-        private const string PLUGIN_VERSION = "2.1.7";
+        internal const string PLUGIN_VERSION = "2.2.0";
 
-        public static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
+        internal const string PLUGIN_VERSION_FULL = PLUGIN_VERSION + ".0";
+
+        internal static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
 
         public static ManualLogSource logger;
 
@@ -410,10 +412,12 @@ namespace GameTranslator
 
         internal static TranslatePlugin Instance;
 
-        public static string DefaultPath;
+        internal static string DefaultPath;
 
-        public static string TexturesPath;
+        internal static string TexturesPath;
 
-        public static bool shouldTranslate;
+        /*
+        internal static bool shouldTranslate;
+        */
     }
 }

@@ -5,7 +5,7 @@ using XUnity.Common.Logging;
 
 namespace GameTranslator.Patches.Translatons
 {
-    public class TranslatedImage
+    internal class TranslatedImage
     {
         public TranslatedImage(string fileName, byte[] data, TranslatedImage.ITranslatedImageSource source)
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace GameTranslator.Patches.Translatons
 {
-    public class TranslationJob
+    internal class TranslationJob
     {
         public TranslationJob(object ui, string originalText, bool saveResult, bool isTranslatable)
         {

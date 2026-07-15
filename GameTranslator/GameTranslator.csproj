@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>GameTranslator</AssemblyName>
     <Product>$(AssemblyName)</Product>
-    <Version>1.0.0</Version>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <Target Name="PackAfterBuild" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">

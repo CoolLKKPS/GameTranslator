@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace GameTranslator.Patches.Utils
 {
-    public static class FontSupportChecker
+    internal static class FontSupportChecker
     {
         private static readonly ConcurrentDictionary<TMP_FontAsset, bool> _availableFonts = new ConcurrentDictionary<TMP_FontAsset, bool>();
         private static readonly Dictionary<char, bool> _characterSupportCache = new Dictionary<char, bool>();
@@ -151,7 +151,7 @@ namespace GameTranslator.Patches.Utils
         */
     }
 
-    public class LRUCache<TKey, TValue>
+    internal class LRUCache<TKey, TValue>
     {
         private readonly int _capacity;
         private readonly Dictionary<TKey, LinkedListNode<CacheItem>> _cacheMap;

@@ -6,7 +6,7 @@ using XUnity.Common.Logging;
 
 namespace GameTranslator.Patches.Utils
 {
-    public class TextureTranslate
+    internal class TextureTranslate
     {
         internal void Hook_ImageChangedOnComponent(object source, ref Texture2D texture, bool isPrefixHooked, bool onEnable = false)
         {
@@ -34,7 +34,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        public void HandleImage(object source, ref Sprite sprite, ref Texture2D texture, bool isPrefixHooked)
+        private void HandleImage(object source, ref Sprite sprite, ref Texture2D texture, bool isPrefixHooked)
         {
             try
             {

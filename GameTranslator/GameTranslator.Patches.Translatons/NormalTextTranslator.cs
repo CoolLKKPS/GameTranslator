@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace GameTranslator.Patches.Translatons
 {
-    public class NormalTextTranslator
+    internal class NormalTextTranslator
     {
         public NormalTextTranslator(string fileName)
         {
@@ -435,6 +435,9 @@ namespace GameTranslator.Patches.Translatons
                             }
                         }
                     }
+                    catch (System.Threading.ThreadAbortException)
+                    {
+                    }
                     catch (Exception ex)
                     {
                         string textSnippet = NormalTextTranslator.GetTextSnippet(text, 50);
@@ -570,7 +573,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        private static string GetTextSnippet(string text, int maxLength)
+        internal static string GetTextSnippet(string text, int maxLength)
         {
             if (string.IsNullOrEmpty(text))
             {

@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace GameTranslator.Patches.Translatons
 {
-    public class TranslationManager
+    internal class TranslationManager
     {
         public event Action<TranslationJob> JobCompleted;
         public event Action<TranslationJob> JobFailed;

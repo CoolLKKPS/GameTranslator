@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace GameTranslator
 {
-    public class TranslateConfig
+    internal class TranslateConfig
     {
         private static SafeFileWatcher _fileWatcher;
 
@@ -24,40 +24,39 @@ namespace GameTranslator
 
         public static void Load()
         {
-            TranslateConfig.hud = TranslateConfig.CreateNewConfig("HUD-Translate", true);
+            TranslateConfig.hud = TranslateConfig.CreateNewConfig("HUD-Translate");
             TranslateConfig.hud.shouldTranslate = TranslatePlugin.shouldTranslateHUD.Value;
             TranslateConfig.hudText = new NormalTextTranslator(TranslateConfig.hud.ConfigFileName + ".cfg");
-
-            TranslateConfig.items = TranslateConfig.CreateNewConfig("Item-Translate", true);
+            TranslateConfig.hudText.Load();
+            TranslateConfig.items = TranslateConfig.CreateNewConfig("Item-Translate");
             TranslateConfig.items.shouldTranslate = TranslatePlugin.shouldTranslateItems.Value;
             TranslateConfig.itemsText = new NormalTextTranslator(TranslateConfig.items.ConfigFileName + ".cfg");
-
-            TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true);
+            TranslateConfig.itemsText.Load();
+            TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate");
             TranslateConfig.terminal.shouldTranslate = TranslatePlugin.shouldTranslateTerimal.Value;
             TranslateConfig.terminalText = new NormalTextTranslator(TranslateConfig.terminal.ConfigFileName + ".cfg");
-
-            TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true);
+            TranslateConfig.terminalText.Load();
+            TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate");
             TranslateConfig.cmdPyText = new NormalTextTranslator(TranslateConfig.cmd_py.ConfigFileName + ".cfg");
-
-            TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true);
+            TranslateConfig.cmdPyText.Load();
+            TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate");
             TranslateConfig.cmdZhText = new NormalTextTranslator(TranslateConfig.cmd_zh.ConfigFileName + ".cfg");
-
-            TranslateConfig.text = TranslateConfig.CreateNewConfig("SpecialText-Translate", true);
+            TranslateConfig.cmdZhText.Load();
+            TranslateConfig.text = TranslateConfig.CreateNewConfig("SpecialText-Translate");
             TranslateConfig.text.shouldTranslate = TranslatePlugin.shouldTranslateSpecialText.Value;
             TranslateConfig.textText = new NormalTextTranslator(TranslateConfig.text.ConfigFileName + ".cfg");
-
-            TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate", true);
+            TranslateConfig.textText.Load();
+            TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate");
             TranslateConfig.gui.shouldTranslate = TranslatePlugin.shouldTranslateGui.Value;
             TranslateConfig.guiText = new NormalTextTranslator(TranslateConfig.gui.ConfigFileName + ".cfg");
-
-            TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate", true);
+            TranslateConfig.guiText.Load();
+            TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate");
             TranslateConfig.interactiveTerminalAPI.shouldTranslate = TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value;
             TranslateConfig.interactiveTerminalAPIText = new NormalTextTranslator(TranslateConfig.interactiveTerminalAPI.ConfigFileName + ".cfg");
-
-            TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate", true);
+            TranslateConfig.interactiveTerminalAPIText.Load();
+            TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate");
             TranslateConfig.normal.shouldTranslate = TranslatePlugin.shouldTranslateNormalText.Value;
             TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
-
             TranslateConfig.normalText.Load();
             TranslateConfig.cache = new TextureTranslationCache();
             TranslateConfig.cache.LoadTranslationFiles();
@@ -381,7 +380,7 @@ namespace GameTranslator
 
         private static readonly TimeSpan CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
 
-        public class TranslateConfigFile
+        internal class TranslateConfigFile
         {
             public TranslateConfigFile(string configName, bool saveOnInit, bool shouldLoad)
             {
@@ -551,9 +550,9 @@ namespace GameTranslator
 
             public bool shouldTranslate;
 
-            public int shouldTranslateMinLength = 200;
+            internal int shouldTranslateMinLength = 200;
 
-            public int shouldTranslateMaxLength;
+            internal int shouldTranslateMaxLength;
 
             public bool shouldLoad = true;
 

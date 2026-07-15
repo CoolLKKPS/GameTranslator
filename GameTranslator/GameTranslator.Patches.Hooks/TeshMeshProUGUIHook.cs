@@ -6,7 +6,7 @@ using TMPro;
 
 namespace GameTranslator.Patches.Hooks
 {
-    public static class TextMeshProHooks
+    internal static class TextMeshProHooks
     {
         public static readonly Type[] All = new[] {
             typeof(TeshMeshProUGUIHook),

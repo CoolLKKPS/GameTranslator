@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using TMPro;
 using UnityEngine;
 using XUnity.Common.Constants;
 
@@ -343,7 +342,7 @@ namespace GameTranslator.Patches
             }
         }
 
-        public static void SetText(string text, Terminal Instance)
+        private static void SetText(string text, Terminal Instance)
         {
             if (!(Instance == null))
             {
@@ -374,26 +373,27 @@ namespace GameTranslator.Patches
             TerminalPatch.info.MustIgnore = true;
         }
 
-        // hasGottenNoun no longer need but will keep
-        public static FieldInfo hasGottenNoun = typeof(Terminal).GetField("hasGottenNoun", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        private static FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
-        public static FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        private static int texdAdded = 0;
 
-        public static bool shouldTranslate = false;
+        private static FieldInfo modifyingText = typeof(Terminal).GetField("modifyingText", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
-        public static bool noText = false;
+        private static Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
 
-        public static int texdAdded = 0;
+        /*
+        private static FieldInfo hasGottenNoun = typeof(Terminal).GetField("hasGottenNoun", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        
+        private static bool shouldTranslate = false;
 
-        public static FieldInfo modifyingText = typeof(Terminal).GetField("modifyingText", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        private static bool noText = false;
+        
+        private static TMP_InputField screenText = null;
+        */
 
-        public static Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
+        private static TextTranslationInfo info;
 
-        public static TMP_InputField screenText = null;
-
-        public static TextTranslationInfo info;
-
-        public static HashSet<object> ig = new HashSet<object>();
+        private static HashSet<object> ig = new HashSet<object>();
 
         public class Translator
         {

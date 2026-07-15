@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace GameTranslator.Patches.Translatons
 {
-    public class RegexTranslation
+    internal class RegexTranslation
     {
         public RegexTranslation(string key, string value)
         {

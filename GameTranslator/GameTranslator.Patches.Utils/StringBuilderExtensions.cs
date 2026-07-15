@@ -2,7 +2,7 @@ using System.Text;
 
 namespace GameTranslator.Patches.Utils
 {
-    public static class StringBuilderExtensions
+    internal static class StringBuilderExtensions
     {
         /*
         public static bool EndsWithWhitespaceOrNewline(this StringBuilder builder)

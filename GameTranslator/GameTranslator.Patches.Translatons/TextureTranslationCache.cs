@@ -12,7 +12,7 @@ using XUnity.Common.Logging;
 
 namespace GameTranslator.Patches.Translatons
 {
-    public class TextureTranslationCache
+    internal class TextureTranslationCache
     {
         private SafeFileWatcher _textureFileWatcher;
 

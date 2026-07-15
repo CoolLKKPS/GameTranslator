@@ -40,9 +40,9 @@ namespace GameTranslator.Patches
             }
         }
 
-        public static Dictionary<string, string> originToTranslated = new Dictionary<string, string>();
+        private static Dictionary<string, string> originToTranslated = new Dictionary<string, string>();
 
-        public static HashSet<string> translatedItems = new HashSet<string>();
+        private static HashSet<string> translatedItems = new HashSet<string>();
 
         public static void ClearCache()
         {

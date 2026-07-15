@@ -1,6 +1,6 @@
 namespace GameTranslator.Patches.Translatons
 {
-    public enum TranslationJobState
+    internal enum TranslationJobState
     {
         Pending,
         Running,

@@ -1,3 +1,7 @@
+## v2.2.0
+
+- Code cleanup
+
 ## v2.1.7
 
 - Added Scope feature, similar like AutoTranslator (between `#set level 2` and `#unset level 2` will only translate MainMenu)

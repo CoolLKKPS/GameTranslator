@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GameTranslator.Patches.Translatons
 {
-    public class TranslationEndpointManager
+    internal class TranslationEndpointManager
     {
         private readonly ConcurrentDictionary<string, TranslationJob> _unstartedJobs;
         private readonly ConcurrentDictionary<string, TranslationJob> _ongoingJobs;
@@ -254,9 +254,13 @@ namespace GameTranslator.Patches.Translatons
                     translatedText = buffer.ToString();
                 }
             }
+            catch (System.Threading.ThreadAbortException)
+            {
+                return text;
+            }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Translation error for text '{text}': {ex.Message}");
+                TranslatePlugin.logger.LogError($"Translation error for text '{NormalTextTranslator.GetTextSnippet(text, 50)}': {ex.Message}");
                 return text;
             }
 
