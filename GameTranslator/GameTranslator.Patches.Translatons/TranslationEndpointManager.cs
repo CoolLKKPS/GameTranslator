@@ -256,7 +256,6 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (System.Threading.ThreadAbortException)
             {
-                return text;
             }
             catch (Exception ex)
             {

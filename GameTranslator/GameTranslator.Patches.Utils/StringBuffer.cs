@@ -357,6 +357,9 @@ namespace GameTranslator.Patches.Utils
             int[] array = new int[num];
             int num2 = 0;
             this.computeLPSArray(str, num, array);
+
+            bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+
             int i = startIndex;
             while (i < startIndex + count)
             {
@@ -367,7 +370,7 @@ namespace GameTranslator.Patches.Utils
                 }
                 if (num2 == num)
                 {
-                    if ((i - num2 == 0 || !char.IsLetter(this.value[i - num2 - 1])) && (i == this.length || !char.IsLetter(this.value[i])))
+                    if ((i - num2 == 0 || !IsWordChar(this.value[i - num2 - 1])) && (i == this.length || !IsWordChar(this.value[i])))
                     {
                         return i - num2;
                     }
