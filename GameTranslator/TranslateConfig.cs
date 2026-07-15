@@ -58,8 +58,11 @@ namespace GameTranslator
             TranslateConfig.normal.shouldTranslate = TranslatePlugin.shouldTranslateNormalText.Value;
             TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
             TranslateConfig.normalText.Load();
-            TranslateConfig.cache = new TextureTranslationCache();
-            TranslateConfig.cache.LoadTranslationFiles();
+            if (TranslatePlugin.changeTexture.Value)
+            {
+                TranslateConfig.cache = new TextureTranslationCache();
+                TranslateConfig.cache.LoadTranslationFiles();
+            }
             string fullPath = Path.GetFullPath(TranslatePlugin.DefaultPath);
             if (TranslatePlugin.enableFileWatcher?.Value ?? false)
             {
