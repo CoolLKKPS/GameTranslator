@@ -11,7 +11,8 @@ namespace GameTranslator.Patches.Utils
 
         private FileSystemWatcher _watcher;
         private bool _disposed;
-        // private object _sync = new object();
+        private int _counter = 0;
+        private object _sync = new object();
         private Timer _timer;
         private readonly string _directory;
 
@@ -35,9 +36,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        /*
-        private int _counter = 0;
-        
+        // Still using for other purposes
         public void Disable()
         {
             var counter = Interlocked.Increment(ref _counter);
@@ -59,7 +58,7 @@ namespace GameTranslator.Patches.Utils
                 _watcher = null;
             }
         }
-        
+
         private void UpdateRaisingEvents(bool enabled)
         {
             lock (_sync)
@@ -74,7 +73,6 @@ namespace GameTranslator.Patches.Utils
                 }
             }
         }
-        */
 
         public void RaiseEvent(object state)
         {

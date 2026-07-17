@@ -98,12 +98,13 @@ namespace GameTranslator.Patches.Translatons
                 }
             }
         }
-        
+        */
+
+        // Still using for other purposes
         public void Dispose()
         {
             _processingTimer?.Dispose();
         }
-        */
 
         public void KickoffTranslations()
         {

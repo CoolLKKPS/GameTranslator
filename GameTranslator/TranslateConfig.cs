@@ -166,7 +166,7 @@ namespace GameTranslator
             return new TranslateConfig.TranslateConfigFile(fileName, true, should);
         }
 
-        /*
+        // Still using for other purposes
         public static void show(TranslateConfig.TranslateConfigFile file)
         {
             foreach (string text in file.normal.Keys)
@@ -175,6 +175,7 @@ namespace GameTranslator
             }
         }
 
+        /*
         public static bool IsStringContainsEnglish(string input)
         {
             return !string.IsNullOrEmpty(input) && new Regex("[a-zA-Z]").IsMatch(input);
