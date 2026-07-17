@@ -108,7 +108,7 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
                 if (TranslatePlugin.showAvailableText.Value &&
                     GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"InteractiveTerminalAPI:{text}"))
                 {
-                    TranslatePlugin.LogInfo($"[Debug] InteractiveTerminalAPI available text: '{text}'");
+                    TranslatePlugin.logger.LogInfo($"[Debug] InteractiveTerminalAPI available text: '{text}'");
                 }
 
                 if (TranslateConfig.interactiveTerminalAPI != null && TranslateConfig.interactiveTerminalAPI.shouldTranslate)
@@ -117,7 +117,7 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
                     if (TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value &&
                         GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"InteractiveTerminalAPI_translated:{translated}"))
                     {
-                        TranslatePlugin.LogInfo($"[Debug] InteractiveTerminalAPI translated: '{translated}'");
+                        TranslatePlugin.logger.LogInfo($"[Debug] InteractiveTerminalAPI translated: '{translated}'");
                     }
                     return translated;
                 }

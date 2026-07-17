@@ -6,7 +6,6 @@ using TMPro;
 using UnityEngine;
 using XUnity.Common.Constants;
 using XUnity.Common.Extensions;
-using XUnity.Common.Harmony;
 using XUnity.Common.Utilities;
 
 namespace GameTranslator.Patches.Translatons
@@ -18,6 +17,7 @@ namespace GameTranslator.Patches.Translatons
             return obj.GetType();
         }
 
+        /*
         public static string ToString(this char[] value, int startIndex, int count)
         {
             if (value == null)
@@ -35,7 +35,6 @@ namespace GameTranslator.Patches.Translatons
             return new string(value, startIndex, count);
         }
 
-        /*
         private static StringBuilder ReplaceFull(this StringBuilder builder, string oldValue, string newValue, int startIndex, int count)
         {
             int length = builder.Length;
@@ -193,6 +192,91 @@ namespace GameTranslator.Patches.Translatons
                 fontAsset.TryRemoveCharacter(unicodes[i]);
             }
         }
+
+        public static Sprite SetTexture(this object ui, Texture2D texture, Sprite sprite, bool isPrefixHooked)
+        {
+            Sprite sprite2;
+            if (ui == null)
+            {
+                sprite2 = null;
+            }
+            else
+            {
+                Texture2D texture2 = ui.GetTexture();
+                if (!UnityObjectReferenceComparer.Default.Equals(texture2, texture))
+                {
+                    SpriteRenderer spriteRenderer = null;
+                    if (ui.TryCastTo(out spriteRenderer))
+                    {
+                        if (isPrefixHooked)
+                        {
+                            return TranslateExtensions.SafeCreateSprite(spriteRenderer, sprite, texture);
+                        }
+                        return TranslateExtensions.SafeSetSprite(spriteRenderer, sprite, texture);
+                    }
+                    else
+                    {
+                        Type type = ui.GetType();
+                        CachedProperty cachedProperty = type.CachedProperty(TranslateExtensions.MainTexturePropertyName);
+                        if (cachedProperty != null)
+                        {
+                            cachedProperty.Set(ui, texture);
+                        }
+                        CachedProperty cachedProperty2 = type.CachedProperty(TranslateExtensions.TexturePropertyName);
+                        if (cachedProperty2 != null)
+                        {
+                            cachedProperty2.Set(ui, texture);
+                        }
+                        CachedProperty cachedProperty3 = type.CachedProperty(TranslateExtensions.CapitalMainTexturePropertyName);
+                        if (cachedProperty3 != null)
+                        {
+                            cachedProperty3.Set(ui, texture);
+                        }
+                        CachedProperty cachedProperty4 = type.CachedProperty("material");
+                        object obj = ((cachedProperty4 != null) ? cachedProperty4.Get(ui) : null);
+                        if (obj != null)
+                        {
+                            CachedProperty cachedProperty5 = obj.GetType().CachedProperty(TranslateExtensions.MainTexturePropertyName);
+                            if ((Texture2D)((cachedProperty5 != null) ? cachedProperty5.Get(obj) : null) == texture2 && cachedProperty5 != null)
+                            {
+                                cachedProperty5.Set(obj, texture);
+                            }
+                        }
+                    }
+                }
+                sprite2 = null;
+            }
+            return sprite2;
+        }
+
+        public static Sprite SafeSetSprite(SpriteRenderer sr, Sprite sprite, Texture2D texture)
+        {
+            Sprite sprite2 = Sprite.Create(texture, (sprite != null) ? sprite.rect : sr.sprite.rect, Vector2.zero);
+            sr.sprite = sprite2;
+            return sprite2;
+        }
+
+        private static Sprite SafeCreateSprite(SpriteRenderer sr, Sprite sprite, Texture2D texture)
+        {
+            return Sprite.Create(texture, (sprite != null) ? sprite.rect : sr.sprite.rect, Vector2.zero);
+        }
+
+        public static void SetAllDirtyEx(this object ui)
+        {
+            if (ui == null) return;
+
+            var type = ui.GetUnityType();
+
+            if (UnityTypes.Graphic != null && UnityTypes.Graphic.IsAssignableFrom(type))
+            {
+                UnityTypes.Graphic.ClrType.CachedMethod(SetAllDirtyMethodName).Invoke(ui);
+            }
+            else if (!ui.TryCastTo<SpriteRenderer>(out _))
+            {
+                var clrType = ui.GetType();
+                AccessToolsShim.Method(clrType, MarkAsChangedMethodName)?.Invoke(ui, null);
+            }
+        }
         */
 
         public static bool EqualsIgnoreCase(this string value, string other)
@@ -269,69 +353,6 @@ namespace GameTranslator.Patches.Translatons
                 array = UnityTypes.Texture2D_Methods.EncodeToPNG(texture);
             }
             return array;
-        }
-
-        public static Sprite SetTexture(this object ui, Texture2D texture, Sprite sprite, bool isPrefixHooked)
-        {
-            Sprite sprite2;
-            if (ui == null)
-            {
-                sprite2 = null;
-            }
-            else
-            {
-                Texture2D texture2 = ui.GetTexture();
-                if (!UnityObjectReferenceComparer.Default.Equals(texture2, texture))
-                {
-                    SpriteRenderer spriteRenderer = null;
-                    if (ui.TryCastTo(out spriteRenderer))
-                    {
-                        if (isPrefixHooked)
-                        {
-                            return TranslateExtensions.SafeCreateSprite(spriteRenderer, sprite, texture);
-                        }
-                        return TranslateExtensions.SafeSetSprite(spriteRenderer, sprite, texture);
-                    }
-                    else
-                    {
-                        Type type = ui.GetType();
-                        CachedProperty cachedProperty = type.CachedProperty(TranslateExtensions.MainTexturePropertyName);
-                        if (cachedProperty != null)
-                        {
-                            cachedProperty.Set(ui, texture);
-                        }
-                        CachedProperty cachedProperty2 = type.CachedProperty(TranslateExtensions.TexturePropertyName);
-                        if (cachedProperty2 != null)
-                        {
-                            cachedProperty2.Set(ui, texture);
-                        }
-                        CachedProperty cachedProperty3 = type.CachedProperty(TranslateExtensions.CapitalMainTexturePropertyName);
-                        if (cachedProperty3 != null)
-                        {
-                            cachedProperty3.Set(ui, texture);
-                        }
-                        CachedProperty cachedProperty4 = type.CachedProperty("material");
-                        object obj = ((cachedProperty4 != null) ? cachedProperty4.Get(ui) : null);
-                        if (obj != null)
-                        {
-                            CachedProperty cachedProperty5 = obj.GetType().CachedProperty(TranslateExtensions.MainTexturePropertyName);
-                            if ((Texture2D)((cachedProperty5 != null) ? cachedProperty5.Get(obj) : null) == texture2 && cachedProperty5 != null)
-                            {
-                                cachedProperty5.Set(obj, texture);
-                            }
-                        }
-                    }
-                }
-                sprite2 = null;
-            }
-            return sprite2;
-        }
-
-        public static Sprite SafeSetSprite(SpriteRenderer sr, Sprite sprite, Texture2D texture)
-        {
-            Sprite sprite2 = Sprite.Create(texture, (sprite != null) ? sprite.rect : sr.sprite.rect, Vector2.zero);
-            sr.sprite = sprite2;
-            return sprite2;
         }
 
         public static bool IsComponentActive(this object ui)
@@ -463,28 +484,6 @@ namespace GameTranslator.Patches.Translatons
                 textComponentManipulator = textComponentManipulator2;
             }
             return textComponentManipulator;
-        }
-
-        private static Sprite SafeCreateSprite(SpriteRenderer sr, Sprite sprite, Texture2D texture)
-        {
-            return Sprite.Create(texture, (sprite != null) ? sprite.rect : sr.sprite.rect, Vector2.zero);
-        }
-
-        public static void SetAllDirtyEx(this object ui)
-        {
-            if (ui == null) return;
-
-            var type = ui.GetUnityType();
-
-            if (UnityTypes.Graphic != null && UnityTypes.Graphic.IsAssignableFrom(type))
-            {
-                UnityTypes.Graphic.ClrType.CachedMethod(SetAllDirtyMethodName).Invoke(ui);
-            }
-            else if (!ui.TryCastTo<SpriteRenderer>(out _))
-            {
-                var clrType = ui.GetType();
-                AccessToolsShim.Method(clrType, MarkAsChangedMethodName)?.Invoke(ui, null);
-            }
         }
 
         public static bool ShouldIgnoreTextComponent(this object ui)
@@ -637,15 +636,11 @@ namespace GameTranslator.Patches.Translatons
 
         private static List<TranslateExtensions.IPropertyMover> TexturePropertyMovers;
 
-        private static readonly string SetAllDirtyMethodName = "SetAllDirty";
-
         private static readonly string TexturePropertyName = "texture";
 
         private static readonly string MainTexturePropertyName = "mainTexture";
 
         private static readonly string CapitalMainTexturePropertyName = "MainTexture";
-
-        private static readonly string MarkAsChangedMethodName = "MarkAsChanged";
 
         public static FieldInfo s_MissingCharacterList = typeof(TMP_FontAsset).GetField("s_MissingCharacterList", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
@@ -658,6 +653,10 @@ namespace GameTranslator.Patches.Translatons
         public static FieldInfo m_CharactersToAddLookup = typeof(TMP_FontAsset).GetField("m_CharactersToAddLookup", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         /*
+        private static readonly string SetAllDirtyMethodName = "SetAllDirty";
+        
+        private static readonly string MarkAsChangedMethodName = "MarkAsChanged";
+
         private static readonly Type TextElementType = typeof(TextElement);
         
         public static FieldInfo m_AtlasPopulationMode = typeof(TMP_FontAsset).GetField("m_AtlasPopulationMode", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);

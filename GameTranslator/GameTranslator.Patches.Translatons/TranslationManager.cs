@@ -10,23 +10,21 @@ namespace GameTranslator.Patches.Translatons
         public event Action<TranslationJob> JobCompleted;
         public event Action<TranslationJob> JobFailed;
 
+        private readonly List<TranslationEndpointManager> _endpointsWithUnstartedJobs;
+        private readonly Timer _processingTimer;
         /*
         private readonly List<IMonoBehaviour_Update> _updateCallbacks;
         */
-        private readonly List<TranslationEndpointManager> _endpointsWithUnstartedJobs;
-        private readonly Timer _processingTimer;
 
         public TranslationManager()
         {
-            /*
-            _updateCallbacks = new List<IMonoBehaviour_Update>();
-            */
             _endpointsWithUnstartedJobs = new List<TranslationEndpointManager>();
             Endpoints = new List<TranslationEndpointManager>();
+            _processingTimer = new Timer(ProcessPendingJobs, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
             /*
+            _updateCallbacks = new List<IMonoBehaviour_Update>();
             AllEndpoints = new List<TranslationEndpointManager>();
             */
-            _processingTimer = new Timer(ProcessPendingJobs, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
         }
 
         public List<TranslationEndpointManager> Endpoints { get; private set; }
@@ -98,6 +96,17 @@ namespace GameTranslator.Patches.Translatons
                 }
             }
         }
+
+        public void OnJobStarted(TranslationEndpointManager endpoint)
+        {
+            UnstartedJobsCount++;
+            OngoingJobsCount--;
+        }
+
+        public void OnJobCompleted(TranslationEndpointManager endpoint)
+        {
+            OngoingJobsCount--;
+        }
         */
 
         // Still using for other purposes
@@ -151,19 +160,6 @@ namespace GameTranslator.Patches.Translatons
                 _endpointsWithUnstartedJobs.Remove(endpoint);
             }
         }
-
-        /*
-        public void OnJobStarted(TranslationEndpointManager endpoint)
-        {
-            UnstartedJobsCount++;
-            OngoingJobsCount--;
-        }
-
-        public void OnJobCompleted(TranslationEndpointManager endpoint)
-        {
-            OngoingJobsCount--;
-        }
-        */
 
         public void InvokeJobCompleted(TranslationJob job)
         {

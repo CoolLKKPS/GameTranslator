@@ -15,7 +15,7 @@ namespace GameTranslator.Patches.Utils
         private static bool _isInitialized = false;
         private static readonly object _lockObject = new object();
 
-        public static void InitializeFonts()
+        internal static void InitializeFonts()
         {
             if (_isInitialized) return;
             lock (_lockObject)
@@ -64,7 +64,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        public static void RegisterFont(TMP_FontAsset font)
+        internal static void RegisterFont(TMP_FontAsset font)
         {
             if (font == null) return;
             lock (_lockObject)
@@ -77,7 +77,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        public static bool IsCharacterSupported(char character)
+        private static bool IsCharacterSupported(char character)
         {
             if (!_isInitialized) return true;
             if (_characterSupportCache.TryGetValue(character, out var isSupported))
@@ -89,7 +89,7 @@ namespace GameTranslator.Patches.Utils
             return isSupported;
         }
 
-        public static string ReplaceUnsupportedCharacters(string text, TMPro.TMP_Text textComponent = null)
+        internal static string ReplaceUnsupportedCharacters(string text, TMPro.TMP_Text textComponent = null)
         {
             if (string.IsNullOrEmpty(text) || !TranslatePlugin.replaceUnsupportedCharacters.Value)
                 return text;
@@ -151,12 +151,11 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        /*
+        // Still using for other purposes
         public static string GetStats()
         {
             return $"Fonts: {_availableFonts.Count}, CharacterCache: {_characterSupportCache.Count}, TextCache: {_textCache.Count}";
         }
-        */
     }
 
     internal class LRUCache<TKey, TValue>
@@ -206,10 +205,6 @@ namespace GameTranslator.Patches.Utils
             _lruList.Clear();
         }
 
-        /*
-        public int Count => _cacheMap.Count;
-        */
-
         private void RemoveLeastRecentlyUsed()
         {
             var lastNode = _lruList.Last;
@@ -225,5 +220,7 @@ namespace GameTranslator.Patches.Utils
             public TKey Key { get; set; }
             public TValue Value { get; set; }
         }
+
+        public int Count => _cacheMap.Count;
     }
 }

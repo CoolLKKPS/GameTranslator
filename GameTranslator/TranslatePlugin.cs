@@ -140,14 +140,6 @@ namespace GameTranslator
             return TranslatePlugin.shouldRemoveChar.Value.ToCharArray().ToList<char>();
         }
 
-        internal static void LogInfo(string info)
-        {
-            if (TranslatePlugin.logger != null)
-            {
-                TranslatePlugin.logger.LogInfo(info);
-            }
-        }
-
         private void ApplyBasicPatches()
         {
             try

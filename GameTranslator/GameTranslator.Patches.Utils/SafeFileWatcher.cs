@@ -43,12 +43,14 @@ namespace GameTranslator.Patches.Utils
             UpdateRaisingEvents(counter == 0);
         }
 
+        // Still using for other purposes
         public void Enable()
         {
             var counter = Interlocked.Decrement(ref _counter);
             UpdateRaisingEvents(counter == 0);
         }
 
+        // Still using for other purposes
         public void DisableWatcher()
         {
             if (_watcher != null)
@@ -59,6 +61,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
+        // Still using for other purposes
         private void UpdateRaisingEvents(bool enabled)
         {
             lock (_sync)

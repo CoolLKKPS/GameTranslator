@@ -27,6 +27,8 @@ namespace GameTranslator.Patches.Translatons
 
         /*
         public bool IsKnownTextComponent { get; set; }
+
+        public long TextVersion { get; set; }
         */
 
         public long ChangeTime
@@ -40,21 +42,6 @@ namespace GameTranslator.Patches.Translatons
                 this.changeTime = value;
             }
         }
-
-        /*
-        public HashSet<string> RedirectedTranslations
-        {
-            get
-            {
-                HashSet<string> hashSet;
-                if ((hashSet = this._redirectedTranslations) == null)
-                {
-                    hashSet = (this._redirectedTranslations = new HashSet<string>());
-                }
-                return hashSet;
-            }
-        }
-        */
 
         public void Init(object ui)
         {
@@ -126,6 +113,19 @@ namespace GameTranslator.Patches.Translatons
         }
 
         /*
+        public HashSet<string> RedirectedTranslations
+        {
+            get
+            {
+                HashSet<string> hashSet;
+                if ((hashSet = this._redirectedTranslations) == null)
+                {
+                    hashSet = (this._redirectedTranslations = new HashSet<string>());
+                }
+                return hashSet;
+            }
+        }
+
         public void UnchangeFont(object ui)
         {
             if (ui != null)

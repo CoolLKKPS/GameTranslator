@@ -69,6 +69,7 @@ namespace GameTranslator.Patches.Utils
                 TranslatePlugin.logger.LogInfo($"[Debug] Cleaned up {keysToRemove.Count} old debug cache entries");
             }
         }
+
         private static bool IsTerminalIgnoredUI(object ui)
         {
             if (TranslatePlugin.enableTerminalPatch == null || !TranslatePlugin.enableTerminalPatch.Value)

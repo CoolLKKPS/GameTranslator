@@ -69,12 +69,8 @@ namespace GameTranslator.Patches
             {
                 for (int j = playerWord.Length; j > 0; j--)
                 {
-                    if (TerminalPatch.GetCmd(options[i].noun.word, true).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
-                    {
-                        __result = options[i].result;
-                        return;
-                    }
-                    if (TerminalPatch.GetCmd(options[i].noun.word, false).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
+                    if (TerminalPatch.GetCmd(options[i].noun.word, true).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()) ||
+                        TerminalPatch.GetCmd(options[i].noun.word, false).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
                     {
                         __result = options[i].result;
                         return;
@@ -89,12 +85,8 @@ namespace GameTranslator.Patches
         {
             for (int i = 0; i < __instance.terminalNodes.allKeywords.Length; i++)
             {
-                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).EqualsIgnoreCase(playerWord))
-                {
-                    __result = __instance.terminalNodes.allKeywords[i];
-                    return;
-                }
-                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).EqualsIgnoreCase(playerWord))
+                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).EqualsIgnoreCase(playerWord) ||
+                    TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).EqualsIgnoreCase(playerWord))
                 {
                     __result = __instance.terminalNodes.allKeywords[i];
                     return;
@@ -149,12 +141,8 @@ namespace GameTranslator.Patches
                     if (!__instance.terminalNodes.allKeywords[i].isVerb || !(bool)TerminalPatch.hasGottenVerb.GetValue(__instance))
                     {
                         bool accessTerminalObjects = __instance.terminalNodes.allKeywords[i].accessTerminalObjects;
-                        if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).EqualsIgnoreCase(playerWord))
-                        {
-                            __result = __instance.terminalNodes.allKeywords[i];
-                            return;
-                        }
-                        if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).EqualsIgnoreCase(playerWord))
+                        if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).EqualsIgnoreCase(playerWord) ||
+                            TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).EqualsIgnoreCase(playerWord))
                         {
                             __result = __instance.terminalNodes.allKeywords[i];
                             return;
@@ -163,11 +151,8 @@ namespace GameTranslator.Patches
                         {
                             for (int j = playerWord.Length; j > specificityRequired; j--)
                             {
-                                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
-                                {
-                                    terminalKeyword = __instance.terminalNodes.allKeywords[i];
-                                }
-                                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
+                                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()) ||
+                                    TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
                                 {
                                     terminalKeyword = __instance.terminalNodes.allKeywords[i];
                                 }
@@ -325,7 +310,7 @@ namespace GameTranslator.Patches
                         if (TranslatePlugin.showAvailableText.Value && !string.IsNullOrEmpty(__instance.currentText) &&
                             GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"terminal:{__instance.currentText}"))
                         {
-                            TranslatePlugin.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'");
+                            TranslatePlugin.logger.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'");
                         }
 
                         string text = TranslateConfig.replaceByMap(__instance.currentText, TranslateConfig.terminal);

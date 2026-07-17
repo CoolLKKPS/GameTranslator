@@ -171,7 +171,7 @@ namespace GameTranslator
         {
             foreach (string text in file.normal.Keys)
             {
-                TranslatePlugin.LogInfo(text + "=" + file.normal[text]);
+                TranslatePlugin.logger.LogInfo(text + "=" + file.normal[text]);
             }
         }
 
@@ -556,10 +556,6 @@ namespace GameTranslator
 
             public bool shouldTranslate;
 
-            internal int shouldTranslateMinLength = 300;    // Still using for other purposes
-
-            internal int shouldTranslateMaxLength;          // Still using for other purposes
-
             public bool shouldLoad = true;
 
             public IDictionary<string, string> normal = new ConcurrentDictionary<string, string>();
@@ -570,10 +566,6 @@ namespace GameTranslator
 
             public ConcurrentDictionary<string, string> translatePairs = new ConcurrentDictionary<string, string>();
 
-            /*
-            private List<string> logs = new List<string>();
-            */
-
             private static Regex _regex;
 
             internal List<RegexTranslation> regexTranslations = new List<RegexTranslation>();
@@ -583,6 +575,14 @@ namespace GameTranslator
             internal readonly ConcurrentDictionary<string, DateTime> _translatePairLastAccess = new ConcurrentDictionary<string, DateTime>();
 
             internal KeyValuePair<string, string>[] _normalOrdered = Array.Empty<KeyValuePair<string, string>>();
+
+            internal int shouldTranslateMinLength = 300;    // Still using for other purposes
+
+            internal int shouldTranslateMaxLength;          // Still using for other purposes
+
+            /*
+            private List<string> logs = new List<string>();
+            */
 
             private void GetNormalOrderedByLength(Dictionary<string, int> lineOrder)
             {
