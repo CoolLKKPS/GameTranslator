@@ -149,13 +149,6 @@ namespace GameTranslator.Patches.Utils
                 {
                     if (info.ChangeTime != TextTranslate.ChangeTime)
                     {
-                        /*
-                        var retranslated = TranslateImmediate(ui, info.OriginalText, info, normalText, config, ignoreComponentState);
-                        if (retranslated != null)
-                        {
-                            return retranslated;
-                        }
-                        */
                         info.Reset(text);
                     }
                     else

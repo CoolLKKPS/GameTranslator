@@ -1,3 +1,7 @@
+## v2.2.1
+
+- More code cleanup
+
 ## v2.2.0
 
 - Code cleanup
