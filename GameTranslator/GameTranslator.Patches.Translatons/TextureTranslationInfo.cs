@@ -1,3 +1,4 @@
+using GameTranslator.Patches.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,21 @@ namespace GameTranslator.Patches.Translatons
         */
 
         public bool UsingReplacedTexture { get; set; }
+
+        public long ChangeTime { get; set; }
+
+        public void Reset()
+        {
+            this.IsTranslated = false;
+            this.Translated = null;
+            this.UsingReplacedTexture = false;
+            this.ChangeTime = TextureTranslate.ChangeTime;
+        }
+
+        public static void ClearNameToHash()
+        {
+            NameToHash.Clear();
+        }
 
         public void Initialize(Texture2D texture)
         {

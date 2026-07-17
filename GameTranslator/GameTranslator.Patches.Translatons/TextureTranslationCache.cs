@@ -63,11 +63,14 @@ namespace GameTranslator.Patches.Translatons
                     this._translatedImages.Clear();
                     this._untranslatedImages.Clear();
                     this._keyToFileName.Clear();
+                    this._textureAccessTime.Clear();
                     Directory.CreateDirectory(TranslatePlugin.TexturesPath);
                     foreach (string text in this.GetTextureFiles())
                     {
                         this.RegisterImageFromFile(text);
                     }
+                    TextureTranslate.ChangeTime += 1L;
+                    TextureTranslationInfo.ClearNameToHash();
                     this.CleanupInvalidEntries();
                     float realtimeSinceStartup2 = Time.realtimeSinceStartup;
                     XuaLogger.AutoTranslator.Debug(string.Format("Loaded texture files (took {0} seconds)", Math.Round((double)(realtimeSinceStartup2 - realtimeSinceStartup), 2)));

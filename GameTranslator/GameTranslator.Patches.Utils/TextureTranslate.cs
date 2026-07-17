@@ -181,7 +181,14 @@ namespace GameTranslator.Patches.Utils
                 TextureTranslationInfo textureInfo = texture.GetOrCreateTextureTranslationInfo();
                 if (textureInfo.IsTranslated && textureInfo.Translated != null)
                 {
-                    return false;
+                    if (textureInfo.ChangeTime != TextureTranslate.ChangeTime)
+                    {
+                        textureInfo.Reset();
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
 
                 var format = (int)texture.format;
@@ -205,5 +212,7 @@ namespace GameTranslator.Patches.Utils
         public static TextureTranslate Instance = new TextureTranslate();
 
         public static bool ImageHooksEnabled = true;
+
+        public static long ChangeTime = 0L;
     }
 }
