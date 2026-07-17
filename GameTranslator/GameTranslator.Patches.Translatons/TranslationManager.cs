@@ -23,7 +23,9 @@ namespace GameTranslator.Patches.Translatons
             */
             _endpointsWithUnstartedJobs = new List<TranslationEndpointManager>();
             Endpoints = new List<TranslationEndpointManager>();
+            /*
             AllEndpoints = new List<TranslationEndpointManager>();
+            */
             _processingTimer = new Timer(ProcessPendingJobs, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
         }
 
@@ -33,12 +35,13 @@ namespace GameTranslator.Patches.Translatons
 
         public TranslationEndpointManager PrimaryEndpoint { get; set; }
 
+        /*
+        public List<TranslationEndpointManager> AllEndpoints { get; private set; }
+
         public int OngoingJobsCount { get; set; }
 
         public int UnstartedJobsCount { get; set; }
 
-        public List<TranslationEndpointManager> AllEndpoints { get; private set; }
-        /*
         public TranslationEndpointManager FallbackEndpoint { get; set; }
 
         public TranslationEndpointManager PassthroughEndpoint { get; private set; }
@@ -148,6 +151,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
+        /*
         public void OnJobStarted(TranslationEndpointManager endpoint)
         {
             UnstartedJobsCount++;
@@ -158,6 +162,7 @@ namespace GameTranslator.Patches.Translatons
         {
             OngoingJobsCount--;
         }
+        */
 
         public void InvokeJobCompleted(TranslationJob job)
         {
@@ -180,11 +185,13 @@ namespace GameTranslator.Patches.Translatons
         public void RegisterEndpoint(TranslationEndpointManager translationEndpointManager)
         {
             translationEndpointManager.Manager = this;
+            /*
             AllEndpoints.Add(translationEndpointManager);
             if (translationEndpointManager.Error == null)
             {
                 ConfiguredEndpoints.Add(translationEndpointManager);
             }
+            */
 
             if (PrimaryEndpoint == null)
             {

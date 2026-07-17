@@ -441,9 +441,9 @@ namespace GameTranslator.Patches.Translatons
         public TextTranslationInfo Info { get; set; }
         public NormalTextTranslator NormalText { get; set; }
         public TranslateConfig.TranslateConfigFile Config { get; set; }
-        public float StartTime { get; set; }
         public int MaxTries { get; set; }
-        public int CurrentTries { get; set; }
+        public float StartTime { get; set; }        // Still using for other purposes
+        public int CurrentTries { get; set; }       // Still using for other purposes
         public float Delay { get; set; }
     }
 }

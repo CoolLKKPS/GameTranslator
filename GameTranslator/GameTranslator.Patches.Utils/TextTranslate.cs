@@ -131,7 +131,7 @@ namespace GameTranslator.Patches.Utils
 
         public string TranslateOrQueue(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
-            if (info != null && (info.IsCurrentlySettingText || info.MustIgnore))
+            if (info != null && (info.IsCurrentlySettingText || info.MustIgnore || info.ShouldIgnore))
             {
                 return null;
             }
@@ -247,7 +247,7 @@ namespace GameTranslator.Patches.Utils
 
         public string TranslateImmediate(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
-            if (info != null && (info.IsCurrentlySettingText || info.MustIgnore))
+            if (info != null && (info.IsCurrentlySettingText || info.MustIgnore || info.ShouldIgnore))
             {
                 return null;
             }

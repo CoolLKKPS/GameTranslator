@@ -486,11 +486,13 @@ namespace GameTranslator
                 }
             }
 
+            /*
             public void Log(string text)
             {
                 this.logs.Add(text);
                 File.WriteAllLines(this.ConfigFilePath, this.logs);
             }
+            */
 
             public void Save()
             {
@@ -553,9 +555,9 @@ namespace GameTranslator
 
             public bool shouldTranslate;
 
-            internal int shouldTranslateMinLength = 200;
+            internal int shouldTranslateMinLength = 300;    // Still using for other purposes
 
-            internal int shouldTranslateMaxLength;
+            internal int shouldTranslateMaxLength;          // Still using for other purposes
 
             public bool shouldLoad = true;
 
@@ -567,7 +569,9 @@ namespace GameTranslator
 
             public ConcurrentDictionary<string, string> translatePairs = new ConcurrentDictionary<string, string>();
 
+            /*
             private List<string> logs = new List<string>();
+            */
 
             private static Regex _regex;
 

@@ -34,6 +34,8 @@ namespace GameTranslator.Patches.Utils
             return -1;
         }
 
+        public static bool EnableTranslationScoping = true;
+
         /*
         public static void RegisterSceneLoadCallback(Action<int> sceneLoaded)
         {
@@ -43,13 +45,11 @@ namespace GameTranslator.Patches.Utils
             });
             // SceneManagerLoader.EnableSceneLoadScanInternal(sceneLoaded);
         }
-        */
-
-        public static bool EnableTranslationScoping = true;
 
         internal static class TranslationScopes
         {
             public const int None = -1;
         }
+        */
     }
 }

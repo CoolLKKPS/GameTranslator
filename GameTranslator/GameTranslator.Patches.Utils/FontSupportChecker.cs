@@ -140,6 +140,7 @@ namespace GameTranslator.Patches.Utils
             return result;
         }
 
+        // Still using for other purposes
         public static void ClearCache()
         {
             lock (_lockObject)
@@ -205,7 +206,9 @@ namespace GameTranslator.Patches.Utils
             _lruList.Clear();
         }
 
+        /*
         public int Count => _cacheMap.Count;
+        */
 
         private void RemoveLeastRecentlyUsed()
         {

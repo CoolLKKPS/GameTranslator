@@ -91,6 +91,7 @@ namespace GameTranslator.Patches.Utils
                         }
                     }
 
+                    /*
                     if (source != null)
                     {
                         if (!tti.IsTranslated)
@@ -120,6 +121,7 @@ namespace GameTranslator.Patches.Utils
                             }
                         }
                     }
+                    */
                 }
 
                 if (previousTextureValue == null)

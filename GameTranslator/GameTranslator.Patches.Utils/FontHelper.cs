@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -42,8 +41,7 @@ namespace GameTranslator.Patches.Utils
                     TranslatePlugin.logger.LogWarning("Could not load asset bundle while loading font: " + overrideFontPath);
                     return null;
                 }
-
-                FontHelper._loadedBundles.Add(bundle);
+                // FontHelper._loadedBundles.Add(bundle);
 
                 if (UnityTypes.TMP_FontAsset != null)
                 {
@@ -106,6 +104,6 @@ namespace GameTranslator.Patches.Utils
         }
         */
 
-        private static readonly List<AssetBundle> _loadedBundles = new List<AssetBundle>();
+        // private static readonly List<AssetBundle> _loadedBundles = new List<AssetBundle>();
     }
 }

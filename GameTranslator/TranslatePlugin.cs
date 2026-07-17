@@ -158,8 +158,6 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.GuiContentHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProUGUIHook),
-                typeof(GameTranslator.Patches.Hooks.TextArea2DHook),
-                typeof(GameTranslator.Patches.Hooks.TextFieldHook),
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextMeshHook),
@@ -190,7 +188,6 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.texture.UITexture_mainTexture_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.UITexture_material_Hook),
                 typeof(GameTranslator.Patches.Translatons.AsyncTranslationManager),
-                typeof(GameTranslator.Patches.Translatons.ImageTranslationInfo),
                 typeof(GameTranslator.Patches.Translatons.NormalTextTranslator),
                 typeof(GameTranslator.Patches.Translatons.RegexTranslation),
                 typeof(GameTranslator.Patches.Translatons.RegexTranslationSplitter),
@@ -208,7 +205,6 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Utils.FontCache),
                 typeof(GameTranslator.Patches.Utils.FontHelper),
                 typeof(GameTranslator.Patches.Utils.FontSupportChecker),
-                typeof(GameTranslator.Patches.Utils.SceneManagerLoader),
                 typeof(GameTranslator.Patches.Utils.StringBuffer),
                 typeof(GameTranslator.Patches.Utils.TextHelper),
                 typeof(GameTranslator.Patches.Utils.TextTranslate),
@@ -218,6 +214,12 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Utils.Textures.LoadImageImageLoader),
                 typeof(GameTranslator.Patches.Utils.Textures.TextureLoader),
                 typeof(GameTranslator.Patches.Utils.Textures.TgaImageLoader),
+                /*
+                typeof(GameTranslator.Patches.Hooks.TextArea2DHook),
+                typeof(GameTranslator.Patches.Hooks.TextFieldHook),
+                typeof(GameTranslator.Patches.Translatons.ImageTranslationInfo),
+                typeof(GameTranslator.Patches.Utils.SceneManagerLoader),
+                */
                 };
                 var patchNames = patchTypes.Select(t => t.Name).ToList();
                 TranslatePlugin.logger.LogDebug($"Found {patchNames.Count} basic patch types: {string.Join(", ", patchNames)}");
@@ -344,8 +346,6 @@ namespace GameTranslator
 
         internal const string PLUGIN_VERSION_FULL = PLUGIN_VERSION + ".0";
 
-        internal static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
-
         public static ManualLogSource logger;
 
         public static ConfigEntry<int> syncTranslationThreshold;
@@ -408,8 +408,6 @@ namespace GameTranslator
 
         public static ConfigEntry<string> ignoredTextureNames;
 
-        public static ConfigEntry<bool> generateTerimalCommand;
-
         internal static TranslatePlugin Instance;
 
         internal static string DefaultPath;
@@ -417,6 +415,10 @@ namespace GameTranslator
         internal static string TexturesPath;
 
         /*
+        internal static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
+        
+        public static ConfigEntry<bool> generateTerimalCommand;
+        
         internal static bool shouldTranslate;
         */
     }

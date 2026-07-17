@@ -11,7 +11,7 @@ namespace GameTranslator.Patches.Utils
 
         private FileSystemWatcher _watcher;
         private bool _disposed;
-        private object _sync = new object();
+        // private object _sync = new object();
         private Timer _timer;
         private readonly string _directory;
 

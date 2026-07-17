@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-
 namespace GameTranslator.Patches.Translatons
 {
+    /*
     public class TemplatedString
     {
         public TemplatedString(string template, Dictionary<string, string> arguments)
@@ -83,4 +82,5 @@ namespace GameTranslator.Patches.Translatons
             return translatedText;
         }
     }
+    */
 }

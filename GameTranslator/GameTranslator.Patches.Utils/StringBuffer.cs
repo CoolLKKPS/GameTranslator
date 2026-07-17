@@ -4,24 +4,6 @@ namespace GameTranslator.Patches.Utils
 {
     internal class StringBuffer
     {
-        public StringBuffer()
-        {
-            this.value = new char[16];
-            this.length = 0;
-            this.capacity = 16;
-        }
-
-        public StringBuffer(int capacity)
-        {
-            if (capacity < 0)
-            {
-                throw new ArgumentOutOfRangeException("capacity");
-            }
-            this.value = new char[capacity];
-            this.length = 0;
-            this.capacity = capacity;
-        }
-
         public StringBuffer(string str)
         {
             if (str == null)
@@ -151,6 +133,24 @@ namespace GameTranslator.Patches.Utils
         }
 
         /*
+        public StringBuffer()
+        {
+            this.value = new char[16];
+            this.length = 0;
+            this.capacity = 16;
+        }
+
+        public StringBuffer(int capacity)
+        {
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException("capacity");
+            }
+            this.value = new char[capacity];
+            this.length = 0;
+            this.capacity = capacity;
+        }
+        
         public StringBuffer Append(object obj)
         {
             StringBuffer stringBuffer;
@@ -433,6 +433,8 @@ namespace GameTranslator.Patches.Utils
 
         private int capacity;
 
+        /*
         private const int DEFAULT_CAPACITY = 16;
+        */
     }
 }

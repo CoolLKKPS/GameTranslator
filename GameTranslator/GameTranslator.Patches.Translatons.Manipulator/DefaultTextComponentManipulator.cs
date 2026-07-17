@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -49,6 +48,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                                 {
                                     object previousCurText = textWindow.GetType().GetField("curText", flags).GetValue(textWindow);
                                     textWindow.GetType().GetField("curText", flags).SetValue(textWindow, text);
+                                    /*
                                     DefaultTextComponentManipulator.SetCurText = delegate (object textWindowInner)
                                     {
                                         object value3 = textWindow.GetType().GetField("curText", flags).GetValue(textWindow);
@@ -62,6 +62,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                                         }
                                         DefaultTextComponentManipulator.SetCurText = null;
                                     };
+                                    */
                                     return;
                                 }
                                 CachedProperty cachedProperty = type.CachedProperty(DefaultTextComponentManipulator.TextPropertyName);
@@ -115,7 +116,15 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
         }
 
+        private static readonly string TextPropertyName = "text";
+
+        private readonly Type _type;
+
+        private readonly CachedProperty _property;
+
         /*
+        public static Action<object> SetCurText = null;
+
         private static DefaultTextComponentManipulator.TypeAndMethod GetTextPropertySetterInParent(Type type)
         {
             Type type2 = type.BaseType;
@@ -143,16 +152,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
             return null;
         }
-        */
-
-        public static Action<object> SetCurText = null;
-
-        private static readonly string TextPropertyName = "text";
-
-        private readonly Type _type;
-
-        private readonly CachedProperty _property;
-
+        
         private static Dictionary<Type, DefaultTextComponentManipulator.TypeAndMethod> _textSetters = new Dictionary<Type, DefaultTextComponentManipulator.TypeAndMethod>();
 
         private class TypeAndMethod
@@ -182,5 +182,6 @@ namespace GameTranslator.Patches.Translatons.Manipulator
 
             private FastReflectionDelegate _setterInvoker;
         }
+        */
     }
 }

@@ -1,5 +1,3 @@
-using GameTranslator.Patches.Translatons;
-using System;
 using UnityEngine;
 
 namespace GameTranslator.Patches.Utils
@@ -12,6 +10,19 @@ namespace GameTranslator.Patches.Utils
         {
             if (ui == null) return false;
             return _guiContentCheckFailed || !IsGUIContentSafe(ui);
+        }
+
+        private static bool IsGUIContentSafe(object ui)
+        {
+            try
+            {
+                return ui is GUIContent;
+            }
+            catch
+            {
+                _guiContentCheckFailed = true;
+            }
+            return false;
         }
 
         /*
@@ -73,25 +84,6 @@ namespace GameTranslator.Patches.Utils
             text = null;
             return false;
         }
-        */
-
-        private static bool IsGUIContentSafe(object ui)
-        {
-            try
-            {
-                return IsGUIContentUnsafe(ui);
-            }
-            catch
-            {
-                _guiContentCheckFailed = true;
-            }
-            return false;
-        }
-
-        private static bool IsGUIContentUnsafe(object ui)
-        {
-            return ui is GUIContent;
-        }
 
         private static bool SetTextOnGUIContentUnsafe(object ui, string text)
         {
@@ -142,5 +134,6 @@ namespace GameTranslator.Patches.Utils
                 TranslatePlugin.logger.LogError($"Error in SetTextOnComponent: {ex.Message}");
             }
         }
+        */
     }
 }

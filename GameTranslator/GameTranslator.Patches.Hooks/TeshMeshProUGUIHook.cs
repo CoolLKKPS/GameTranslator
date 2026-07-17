@@ -1,11 +1,11 @@
 using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
-using System.Reflection;
 using TMPro;
 
 namespace GameTranslator.Patches.Hooks
 {
+    /*
     internal static class TextMeshProHooks
     {
         public static readonly Type[] All = new[] {
@@ -20,6 +20,7 @@ namespace GameTranslator.Patches.Hooks
             typeof(TMP_Text_SetCharArray_Hook3)
         };
     }
+    */
 
     [HarmonyPatch(typeof(TextMeshProUGUI))]
     internal class TeshMeshProUGUIHook
@@ -48,6 +49,7 @@ namespace GameTranslator.Patches.Hooks
         */
     }
 
+    /*
     [HarmonyPatch(typeof(TextMeshPro))]
     internal class TextMeshProHook
     {
@@ -255,4 +257,5 @@ namespace GameTranslator.Patches.Hooks
             }
         }
     }
+    */
 }

@@ -1,8 +1,8 @@
 namespace GameTranslator.Patches.Translatons
 {
+    /*
     internal class ImageTranslationInfo
     {
-        /*
         public bool IsTranslated { get; set; }
 
         public XUnity.Common.Utilities.WeakReference<Texture2D> Original { get; private set; }
@@ -17,6 +17,6 @@ namespace GameTranslator.Patches.Translatons
             this.IsTranslated = false;
             this.Original = XUnity.Common.Utilities.WeakReference<Texture2D>.Create(newTexture);
         }
-        */
     }
+    */
 }

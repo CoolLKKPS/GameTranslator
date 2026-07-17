@@ -2,7 +2,6 @@ using GameTranslator.Patches.Translatons;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
@@ -248,11 +247,6 @@ namespace GameTranslator.Patches
             }
         }
 
-        private static bool HaveCmd(string name, bool useC)
-        {
-            return (useC ? TranslateConfig.cmd_zh : TranslateConfig.cmd_py).normal.ContainsKey(name);
-        }
-
         private static string GetCmd(string name, bool useC)
         {
             if (useC)
@@ -269,6 +263,11 @@ namespace GameTranslator.Patches
         }
 
         /*
+        private static bool HaveCmd(string name, bool useC)
+        {
+            return (useC ? TranslateConfig.cmd_zh : TranslateConfig.cmd_py).normal.ContainsKey(name);
+        }
+        
         private static string GetOriginByCmd(string name, bool useC)
         {
             var dict = useC ? TranslateConfig.cmd_zh.special : TranslateConfig.cmd_py.special;
@@ -276,7 +275,6 @@ namespace GameTranslator.Patches
                 return dict[name];
             return name;
         }
-        */
 
         private static T TransReflection<T>(T tIn)
         {
@@ -288,6 +286,7 @@ namespace GameTranslator.Patches
             }
             return t;
         }
+        */
 
         [HarmonyPostfix]
         [HarmonyPatch("LoadNewNode")]
@@ -373,15 +372,19 @@ namespace GameTranslator.Patches
             TerminalPatch.info.MustIgnore = true;
         }
 
-        private static FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        private static TextTranslationInfo info;
+
+        public static HashSet<object> ig = new HashSet<object>();
 
         private static int texdAdded = 0;
 
+        private static FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+
         private static FieldInfo modifyingText = typeof(Terminal).GetField("modifyingText", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
-        private static Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
-
         /*
+        private static Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
+        
         private static FieldInfo hasGottenNoun = typeof(Terminal).GetField("hasGottenNoun", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
         
         private static bool shouldTranslate = false;
@@ -389,11 +392,6 @@ namespace GameTranslator.Patches
         private static bool noText = false;
         
         private static TMP_InputField screenText = null;
-        */
-
-        private static TextTranslationInfo info;
-
-        public static HashSet<object> ig = new HashSet<object>();
 
         public class Translator
         {
@@ -487,5 +485,6 @@ namespace GameTranslator.Patches
 
             public Dictionary<string, string> keys = new Dictionary<string, string>();
         }
+        */
     }
 }

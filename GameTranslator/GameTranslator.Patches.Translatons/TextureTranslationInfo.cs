@@ -14,11 +14,13 @@ namespace GameTranslator.Patches.Translatons
 
         public Texture2D Translated { get; private set; }
 
-        public Sprite TranslatedSprite { get; set; }
-
         public bool IsTranslated { get; set; }
 
+        /*
+        public Sprite TranslatedSprite { get; set; }
+
         public bool IsDumped { get; set; }
+        */
 
         public bool UsingReplacedTexture { get; set; }
 
@@ -98,12 +100,12 @@ namespace GameTranslator.Patches.Translatons
             }
             return array;
         }
-        */
 
         public static void AddDuplicateName(string name)
         {
             TextureTranslationInfo.DuplicateTextureNames.Add(name);
         }
+        */
 
         private TextureDataResult SetupKeyForNameWithFallback(string name, Texture2D texture)
         {
@@ -131,7 +133,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     XuaLogger.AutoTranslator.Warn("Detected duplicate image name: " + name);
                     flag = true;
-                    TextureTranslationInfo.AddDuplicateName(name);
+                    // TextureTranslationInfo.AddDuplicateName(name);
                 }
             }
             else
@@ -155,10 +157,12 @@ namespace GameTranslator.Patches.Translatons
                 if (textureName != null)
                 {
                     TextureDataResult textureDataResult = this.SetupKeyForNameWithFallback(textureName, texture);
+                    /*
                     if (textureDataResult != null)
                     {
                         this._originalData = textureDataResult.Data;
                     }
+                    */
                 }
             }
         }
@@ -184,23 +188,25 @@ namespace GameTranslator.Patches.Translatons
             return new Texture2D(2, 2, newFormat, false);
         }
 
-        public static Texture2D CreateEmptyTexture2D(Texture2D texture)
-        {
-            return new Texture2D(texture.width, texture.height, texture.format, false);
-        }
-
         private static Dictionary<string, string> NameToHash = new Dictionary<string, string>();
 
         private static readonly Encoding UTF8 = new UTF8Encoding(false);
 
         private string _key;
 
-        private byte[] _originalData;
-
         private bool _initialized;
 
         private TextureFormat _textureFormat;
 
+        /*
+        public static Texture2D CreateEmptyTexture2D(Texture2D texture)
+        {
+            return new Texture2D(texture.width, texture.height, texture.format, false);
+        }
+
+        private byte[] _originalData;
+        
         public static HashSet<string> DuplicateTextureNames = new HashSet<string>();
+        */
     }
 }

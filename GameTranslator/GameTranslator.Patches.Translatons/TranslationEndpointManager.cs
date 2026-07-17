@@ -18,7 +18,7 @@ namespace GameTranslator.Patches.Translatons
         private readonly int _maxConcurrency;
         private readonly int _maxRetries;
         private readonly float _translationDelay;
-        private int _availableBatchOperations = 5;
+        // private int _availableBatchOperations = 5;
 
         public TranslationEndpointManager(int maxConcurrency = 3, int maxRetries = 3, float translationDelay = 1.0f)
         {
@@ -36,6 +36,9 @@ namespace GameTranslator.Patches.Translatons
 
         public bool HasUnstartedJob => !_unstartedJobs.IsEmpty;
 
+        public TranslationManager Manager { get; set; }
+
+        /*
         public int OngoingJobsCount => _ongoingJobs.Count;
 
         public int UnstartedJobsCount => _unstartedJobs.Count;
@@ -46,11 +49,10 @@ namespace GameTranslator.Patches.Translatons
             set => _availableBatchOperations = value;
         }
 
-        public TranslationManager Manager { get; set; }
-
         public Exception Error { get; set; }
 
         public int ConsecutiveErrors { get; set; }
+        */
 
         public bool TryGetTranslation(string key, out string value)
         {
@@ -114,7 +116,7 @@ namespace GameTranslator.Patches.Translatons
             if (!_unstartedJobs.TryRemove(jobKey, out job)) return;
 
             _ongoingJobs.TryAdd(jobKey, job);
-            Manager?.OnJobStarted(this);
+            // Manager?.OnJobStarted(this);
 
             try
             {
@@ -125,7 +127,7 @@ namespace GameTranslator.Patches.Translatons
             {
                 _concurrencyLimiter.Release();
                 _ongoingJobs.TryRemove(jobKey, out _);
-                Manager?.OnJobCompleted(this);
+                // Manager?.OnJobCompleted(this);
 
                 if (_unstartedJobs.IsEmpty)
                 {
@@ -164,6 +166,7 @@ namespace GameTranslator.Patches.Translatons
                         job.TranslatedText = null;
                         Manager?.InvokeJobCompleted(job);
                     }
+                    /*
                     else
                     {
                         if (job.RetryCount < _maxRetries)
@@ -181,6 +184,7 @@ namespace GameTranslator.Patches.Translatons
                             Manager?.InvokeJobFailed(job);
                         }
                     }
+                    */
                 }
             }
             catch (Exception ex)

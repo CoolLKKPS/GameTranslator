@@ -43,14 +43,16 @@ namespace GameTranslator.Patches.Translatons
                     this._defaultRegexes.Clear();
                     this._translations.Clear();
                     this._reverseTranslations.Clear();
-                    this._partialTranslations.Clear();
                     this._splitterRegexes.Clear();
                     this._registeredRegexes.Clear();
                     this._registeredSplitterRegexes.Clear();
                     this._failedRegexLookups.Clear();
                     this._scopedTranslations.Clear();
+                    /*
+                    this._partialTranslations.Clear();
                     this._tokenTranslations.Clear();
                     this._reverseTokenTranslations.Clear();
+                    */
                     this.LoadTranslationsInStream(this.FilePath, true);
                     this.PrecompileAndCacheRegexes();
                 }
@@ -277,18 +279,22 @@ namespace GameTranslator.Patches.Translatons
             return false;
         }
 
+        /*
         private bool IsTokenTranslation(string translation)
         {
             return this._reverseTokenTranslations.ContainsKey(translation);
         }
+        */
 
         public bool IsTranslatable(string text, bool isToken, int scope = -1)
         {
             bool flag = !this.IsTranslation(text, scope);
+            /*
             if (isToken && flag)
             {
                 flag = !this.IsTokenTranslation(text);
             }
+            */
             return flag;
         }
 
@@ -661,11 +667,13 @@ namespace GameTranslator.Patches.Translatons
 
         private ConcurrentDictionary<int, ScopedTranslationData> _scopedTranslations = new ConcurrentDictionary<int, ScopedTranslationData>();
 
+        /*
         private ConcurrentDictionary<string, string> _tokenTranslations = new ConcurrentDictionary<string, string>();
 
         private ConcurrentDictionary<string, string> _reverseTokenTranslations = new ConcurrentDictionary<string, string>();
 
         private ConcurrentDictionary<string, string> _partialTranslations = new ConcurrentDictionary<string, string>();
+        */
 
         internal class ScopedTranslationData
         {

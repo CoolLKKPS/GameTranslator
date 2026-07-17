@@ -9,12 +9,6 @@ namespace GameTranslator.Patches
     internal class HUDManagerPatcher
     {
         [HarmonyPostfix]
-        [HarmonyPatch("Start")]
-        private static void start(ref HUDManager __instance)
-        {
-        }
-
-        [HarmonyPostfix]
         [HarmonyPatch("Update")]
         private static void update(HUDManager __instance)
         {
@@ -36,6 +30,12 @@ namespace GameTranslator.Patches
         }
 
         /*
+        [HarmonyPostfix]
+        [HarmonyPatch("Start")]
+        private static void start(ref HUDManager __instance)
+        {
+        }
+        
         private static void fadeText(TextMeshProUGUI text, ref bool fade, float duration, float newAlpha)
         {
             float a = text.color.a;

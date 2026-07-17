@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
 using XUnity.Common.Constants;
 using XUnity.Common.Extensions;
 using XUnity.Common.Harmony;
@@ -356,7 +355,9 @@ namespace GameTranslator.Patches.Translatons
 
         public static TextureDataResult GetTextureData(this Texture2D texture)
         {
+            /*
             float realtimeSinceStartup = Time.realtimeSinceStartup;
+            */
             int width = texture.width;
             int height = texture.height;
             byte[] array = null;
@@ -374,8 +375,11 @@ namespace GameTranslator.Patches.Translatons
                 RenderTexture.active = ((active == temporary) ? null : active);
                 RenderTexture.ReleaseTemporary(temporary);
             }
+            /*
             float realtimeSinceStartup2 = Time.realtimeSinceStartup;
-            return new TextureDataResult(array, false, realtimeSinceStartup2 - realtimeSinceStartup);
+            // return new TextureDataResult(array, false, realtimeSinceStartup2 - realtimeSinceStartup);
+            */
+            return new TextureDataResult(array);
         }
 
         public static bool IsCompatible(this Texture2D texture, TranslateExtensions.ImageFormat dataType)
@@ -631,8 +635,6 @@ namespace GameTranslator.Patches.Translatons
 
         private static readonly Dictionary<Type, ITextComponentManipulator> Manipulators = new Dictionary<Type, ITextComponentManipulator>();
 
-        private static readonly Type TextElementType = typeof(TextElement);
-
         private static List<TranslateExtensions.IPropertyMover> TexturePropertyMovers;
 
         private static readonly string SetAllDirtyMethodName = "SetAllDirty";
@@ -656,6 +658,8 @@ namespace GameTranslator.Patches.Translatons
         public static FieldInfo m_CharactersToAddLookup = typeof(TMP_FontAsset).GetField("m_CharactersToAddLookup", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         /*
+        private static readonly Type TextElementType = typeof(TextElement);
+        
         public static FieldInfo m_AtlasPopulationMode = typeof(TMP_FontAsset).GetField("m_AtlasPopulationMode", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         public static FieldInfo m_SourceFontFile = typeof(TMP_FontAsset).GetField("m_SourceFontFile", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);

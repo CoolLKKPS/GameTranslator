@@ -9,8 +9,10 @@ namespace GameTranslator.Patches.Translatons
         {
             UI = ui;
             OriginalText = originalText;
+            /*
             SaveResult = saveResult;
             IsTranslatable = isTranslatable;
+            */
             State = TranslationJobState.Pending;
             AssociatedUIs = new List<object>();
             RetryCount = 0;
@@ -25,8 +27,11 @@ namespace GameTranslator.Patches.Translatons
         public object UI { get; set; }
         public string OriginalText { get; set; }
         public string TranslatedText { get; set; }
+        /*
         public bool SaveResult { get; private set; }
         public bool IsTranslatable { get; private set; }
+        public bool AllowFallback { get; set; } = true;
+        */
         public TranslationJobState State { get; set; }
         public string ErrorMessage { get; set; }
         public List<object> AssociatedUIs { get; set; }
@@ -34,7 +39,6 @@ namespace GameTranslator.Patches.Translatons
         public NormalTextTranslator NormalText { get; set; }
         public TranslateConfig.TranslateConfigFile Config { get; set; }
         public int RetryCount { get; set; }
-        public bool AllowFallback { get; set; } = true;
         public long StartVersion { get; set; }
         public int Scope { get; set; } = -1;
 
@@ -69,8 +73,8 @@ namespace GameTranslator.Patches.Translatons
             TranslationInfo = info;
             NormalText = normalText;
             Config = config;
-            AllowFallback = allowFallback;
-            SaveResult = SaveResult || saveResult;
+            // AllowFallback = allowFallback;
+            // SaveResult = SaveResult || saveResult;
 
             /*
             if (ui != null && !ui.IsSpammingComponent())

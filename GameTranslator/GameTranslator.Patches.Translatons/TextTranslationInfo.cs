@@ -21,13 +21,13 @@ namespace GameTranslator.Patches.Translatons
 
         public bool IsCurrentlySettingText { get; set; }
 
-        public bool IsKnownTextComponent { get; set; }
-
         public bool ShouldIgnore { get; set; }
 
         public bool MustIgnore { get; set; }
 
-        public long TextVersion { get; set; }
+        /*
+        public bool IsKnownTextComponent { get; set; }
+        */
 
         public long ChangeTime
         {
@@ -41,6 +41,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
+        /*
         public HashSet<string> RedirectedTranslations
         {
             get
@@ -53,6 +54,7 @@ namespace GameTranslator.Patches.Translatons
                 return hashSet;
             }
         }
+        */
 
         public void Init(object ui)
         {
@@ -71,7 +73,7 @@ namespace GameTranslator.Patches.Translatons
             this.TranslatedText = null;
             this.OriginalText = newText;
             this.ChangeTime = TextTranslate.ChangeTime;
-            this.TextVersion++;
+            // this.TextVersion++;
         }
 
         public void SetTranslatedText(string translatedText)
@@ -138,11 +140,11 @@ namespace GameTranslator.Patches.Translatons
         }
 
         private Action<object> _unfont;
+        
+        private HashSet<string> _redirectedTranslations;
         */
 
         private bool _initialized;
-
-        private HashSet<string> _redirectedTranslations;
 
         public long changeTime;
 
