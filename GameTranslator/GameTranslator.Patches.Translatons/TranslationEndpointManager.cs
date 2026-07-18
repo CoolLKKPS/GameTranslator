@@ -90,8 +90,10 @@ namespace GameTranslator.Patches.Translatons
                 return null;
             }
 
-            var newJob = new TranslationJob(ui, key, true, isTranslatable);
-            newJob.Scope = TranslationScopeHelper.GetScope(ui);
+            var newJob = new TranslationJob(ui, key, true, isTranslatable)
+            {
+                Scope = TranslationScopeHelper.GetScope(ui)
+            };
             newJob.Associate(key, ui, translationInfo, normalText, config, true, allowFallback);
 
             if (_unstartedJobs.TryAdd(jobKey, newJob))

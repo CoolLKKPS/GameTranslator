@@ -358,7 +358,10 @@ namespace GameTranslator.Patches.Utils
             int num2 = 0;
             this.computeLPSArray(str, num, array);
 
-            bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+            static bool IsWordChar(char c)
+            {
+                return char.IsLetterOrDigit(c) || c == '_';
+            }
 
             int i = startIndex;
             while (i < startIndex + count)
