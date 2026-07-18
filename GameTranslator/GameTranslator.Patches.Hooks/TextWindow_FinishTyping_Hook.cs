@@ -27,14 +27,14 @@ namespace GameTranslator.Patches.Hooks
             var textMesh = __instance.GetType().GetField("TextMesh", flags)?.GetValue(__instance);
             if (textMesh != null)
             {
-                TextTranslate._translatingFromFinishTyping = true;
+                TextTranslate._translatingFromFinishTyping.Add(textMesh);
                 try
                 {
                     TextTranslate.Instance.OnComponentTextChanged(textMesh);
                 }
                 finally
                 {
-                    TextTranslate._translatingFromFinishTyping = false;
+                    TextTranslate._translatingFromFinishTyping.Remove(textMesh);
                 }
             }
         }

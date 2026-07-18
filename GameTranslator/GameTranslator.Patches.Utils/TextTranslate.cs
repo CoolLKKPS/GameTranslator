@@ -15,7 +15,16 @@ namespace GameTranslator.Patches.Utils
         private static readonly TimeSpan _debugOutputInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan _cacheCleanupInterval = TimeSpan.FromMinutes(5);
         private static DateTime _lastCleanupTime = DateTime.Now;
-        internal static bool _translatingFromFinishTyping = false;
+        internal static HashSet<object> _translatingFromFinishTyping = new HashSet<object>();
+        private static object _cachedTextWindowTextMesh;
+        private static bool _textWindowTextMeshCached;
+
+        public static void ClearCache()
+        {
+            _cachedTextWindowTextMesh = null;
+            _textWindowTextMeshCached = false;
+            _translatingFromFinishTyping.Clear();
+        }
 
         public static bool ShouldOutputDebug(string text)
         {
@@ -106,13 +115,22 @@ namespace GameTranslator.Patches.Utils
             var type = ui.GetType();
             if (!UnityTypes.TextMeshPro.ClrType.IsAssignableFrom(type))
                 return false;
-            var textWindow = global::UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
-            if (textWindow == null)
-                return false;
-            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
-            var field = textWindow.GetType().GetField("TextMesh", flags);
-            var textMesh = field?.GetValue(textWindow);
-            return textMesh != null && object.Equals(textMesh, ui);
+            if (_textWindowTextMeshCached && _cachedTextWindowTextMesh is UnityEngine.Object uObj && !uObj)
+            {
+                _textWindowTextMeshCached = false;
+                _cachedTextWindowTextMesh = null;
+            }
+            if (!_textWindowTextMeshCached)
+            {
+                var textWindow = global::UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
+                if (textWindow == null)
+                    return false;
+                var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+                var field = textWindow.GetType().GetField("TextMesh", flags);
+                _cachedTextWindowTextMesh = field?.GetValue(textWindow);
+                _textWindowTextMeshCached = true;
+            }
+            return _cachedTextWindowTextMesh != null && object.Equals(_cachedTextWindowTextMesh, ui);
         }
 
         private static bool IsCallFromTextWindow()
@@ -127,7 +145,7 @@ namespace GameTranslator.Patches.Utils
             info = null;
             if (IsTerminalIgnoredUI(ui))
                 return false;
-            if (IsTextWindowTextMesh(ui) && IsCallFromTextWindow() && !_translatingFromFinishTyping)
+            if (IsTextWindowTextMesh(ui) && IsCallFromTextWindow() && !_translatingFromFinishTyping.Contains(ui))
                 return false;
             info = ui.GetOrCreateTextTranslationInfo();
             bool componentState = this.DiscoverComponent(ui, info);

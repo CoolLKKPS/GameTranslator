@@ -95,6 +95,7 @@ namespace GameTranslator
             _pollingTimer = null;
             GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
             GrabbableObjectPatcher.ClearCache();
+            GameTranslator.Patches.Utils.TextTranslate.ClearCache();
         }
 
         private static void OnDirectoryUpdated()
