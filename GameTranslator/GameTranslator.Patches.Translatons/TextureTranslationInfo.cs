@@ -35,6 +35,7 @@ namespace GameTranslator.Patches.Translatons
             this.ChangeTime = TextureTranslate.ChangeTime;
         }
 
+        // Still using for other purposes
         public static void ClearNameToHash()
         {
             NameToHash.Clear();
