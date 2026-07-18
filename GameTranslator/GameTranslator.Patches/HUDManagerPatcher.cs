@@ -8,12 +8,16 @@ namespace GameTranslator.Patches
     [HarmonyPatch(typeof(HUDManager))]
     internal class HUDManagerPatcher
     {
+        /*
         [HarmonyPostfix]
         [HarmonyPatch("Update")]
         private static void update(HUDManager __instance)
         {
             if (TranslatePlugin.shouldTranslateHUD.Value)
             {
+                if (__instance.chatText.ShouldIgnoreTextComponent())
+                    return;
+
                 string currentChatText = __instance.chatText.text;
 
                 if (HUDManagerPatcher.lastChat.Length != currentChatText.Length)
@@ -29,7 +33,6 @@ namespace GameTranslator.Patches
             }
         }
 
-        /*
         [HarmonyPostfix]
         [HarmonyPatch("Start")]
         private static void start(ref HUDManager __instance)
@@ -71,15 +74,7 @@ namespace GameTranslator.Patches
             }
             try
             {
-                string text = chatText.text;
-                if (!string.IsNullOrEmpty(text))
-                {
-                    string text2 = TranslateConfig.hudText.TryTranslate(text, TranslationScopeHelper.GetScope(__instance));
-                    if (!string.IsNullOrEmpty(text2) && !text2.Equals(text))
-                    {
-                        chatText.text = text2;
-                    }
-                }
+                TextTranslate.Instance.OnComponentTextChanged(chatText);
             }
             catch (Exception ex)
             {
@@ -87,34 +82,54 @@ namespace GameTranslator.Patches
             }
         }
 
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         [HarmonyPatch("DisplayTip")]
-        [HarmonyPriority(2147483647)]
-        private static bool changeTip(HUDManager __instance, ref string headerText, ref string bodyText, bool isWarning = false, bool useSave = false, string prefsKey = "LC_Tip1")
+        private static void changeTip(HUDManager __instance)
         {
-            if (TranslatePlugin.shouldTranslateHUD.Value)
+            if (!TranslatePlugin.shouldTranslateHUD.Value)
             {
-                headerText = TranslateConfig.hudText.TryTranslate(headerText, TranslationScopeHelper.GetScope(__instance));
-                bodyText = TranslateConfig.hudText.TryTranslate(bodyText, TranslationScopeHelper.GetScope(__instance));
+                return;
             }
-            return true;
+            if (__instance == null || __instance.Equals(null))
+            {
+                return;
+            }
+            try
+            {
+                TextTranslate.Instance.OnComponentTextChanged(__instance.tipsPanelHeader);
+                TextTranslate.Instance.OnComponentTextChanged(__instance.tipsPanelBody);
+            }
+            catch (Exception ex)
+            {
+                TranslatePlugin.logger.LogError("Error in changeTip: " + ex.Message);
+            }
         }
 
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         [HarmonyPatch("DisplayGlobalNotification")]
-        [HarmonyPriority(2147483647)]
-        private static bool changeNotification(HUDManager __instance, ref string displayText)
+        private static void changeNotification(HUDManager __instance)
         {
-            if (TranslatePlugin.shouldTranslateHUD.Value)
+            if (!TranslatePlugin.shouldTranslateHUD.Value)
             {
-                displayText = TranslateConfig.hudText.TryTranslate(displayText, TranslationScopeHelper.GetScope(__instance));
+                return;
             }
-            return true;
+            if (__instance == null || __instance.Equals(null))
+            {
+                return;
+            }
+            try
+            {
+                TextTranslate.Instance.OnComponentTextChanged(__instance.globalNotificationText);
+            }
+            catch (Exception ex)
+            {
+                TranslatePlugin.logger.LogError("Error in changeNotification: " + ex.Message);
+            }
         }
-
-        private static string lastChat = "";
 
         /*
+        private static string lastChat = "";
+
         public static FieldInfo scanNodes = typeof(HUDManager).GetField("scanNodes", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
         public static FieldInfo nodesOnScreen = typeof(HUDManager).GetField("nodesOnScreen", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);

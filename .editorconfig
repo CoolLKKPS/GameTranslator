@@ -1,7 +1,7 @@
 root = true
 
 [*.cs]
-dotnet_analyzer_diagnostic.category-Style.severity = none
+dotnet_analyzer_diagnostic.category-Style.severity = Warning
 
 tab_width = 4
 indent_style = space

@@ -150,6 +150,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.GuiContentHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProUGUIHook),
+                typeof(GameTranslator.Patches.Hooks.TextWindow_FinishTyping_Hook),
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextMeshHook),

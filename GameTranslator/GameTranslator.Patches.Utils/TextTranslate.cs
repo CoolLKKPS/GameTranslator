@@ -3,7 +3,9 @@ using BepInEx.Logging;
 using GameTranslator.Patches.Translatons;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using XUnity.Common.Constants;
 
 namespace GameTranslator.Patches.Utils
 {
@@ -13,6 +15,7 @@ namespace GameTranslator.Patches.Utils
         private static readonly TimeSpan _debugOutputInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan _cacheCleanupInterval = TimeSpan.FromMinutes(5);
         private static DateTime _lastCleanupTime = DateTime.Now;
+        internal static bool _translatingFromFinishTyping = false;
 
         public static bool ShouldOutputDebug(string text)
         {
@@ -96,11 +99,35 @@ namespace GameTranslator.Patches.Utils
             return false;
         }
 
+        private static bool IsTextWindowTextMesh(object ui)
+        {
+            if (UnityTypes.TextWindow == null || UnityTypes.TextMeshPro == null)
+                return false;
+            var type = ui.GetType();
+            if (!UnityTypes.TextMeshPro.ClrType.IsAssignableFrom(type))
+                return false;
+            var textWindow = global::UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
+            if (textWindow == null)
+                return false;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+            var field = textWindow.GetType().GetField("TextMesh", flags);
+            var textMesh = field?.GetValue(textWindow);
+            return textMesh != null && object.Equals(textMesh, ui);
+        }
+
+        private static bool IsCallFromTextWindow()
+        {
+            return new System.Diagnostics.StackTrace().GetFrames().Any(
+                x => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType);
+        }
+
         private bool TryTranslateChangedText(object ui, ref string text, out string translated, out TextTranslationInfo info)
         {
             translated = null;
             info = null;
             if (IsTerminalIgnoredUI(ui))
+                return false;
+            if (IsTextWindowTextMesh(ui) && IsCallFromTextWindow() && !_translatingFromFinishTyping)
                 return false;
             info = ui.GetOrCreateTextTranslationInfo();
             bool componentState = this.DiscoverComponent(ui, info);

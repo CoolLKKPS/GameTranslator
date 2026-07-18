@@ -1,6 +1,4 @@
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using XUnity.Common.Constants;
 using XUnity.Common.Utilities;
@@ -44,11 +42,11 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                             object obj = ((field != null) ? field.GetValue(textWindow) : null);
                             if (obj != null && object.Equals(obj, ui))
                             {
+                                /*
                                 if (new StackTrace().GetFrames().Any((StackFrame x) => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType))
                                 {
                                     object previousCurText = textWindow.GetType().GetField("curText", flags).GetValue(textWindow);
                                     textWindow.GetType().GetField("curText", flags).SetValue(textWindow, text);
-                                    /*
                                     DefaultTextComponentManipulator.SetCurText = delegate (object textWindowInner)
                                     {
                                         object value3 = textWindow.GetType().GetField("curText", flags).GetValue(textWindow);
@@ -62,9 +60,9 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                                         }
                                         DefaultTextComponentManipulator.SetCurText = null;
                                     };
-                                    */
                                     return;
                                 }
+                                */
                                 CachedProperty cachedProperty = type.CachedProperty(DefaultTextComponentManipulator.TextPropertyName);
                                 if (cachedProperty != null)
                                 {
