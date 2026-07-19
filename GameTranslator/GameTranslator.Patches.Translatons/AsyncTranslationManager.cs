@@ -325,11 +325,21 @@ namespace GameTranslator.Patches.Translatons
                 _immediatelyTranslating.TryRemove(immKey, out _);
                 if (!string.IsNullOrEmpty(job.TranslatedText))
                 {
+                    string final = job.TranslatedText;
+                    if ((object.ReferenceEquals(job.Config, TranslateConfig.text) || object.ReferenceEquals(job.Config, TranslateConfig.hud)) && job.Config.shouldTranslate && job.Config.normal.Count > 0)
+                    {
+                        StringBuffer buffer = new StringBuffer(job.TranslatedText);
+                        foreach (var kv in job.Config._normalOrdered)
+                        {
+                            buffer.ReplaceFull(kv.Key, kv.Value);
+                        }
+                        final = buffer.ToString();
+                    }
                     foreach (var ui in job.AssociatedUIs)
                     {
                         if (TextTranslate.IsUIObjectValid(ui))
                         {
-                            _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, job.TranslatedText, job.OriginalText, job.TranslationInfo, job.StartVersion));
+                            _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, final, job.OriginalText, job.TranslationInfo, job.StartVersion));
                         }
                     }
                     if (_pendingStabilizationUIs.TryRemove(immKey, out var pendingSet))
@@ -338,12 +348,12 @@ namespace GameTranslator.Patches.Translatons
                         {
                             if (TextTranslate.IsUIObjectValid(kvp.Key))
                             {
-                                _mainThreadActions.Enqueue(() => SafeUpdateUI(kvp.Key, job.TranslatedText, job.OriginalText, job.TranslationInfo, job.StartVersion));
+                                _mainThreadActions.Enqueue(() => SafeUpdateUI(kvp.Key, final, job.OriginalText, job.TranslationInfo, job.StartVersion));
                             }
                         }
                     }
                     string cacheKey = TranslationEndpointManager.GetCacheKey(job.OriginalText, job.Config, job.Scope);
-                    _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, job.TranslatedText);
+                    _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, final);
                 }
             }
             catch (Exception ex)

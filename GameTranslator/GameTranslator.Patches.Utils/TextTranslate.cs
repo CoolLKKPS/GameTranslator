@@ -381,6 +381,7 @@ namespace GameTranslator.Patches.Utils
             }
 
             string text3 = null;
+            bool fallbackUsed = false;
             if ((normalText == null || normalText.IsTranslatable(text, false, TranslationScopeHelper.GetScope(ui))) && (ignoreComponentState || ui.IsComponentActive()))
             {
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
@@ -392,9 +393,16 @@ namespace GameTranslator.Patches.Utils
                     int scope = TranslationScopeHelper.GetScope(ui);
                     text3 = normalText.TryTranslate(text, scope);
                 }
+                if (text3 == null && config.shouldTranslate && config.normal.Count > 0 && (object.ReferenceEquals(config, TranslateConfig.text) || object.ReferenceEquals(config, TranslateConfig.hud)))
+                {
+                    text3 = text;
+                    fallbackUsed = true;
+                }
                 if (text3 != null)
                 {
-                    if (!normalText.IsScopedTranslation(text, TranslationScopeHelper.GetScope(ui)) && config.shouldTranslate && config.normal.Count > 0)
+                    var configTranslator = TranslateConfig.GetModuleTranslator(config);
+                    bool sameSource = configTranslator != null && object.ReferenceEquals(normalText, configTranslator);
+                    if ((fallbackUsed || !sameSource) && !normalText.IsScopedTranslation(text, TranslationScopeHelper.GetScope(ui)) && config.shouldTranslate && config.normal.Count > 0)
                     {
                         StringBuffer buffer = new StringBuffer(text3);
                         foreach (KeyValuePair<string, string> kv in config._normalOrdered)

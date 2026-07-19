@@ -263,7 +263,7 @@ namespace GameTranslator
             return text5;
         }
 
-        private static NormalTextTranslator GetModuleTranslator(TranslateConfig.TranslateConfigFile file)
+        internal static NormalTextTranslator GetModuleTranslator(TranslateConfig.TranslateConfigFile file)
         {
             if (file == TranslateConfig.normal)
             {
