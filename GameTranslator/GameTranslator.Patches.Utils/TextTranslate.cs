@@ -164,10 +164,12 @@ namespace GameTranslator.Patches.Utils
             if (!_typingCache.TryGetValue(ui, out var cached) || cached.original != fullText)
             {
                 var info = ui.GetOrCreateTextTranslationInfo();
-                string t = Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.text, false);
+                var config = TranslateConfig.text;
+                string t = Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, config, false);
                 if (string.IsNullOrEmpty(t))
-                    t = Instance.TranslateOrQueue(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.text, false);
-                if (string.IsNullOrEmpty(t))
+                    t = Instance.TranslateOrQueue(ui, fullText, info, TranslateConfig.normalText, config, false);
+                t = Instance.ApplyPostTranslation(t, fullText, info, TranslateConfig.normalText, config);
+                if (string.IsNullOrEmpty(t) || t == fullText)
                     return null;
                 cached = (fullText, t);
                 _typingCache[ui] = cached;
@@ -216,6 +218,7 @@ namespace GameTranslator.Patches.Utils
             if (text == null)
                 text = ui.GetText(info);
             translated = this.TranslateOrQueue(ui, text, info, normalText, config, componentState);
+            translated = ApplyPostTranslation(translated, text, info, normalText, config);
             return !string.IsNullOrEmpty(translated) && !translated.Equals(text) && IsUIObjectValid(ui);
         }
 
@@ -381,7 +384,6 @@ namespace GameTranslator.Patches.Utils
             }
 
             string text3 = null;
-            bool fallbackUsed = false;
             if ((normalText == null || normalText.IsTranslatable(text, false, TranslationScopeHelper.GetScope(ui))) && (ignoreComponentState || ui.IsComponentActive()))
             {
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
@@ -393,32 +395,47 @@ namespace GameTranslator.Patches.Utils
                     int scope = TranslationScopeHelper.GetScope(ui);
                     text3 = normalText.TryTranslate(text, scope);
                 }
-                if (text3 == null && config.shouldTranslate && config.normal.Count > 0 && (object.ReferenceEquals(config, TranslateConfig.text) || object.ReferenceEquals(config, TranslateConfig.hud)))
+                if (text3 != null && info != null)
                 {
-                    text3 = text;
-                    fallbackUsed = true;
-                }
-                if (text3 != null)
-                {
-                    var configTranslator = TranslateConfig.GetModuleTranslator(config);
-                    bool sameSource = configTranslator != null && object.ReferenceEquals(normalText, configTranslator);
-                    if ((fallbackUsed || !sameSource) && !normalText.IsScopedTranslation(text, TranslationScopeHelper.GetScope(ui)) && config.shouldTranslate && config.normal.Count > 0)
-                    {
-                        StringBuffer buffer = new StringBuffer(text3);
-                        foreach (KeyValuePair<string, string> kv in config._normalOrdered)
-                        {
-                            buffer.ReplaceFull(kv.Key, kv.Value);
-                        }
-                        text3 = buffer.ToString();
-                    }
-                    if (info != null)
-                    {
-                        info.OriginalText = text;
-                        info.SetTranslatedText(text3);
-                    }
+                    info.OriginalText = text;
+                    info.SetTranslatedText(text3);
                 }
             }
             return text3;
+        }
+
+        internal static string ApplyReplaceFull(string text, TranslateConfig.TranslateConfigFile config)
+        {
+            if (!config.shouldTranslate || config.normal.Count == 0 || string.IsNullOrEmpty(text))
+                return text;
+            StringBuffer buffer = new StringBuffer(text);
+            foreach (KeyValuePair<string, string> kv in config._normalOrdered)
+            {
+                buffer.ReplaceFull(kv.Key, kv.Value);
+            }
+            return buffer.ToString();
+        }
+
+        private string ApplyPostTranslation(string translated, string original, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
+        {
+            if (config == null || !config.shouldTranslate || config.normal.Count == 0)
+                return translated;
+
+            if (object.ReferenceEquals(config, TranslateConfig.text))
+            {
+                translated = ApplyReplaceFull(translated ?? original, config);
+            }
+            else if (object.ReferenceEquals(config, TranslateConfig.hud) && translated == null)
+            {
+                translated = ApplyReplaceFull(original, config);
+            }
+
+            if (translated != null && info != null && !translated.Equals(original))
+            {
+                info.OriginalText = original;
+                info.SetTranslatedText(translated);
+            }
+            return translated;
         }
 
         internal void SetTranslatedText(object ui, string translatedText, string originalText, TextTranslationInfo info)

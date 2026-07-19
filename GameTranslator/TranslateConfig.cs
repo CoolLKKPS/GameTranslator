@@ -488,14 +488,6 @@ namespace GameTranslator
                 }
             }
 
-            /*
-            public void Log(string text)
-            {
-                this.logs.Add(text);
-                File.WriteAllLines(this.ConfigFilePath, this.logs);
-            }
-            */
-
             public void Save()
             {
                 string directoryName = Path.GetDirectoryName(this.ConfigFilePath);
@@ -580,10 +572,6 @@ namespace GameTranslator
             internal int shouldTranslateMinLength = 300;    // Still using for other purposes
 
             internal int shouldTranslateMaxLength;          // Still using for other purposes
-
-            /*
-            private List<string> logs = new List<string>();
-            */
 
             private void GetNormalOrderedByLength(Dictionary<string, int> lineOrder)
             {
