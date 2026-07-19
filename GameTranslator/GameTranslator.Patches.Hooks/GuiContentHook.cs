@@ -19,21 +19,21 @@ namespace GameTranslator.Patches.Hooks
         })]
         public static void Init(ref GUIContent __instance, ref string text, Texture image, string tooltip)
         {
-            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, __instance, ref text, null, TranslateConfig.gui);
+            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, __instance, ref text, TranslateConfig.guiText, TranslateConfig.gui);
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("text", MethodType.Setter)]
         public static void Change(ref GUIContent __instance, ref string value)
         {
-            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, __instance, ref value, null, TranslateConfig.gui);
+            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, __instance, ref value, TranslateConfig.guiText, TranslateConfig.gui);
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("Temp", new Type[] { typeof(string) })]
         public static void Temp(ref string t)
         {
-            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, (GUIContent)GuiContentHook.s_Text.GetValue(typeof(GUIContent)), ref t, null, TranslateConfig.gui);
+            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, (GUIContent)GuiContentHook.s_Text.GetValue(typeof(GUIContent)), ref t, TranslateConfig.guiText, TranslateConfig.gui);
         }
 
         [HarmonyPrefix]
@@ -44,7 +44,7 @@ namespace GameTranslator.Patches.Hooks
         })]
         public static void Temp(ref string t, string tooltip)
         {
-            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, (GUIContent)GuiContentHook.s_Text.GetValue(typeof(GUIContent)), ref t, null, TranslateConfig.gui);
+            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, (GUIContent)GuiContentHook.s_Text.GetValue(typeof(GUIContent)), ref t, TranslateConfig.guiText, TranslateConfig.gui);
         }
 
         [HarmonyPrefix]
@@ -55,7 +55,7 @@ namespace GameTranslator.Patches.Hooks
         })]
         public static void Temp(ref string t, Texture i)
         {
-            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, (GUIContent)GuiContentHook.s_TextImage.GetValue(typeof(GUIContent)), ref t, null, TranslateConfig.gui);
+            GuiContentHook.Hook_TextChanged(TextTranslate.Instance, (GUIContent)GuiContentHook.s_TextImage.GetValue(typeof(GUIContent)), ref t, TranslateConfig.guiText, TranslateConfig.gui);
         }
 
         [HarmonyPrefix]
@@ -64,7 +64,7 @@ namespace GameTranslator.Patches.Hooks
         {
             for (int i = 0; i < texts.Length; i++)
             {
-                GuiContentHook.Hook_TextChanged(TextTranslate.Instance, (GUIContent)GuiContentHook.s_Text.GetValue(typeof(GUIContent)), ref texts[i], null, TranslateConfig.gui);
+                GuiContentHook.Hook_TextChanged(TextTranslate.Instance, (GUIContent)GuiContentHook.s_Text.GetValue(typeof(GUIContent)), ref texts[i], TranslateConfig.guiText, TranslateConfig.gui);
             }
         }
 
@@ -86,7 +86,11 @@ namespace GameTranslator.Patches.Hooks
                 {
                     TextTranslationInfo orCreateTextTranslationInfo = ui.GetOrCreateTextTranslationInfo();
                     bool flag = textTranslate.DiscoverComponent(ui, orCreateTextTranslationInfo);
-                    value = textTranslate.TranslateOrQueue(ui, value, orCreateTextTranslationInfo, normalText, config, flag);
+                    var translatedText = textTranslate.TranslateOrQueue(ui, value, orCreateTextTranslationInfo, normalText, config, flag);
+                    if (translatedText != null)
+                    {
+                        value = translatedText;
+                    }
                 }
             }
         }

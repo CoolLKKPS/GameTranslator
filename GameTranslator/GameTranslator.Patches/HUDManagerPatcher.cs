@@ -74,7 +74,7 @@ namespace GameTranslator.Patches
             }
             try
             {
-                TextTranslate.Instance.OnComponentTextChanged(chatText);
+                TextTranslate.Instance.OnComponentTextChanged(chatText, TranslateConfig.hudText, TranslateConfig.hud);
             }
             catch (Exception ex)
             {
@@ -96,8 +96,8 @@ namespace GameTranslator.Patches
             }
             try
             {
-                TextTranslate.Instance.OnComponentTextChanged(__instance.tipsPanelHeader);
-                TextTranslate.Instance.OnComponentTextChanged(__instance.tipsPanelBody);
+                TextTranslate.Instance.OnComponentTextChanged(__instance.tipsPanelHeader, TranslateConfig.hudText, TranslateConfig.hud);
+                TextTranslate.Instance.OnComponentTextChanged(__instance.tipsPanelBody, TranslateConfig.hudText, TranslateConfig.hud);
             }
             catch (Exception ex)
             {
@@ -119,7 +119,7 @@ namespace GameTranslator.Patches
             }
             try
             {
-                TextTranslate.Instance.OnComponentTextChanged(__instance.globalNotificationText);
+                TextTranslate.Instance.OnComponentTextChanged(__instance.globalNotificationText, TranslateConfig.hudText, TranslateConfig.hud);
             }
             catch (Exception ex)
             {

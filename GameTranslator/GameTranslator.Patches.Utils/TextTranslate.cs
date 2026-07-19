@@ -17,13 +17,18 @@ namespace GameTranslator.Patches.Utils
         private static DateTime _lastCleanupTime = DateTime.Now;
         internal static HashSet<object> _translatingFromFinishTyping = new HashSet<object>();
         private static object _cachedTextWindowTextMesh;
+        private static object _cachedTextWindow;
         private static bool _textWindowTextMeshCached;
+        private static Dictionary<object, (string original, string translated)> _typingCache = new Dictionary<object, (string, string)>();
+        internal static bool EnableTypingTranslation = false;
 
         public static void ClearCache()
         {
             _cachedTextWindowTextMesh = null;
+            _cachedTextWindow = null;
             _textWindowTextMeshCached = false;
             _translatingFromFinishTyping.Clear();
+            _typingCache.Clear();
         }
 
         public static bool ShouldOutputDebug(string text)
@@ -115,16 +120,21 @@ namespace GameTranslator.Patches.Utils
             var type = ui.GetType();
             if (!UnityTypes.TextMeshPro.ClrType.IsAssignableFrom(type))
                 return false;
-            if (_textWindowTextMeshCached && _cachedTextWindowTextMesh is UnityEngine.Object uObj && !uObj)
+            if (_textWindowTextMeshCached &&
+                (_cachedTextWindowTextMesh == null ||
+                 (_cachedTextWindowTextMesh is UnityEngine.Object uObj1 && !uObj1) ||
+                 (_cachedTextWindow is UnityEngine.Object uObj2 && !uObj2)))
             {
                 _textWindowTextMeshCached = false;
                 _cachedTextWindowTextMesh = null;
+                _cachedTextWindow = null;
             }
             if (!_textWindowTextMeshCached)
             {
                 var textWindow = global::UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
                 if (textWindow == null)
                     return false;
+                _cachedTextWindow = textWindow;
                 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
                 var field = textWindow.GetType().GetField("TextMesh", flags);
                 _cachedTextWindowTextMesh = field?.GetValue(textWindow);
@@ -139,28 +149,80 @@ namespace GameTranslator.Patches.Utils
                 x => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType);
         }
 
-        private bool TryTranslateChangedText(object ui, ref string text, out string translated, out TextTranslationInfo info)
+        private static string GetPartialTypingTranslation(object ui, string currentPartialText)
         {
+            if (UnityTypes.TextWindow == null || _cachedTextWindow == null)
+                return null;
+            var textWindow = _cachedTextWindow;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+            string fullText = textWindow.GetType().GetField("curText", flags)?.GetValue(textWindow) as string;
+            if (string.IsNullOrEmpty(fullText) || string.IsNullOrEmpty(currentPartialText))
+                return null;
+
+            if (!_typingCache.TryGetValue(ui, out var cached) || cached.original != fullText)
+            {
+                var info = ui.GetOrCreateTextTranslationInfo();
+                string t = Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.text, false);
+                if (string.IsNullOrEmpty(t))
+                    t = Instance.TranslateOrQueue(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.text, false);
+                if (string.IsNullOrEmpty(t))
+                    return null;
+                cached = (fullText, t);
+                _typingCache[ui] = cached;
+            }
+
+            float progress = (float)currentPartialText.Length / fullText.Length;
+            int len = (int)System.Math.Ceiling(cached.translated.Length * progress);
+            if (len > cached.translated.Length)
+                len = cached.translated.Length;
+            if (len <= 0)
+                len = 1;
+            return cached.translated.Substring(0, len);
+        }
+
+        internal static void ClearTypingCacheForUI(object ui)
+        {
+            _typingCache.Remove(ui);
+        }
+
+        private bool TryTranslateChangedText(object ui, ref string text, out string translated, out TextTranslationInfo info,
+            NormalTextTranslator normalText = null, TranslateConfig.TranslateConfigFile config = null)
+        {
+            normalText = normalText ?? TranslateConfig.normalText;
+            config = config ?? TranslateConfig.text;
             translated = null;
             info = null;
             if (IsTerminalIgnoredUI(ui))
                 return false;
-            if (IsTextWindowTextMesh(ui) && IsCallFromTextWindow() && !_translatingFromFinishTyping.Contains(ui))
-                return false;
+            if (IsTextWindowTextMesh(ui) && IsCallFromTextWindow())
+            {
+                if (!_translatingFromFinishTyping.Contains(ui))
+                {
+                    if (EnableTypingTranslation)
+                    {
+                        translated = GetPartialTypingTranslation(ui, text);
+                        if (translated != null)
+                            return true;
+                    }
+                    return false;
+                }
+            }
             info = ui.GetOrCreateTextTranslationInfo();
             bool componentState = this.DiscoverComponent(ui, info);
             if (!TranslatePlugin.shouldTranslateSpecialText.Value && !TranslatePlugin.shouldTranslateNormalText.Value)
                 return false;
             if (text == null)
                 text = ui.GetText(info);
-            translated = this.TranslateOrQueue(ui, text, info, TranslateConfig.normalText, TranslateConfig.text, componentState);
+            translated = this.TranslateOrQueue(ui, text, info, normalText, config, componentState);
             return !string.IsNullOrEmpty(translated) && !translated.Equals(text) && IsUIObjectValid(ui);
         }
 
-        internal void OnComponentTextChanged(object ui)
+        internal void OnComponentTextChanged(object ui, NormalTextTranslator normalText = null, TranslateConfig.TranslateConfigFile config = null)
         {
+            normalText = normalText ?? TranslateConfig.normalText;
+            config = config ?? TranslateConfig.text;
             string currentText = null;
-            if (TryTranslateChangedText(ui, ref currentText, out var translated, out var info))
+            if (TryTranslateChangedText(ui, ref currentText, out var translated, out var info, normalText, config))
             {
                 this.SetText(ui, translated, true, currentText, info);
             }

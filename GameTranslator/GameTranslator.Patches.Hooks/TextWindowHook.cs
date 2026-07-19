@@ -8,7 +8,7 @@ using XUnity.Common.Harmony;
 namespace GameTranslator.Patches.Hooks
 {
     [HarmonyPatch]
-    internal static class TextWindow_FinishTyping_Hook
+    internal static class TextWindowHook
     {
         static bool Prepare()
         {
@@ -30,6 +30,7 @@ namespace GameTranslator.Patches.Hooks
                 TextTranslate._translatingFromFinishTyping.Add(textMesh);
                 try
                 {
+                    TextTranslate.ClearTypingCacheForUI(textMesh);
                     TextTranslate.Instance.OnComponentTextChanged(textMesh);
                 }
                 finally
