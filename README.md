@@ -9,13 +9,12 @@ Notice: You need to place your localization content according to the methods req
  - Once you run the game with this plugin, you will see this plugin create something inside your config folder, for advance user please read "GameTranslator.cfg" before using
  - translations folder store all language folders that user defined, default to use "Default" language folder, you need to place font files and texture folder inside the language folder
  - "Normal-Translate.cfg" works just like AutoTranslator, you can import some translate files content in here
- - "HUD-Translate.cfg" is for HUDManager
+ - "SpecialText-Translate.cfg" after Normal-Translate, when this module find the key and no matter where, it will just translate
+ - "HUD-Translate.cfg" is for HUDManager chattext
  - "Terminal-Translate.cfg" and "GuiText-Translate.cfg" both have special use
  - "Item-Translate.cfg" will directly replace GrabbableObject name
- - "SpecialText-Translate.cfg" is for other special cases
  - The above 6 translation files regex rules are independent of each other
- - "CMD-PY-Translate.cfg" stores most terminal shortcut commands, for example "transmit=tm" means you only just need to type "tm" and words in your terminal to send a transmit
- - "CMD-ZH-Translate.cfg" are use to store some terminal shortcut commands but contain non-english characters; The actual function is still to establish a shortcut, but it is recommended to store non-English characters
+ - "CMD-ZH-Translate.cfg" and "CMD-PY-Translate.cfg" can define terminal shortcut commands, for example "transmit=tm" means you only just need to type "tm" and words in your terminal to send a transmit
 
 ## Contact
 

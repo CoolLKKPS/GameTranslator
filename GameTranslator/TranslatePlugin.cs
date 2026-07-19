@@ -100,8 +100,8 @@ namespace GameTranslator
             TranslatePlugin.shouldTranslateSpecialText = base.Config.Bind<bool>("General", "Translate Special Text", false, "Define whether to use SpecialText Translate method");
             TranslatePlugin.shouldTranslateTerimal = base.Config.Bind<bool>("General", "Translate Terminal", false, "Define whether translate Terminal");
             TranslatePlugin.shouldTranslateInteractiveTerminalAPI = base.Config.Bind<bool>("General", "Translate InteractiveTerminalAPI", false, "Define whether translate InteractiveTerminalAPI");
-            TranslatePlugin.TerimalCanUseChinese = base.Config.Bind<bool>("General", "Terminal Can Use Non-English Shortcut Commands", false, "Define whether the terminal can use non-English shortcut commands, such as Chinese");
-            TranslatePlugin.TerimalCanUsePinyinAbbreviation = base.Config.Bind<bool>("General", "Terminal Can Use Custom Shortcut Commands", false, "Define whether the terminal can use custom shortcut commands");
+            TranslatePlugin.TerimalCanUseShortCutOne = base.Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category ZH", false, "Define whether the terminal can use category ZH shortcut commands");
+            TranslatePlugin.TerimalCanUseShortCutTwo = base.Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category PY", false, "Define whether the terminal can use category PY shortcut commands");
             TranslatePlugin.shouldTranslateGui = base.Config.Bind<bool>("General", "Translate Gui", false, "Define whether translate Gui");
             TranslatePlugin.shouldTranslateItems = base.Config.Bind<bool>("General", "Translate Items", false, "Define whether translate Items");
             TranslatePlugin.shouldTranslateHUD = base.Config.Bind<bool>("General", "Translate HUD", false, "Define whether translate HUD");
@@ -335,7 +335,7 @@ namespace GameTranslator
 
         internal const string PLUGIN_NAME = "GameTranslator";
 
-        internal const string PLUGIN_VERSION = "2.2.1";
+        internal const string PLUGIN_VERSION = "2.2.2";
 
         internal const string PLUGIN_VERSION_FULL = PLUGIN_VERSION + ".0";
 
@@ -383,9 +383,9 @@ namespace GameTranslator
 
         public static ConfigEntry<bool> shouldTranslateInteractiveTerminalAPI;
 
-        public static ConfigEntry<bool> TerimalCanUseChinese;
+        public static ConfigEntry<bool> TerimalCanUseShortCutOne;
 
-        public static ConfigEntry<bool> TerimalCanUsePinyinAbbreviation;
+        public static ConfigEntry<bool> TerimalCanUseShortCutTwo;
 
         public static ConfigEntry<bool> shouldTranslateGui;
 

@@ -128,7 +128,7 @@ namespace GameTranslator.Patches
         [HarmonyPatch("ParseWord")]
         private static void ParseWord(Terminal __instance, string playerWord, int specificityRequired, ref TerminalKeyword __result)
         {
-            if (TranslatePlugin.TerimalCanUseChinese.Value || TranslatePlugin.TerimalCanUsePinyinAbbreviation.Value)
+            if (TranslatePlugin.TerimalCanUseShortCutOne.Value || TranslatePlugin.TerimalCanUseShortCutTwo.Value)
             {
                 if (playerWord.Length < specificityRequired)
                 {
@@ -167,12 +167,13 @@ namespace GameTranslator.Patches
             }
         }
 
+        // Lethal Company Special Terminal Commands
         [HarmonyPostfix]
         [HarmonyPatch("ParsePlayerSentence")]
         private static void customParser(Terminal __instance, ref TerminalNode __result)
         {
             string[] array = TerminalPatch.RemovePunctuation(__instance.screenText.text.Substring(__instance.screenText.text.Length - __instance.textAdded)).Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
-            if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseChinese.Value && TranslateConfig.cmd_zh.normal.ContainsKey("transmit") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["transmit"])) || (TranslatePlugin.TerimalCanUsePinyinAbbreviation.Value && TranslateConfig.cmd_py.normal.ContainsKey("transmit") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["transmit"]))))
+            if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey("transmit") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["transmit"])) || (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey("transmit") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["transmit"]))))
             {
                 try
                 {
@@ -195,7 +196,7 @@ namespace GameTranslator.Patches
                     return;
                 }
             }
-            if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseChinese.Value && TranslateConfig.cmd_zh.normal.ContainsKey("switch") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["switch"])) || (TranslatePlugin.TerimalCanUsePinyinAbbreviation.Value && TranslateConfig.cmd_py.normal.ContainsKey("switch") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["switch"]))))
+            if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey("switch") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["switch"])) || (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey("switch") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["switch"]))))
             {
                 int num = TerminalPatch.CheckForPlayerNameCommand(array[0], array[1]);
                 if (num != -1)
@@ -205,7 +206,7 @@ namespace GameTranslator.Patches
                     return;
                 }
             }
-            else if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseChinese.Value && TranslateConfig.cmd_zh.normal.ContainsKey("ping") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["ping"])) || (TranslatePlugin.TerimalCanUsePinyinAbbreviation.Value && TranslateConfig.cmd_py.normal.ContainsKey("ping") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["ping"]))))
+            else if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey("ping") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["ping"])) || (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey("ping") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["ping"]))))
             {
                 int num2 = TerminalPatch.CheckForPlayerNameCommand(array[0], array[1]);
                 if (num2 != -1)
@@ -215,7 +216,7 @@ namespace GameTranslator.Patches
                     return;
                 }
             }
-            else if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseChinese.Value && TranslateConfig.cmd_zh.normal.ContainsKey("flash") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["flash"])) || (TranslatePlugin.TerimalCanUsePinyinAbbreviation.Value && TranslateConfig.cmd_py.normal.ContainsKey("flash") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["flash"]))))
+            else if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey("flash") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["flash"])) || (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey("flash") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["flash"]))))
             {
                 int num3 = TerminalPatch.CheckForPlayerNameCommand(array[0], array[1]);
                 if (num3 != -1)
@@ -236,12 +237,12 @@ namespace GameTranslator.Patches
         {
             if (useC)
             {
-                if (TranslatePlugin.TerimalCanUseChinese.Value && TranslateConfig.cmd_zh.normal.ContainsKey(name))
+                if (TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey(name))
                     return TranslateConfig.cmd_zh.normal[name];
             }
             else
             {
-                if (TranslatePlugin.TerimalCanUsePinyinAbbreviation.Value && TranslateConfig.cmd_py.normal.ContainsKey(name))
+                if (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey(name))
                     return TranslateConfig.cmd_py.normal[name];
             }
             return "";

@@ -1,3 +1,10 @@
+## v2.2.2
+
+- Made some fixes for HUD and GUI translate
+- Rework Readme
+- Added TextWindowHook basic patch
+- [Config] ShortCutCommand config name changed, setting will be reset to default value, but won't affect old config
+
 ## v2.2.1
 
 - More code cleanup

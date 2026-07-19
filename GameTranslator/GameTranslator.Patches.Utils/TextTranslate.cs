@@ -134,10 +134,12 @@ namespace GameTranslator.Patches.Utils
                 var textWindow = global::UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
                 if (textWindow == null)
                     return false;
-                _cachedTextWindow = textWindow;
                 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
                 var field = textWindow.GetType().GetField("TextMesh", flags);
-                _cachedTextWindowTextMesh = field?.GetValue(textWindow);
+                if (field == null)
+                    return false;
+                _cachedTextWindow = textWindow;
+                _cachedTextWindowTextMesh = field.GetValue(textWindow);
                 _textWindowTextMeshCached = true;
             }
             return _cachedTextWindowTextMesh != null && object.Equals(_cachedTextWindowTextMesh, ui);
