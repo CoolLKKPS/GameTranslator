@@ -101,16 +101,14 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
             catch (System.IndexOutOfRangeException ex)
             {
-                BepInEx.Logging.ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("GameTranslator");
-                logger.LogError($"IndexOutOfRangeException in DefaultTextComponentManipulator.SetText: {ex.Message}");
+                TranslatePlugin.logger.LogError($"IndexOutOfRangeException in DefaultTextComponentManipulator.SetText: {ex.Message}");
             }
             catch (System.NullReferenceException)
             {
             }
             catch (System.Exception ex)
             {
-                BepInEx.Logging.ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("GameTranslator");
-                logger.LogError($"Exception in DefaultTextComponentManipulator.SetText: {ex.Message}");
+                TranslatePlugin.logger.LogError($"Exception in DefaultTextComponentManipulator.SetText: {ex.Message}");
             }
         }
 

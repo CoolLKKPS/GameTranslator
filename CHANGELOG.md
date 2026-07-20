@@ -4,6 +4,7 @@
 - Rework Readme
 - Added TextWindowHook basic patch
 - [Config] ShortCutCommand config name changed, setting will be reset to default value, but won't affect old config
+- [SpecialText] SpecialText will now always work after normal-translate, no matter normal-translate handle the text or not
 
 ## v2.2.1
 

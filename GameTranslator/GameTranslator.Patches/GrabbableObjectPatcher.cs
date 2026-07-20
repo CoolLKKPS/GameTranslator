@@ -1,6 +1,6 @@
 using BepInEx;
 using HarmonyLib;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace GameTranslator.Patches
 {
@@ -34,7 +34,7 @@ namespace GameTranslator.Patches
             }
         }
 
-        private static Dictionary<string, string> originToTranslated = new Dictionary<string, string>();
+        private static ConcurrentDictionary<string, string> originToTranslated = new ConcurrentDictionary<string, string>();
 
         public static void ClearCache()
         {

@@ -35,7 +35,7 @@ namespace GameTranslator.Patches.Utils
         {
             if (!TranslatePlugin.showOtherDebug.Value && !TranslatePlugin.showAvailableText.Value)
             {
-                return true;
+                return false;
             }
 
             var now = DateTime.Now;
@@ -215,8 +215,10 @@ namespace GameTranslator.Patches.Utils
             }
             info = ui.GetOrCreateTextTranslationInfo();
             bool componentState = this.DiscoverComponent(ui, info);
+
             if (!TranslatePlugin.shouldTranslateSpecialText.Value && !TranslatePlugin.shouldTranslateNormalText.Value)
                 return false;
+
             if (text == null)
                 text = ui.GetText(info);
             translated = this.TranslateOrQueue(ui, text, info, normalText, config, componentState);

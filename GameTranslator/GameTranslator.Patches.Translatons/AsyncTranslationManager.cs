@@ -400,8 +400,6 @@ namespace GameTranslator.Patches.Translatons
                     {
                         return;
                     }
-                    info.OriginalText = originalText;
-                    info.SetTranslatedText(translatedText);
                 }
                 TextTranslate.Instance.SetTranslatedText(ui, translatedText, originalText, info as TextTranslationInfo);
             }

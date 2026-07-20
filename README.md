@@ -10,7 +10,7 @@ Notice: You need to place your localization content according to the methods req
  - translations folder store all language folders that user defined, default to use "Default" language folder, you need to place font files and texture folder inside the language folder
  - "Normal-Translate.cfg" works just like AutoTranslator, you can import some translate files content in here
  - "SpecialText-Translate.cfg" after Normal-Translate, when this module find the key and no matter where, it will just translate
- - "HUD-Translate.cfg" is for HUDManager chattext
+ - "HUD-Translate.cfg" is for HUDManager chattext, won't work if both normal and special config are false
  - "Terminal-Translate.cfg" and "GuiText-Translate.cfg" both have special use
  - "Item-Translate.cfg" will directly replace GrabbableObject name
  - The above 6 translation files regex rules are independent of each other
