@@ -168,7 +168,9 @@ namespace GameTranslator.Patches.Utils
                 string t = Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, config, false);
                 if (string.IsNullOrEmpty(t))
                     t = Instance.TranslateOrQueue(ui, fullText, info, TranslateConfig.normalText, config, false);
-                t = Instance.ApplyPostTranslation(t, fullText, info, TranslateConfig.normalText, config);
+                bool isAsync = fullText.Length > TranslatePlugin.syncTranslationThreshold.Value;
+                if (!isAsync || t != null)
+                    t = Instance.ApplyPostTranslation(t, fullText, info, TranslateConfig.normalText, config);
                 if (string.IsNullOrEmpty(t) || t == fullText)
                     return null;
                 cached = (fullText, t);
@@ -218,7 +220,9 @@ namespace GameTranslator.Patches.Utils
             if (text == null)
                 text = ui.GetText(info);
             translated = this.TranslateOrQueue(ui, text, info, normalText, config, componentState);
-            translated = ApplyPostTranslation(translated, text, info, normalText, config);
+            bool isAsync = text.Length > TranslatePlugin.syncTranslationThreshold.Value;
+            if (!isAsync || translated != null)
+                translated = ApplyPostTranslation(translated, text, info, normalText, config);
             return !string.IsNullOrEmpty(translated) && !translated.Equals(text) && IsUIObjectValid(ui);
         }
 
@@ -286,7 +290,7 @@ namespace GameTranslator.Patches.Utils
                     info.OriginalText = text;
                     info.SetTranslatedText(cachedTranslation);
                 }
-
+                /*
                 if (!IsUIObjectValid(ui))
                 {
                     return null;
@@ -319,7 +323,7 @@ namespace GameTranslator.Patches.Utils
                         info.IsCurrentlySettingText = false;
                     }
                 }
-
+                */
                 return cachedTranslation;
             }
 
@@ -416,9 +420,14 @@ namespace GameTranslator.Patches.Utils
             return buffer.ToString();
         }
 
+        internal static bool NeedsReplaceFull(TranslateConfig.TranslateConfigFile config)
+        {
+            return object.ReferenceEquals(config, TranslateConfig.text) || object.ReferenceEquals(config, TranslateConfig.hud);
+        }
+
         private string ApplyPostTranslation(string translated, string original, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
         {
-            if (config == null || !config.shouldTranslate || config.normal.Count == 0)
+            if (config == null || !config.shouldTranslate || config.normal.Count == 0 || !NeedsReplaceFull(config))
                 return translated;
 
             if (object.ReferenceEquals(config, TranslateConfig.text))
