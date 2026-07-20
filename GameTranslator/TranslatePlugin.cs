@@ -406,13 +406,5 @@ namespace GameTranslator
         internal static string DefaultPath;
 
         internal static string TexturesPath;
-
-        /*
-        internal static bool CacheTexturesInMemory => TranslatePlugin.cacheTexturesInMemory.Value;
-        
-        public static ConfigEntry<bool> generateTerimalCommand;
-        
-        internal static bool shouldTranslate;
-        */
     }
 }

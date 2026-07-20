@@ -301,29 +301,6 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        /*
-        private float _batchOperationSecondCounter = 0;
-
-        private void IncrementBatchOperations()
-        {
-            _batchOperationSecondCounter += Time.deltaTime;
-
-            if (_batchOperationSecondCounter > 1.0f)
-            {
-                var endpoints = _translationManager.Endpoints;
-                foreach (var endpoint in endpoints)
-                {
-                    if (endpoint.AvailableBatchOperations < 5)
-                    {
-                        endpoint.AvailableBatchOperations++;
-                    }
-                }
-
-                _batchOperationSecondCounter = 0;
-            }
-        }
-        */
-
         private void OnTranslationJobCompleted(TranslationJob job)
         {
             try
@@ -426,69 +403,6 @@ namespace GameTranslator.Patches.Translatons
                 return string.Empty;
             }
         }
-
-        /*
-        private string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
-        {
-            if (string.IsNullOrEmpty(text)) return text;
-            string translatedText = text;
-            try
-            {
-                if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false, scope))
-                {
-                    translatedText = normalText.TryTranslate(translatedText, scope);
-                }
-                if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.normal.Count > 0)
-                {
-                    StringBuffer buffer = new StringBuffer(translatedText);
-                    foreach (KeyValuePair<string, string> kv in config._normalOrdered)
-                    {
-                        buffer.ReplaceFull(kv.Key, kv.Value);
-                    }
-                    translatedText = buffer.ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                TranslatePlugin.logger.LogError($"Translation error for text '{text}': {ex.Message}");
-                return text;
-            }
-            return translatedText;
-        }
-
-        private bool IsUIObjectValid(object ui)
-        {
-            if (ui == null) return false;
-            try
-            {
-                if (ui is Component component && component)
-                {
-                    var go = component.gameObject;
-                    if (go)
-                    {
-                        if (component is Behaviour be)
-                        {
-                            return go.activeInHierarchy && be.enabled;
-                        }
-                        else
-                        {
-                            return go.activeInHierarchy;
-                        }
-                    }
-                }
-                return ui != null;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private string GetCacheKey(string originalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
-        {
-            return $"{config?.ConfigFileName ?? "global"}:{scope}:{originalText}";
-        }
-        */
 
         public void ClearCache()
         {

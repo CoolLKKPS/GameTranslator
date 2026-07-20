@@ -17,7 +17,6 @@ namespace GameTranslator.Patches.Translatons
         private readonly int _maxConcurrency;
         private readonly int _maxRetries;
         private readonly float _translationDelay;
-        // private int _availableBatchOperations = 5;
 
         public TranslationEndpointManager(int maxConcurrency = 3, int maxRetries = 3, float translationDelay = 1.0f)
         {
@@ -36,22 +35,6 @@ namespace GameTranslator.Patches.Translatons
         public bool HasUnstartedJob => !_unstartedJobs.IsEmpty;
 
         public TranslationManager Manager { get; set; }
-
-        /*
-        public int OngoingJobsCount => _ongoingJobs.Count;
-
-        public int UnstartedJobsCount => _unstartedJobs.Count;
-
-        public int AvailableBatchOperations
-        {
-            get => _availableBatchOperations;
-            set => _availableBatchOperations = value;
-        }
-
-        public Exception Error { get; set; }
-
-        public int ConsecutiveErrors { get; set; }
-        */
 
         public bool TryGetTranslation(string key, out string value)
         {
@@ -117,7 +100,6 @@ namespace GameTranslator.Patches.Translatons
             if (!_unstartedJobs.TryRemove(jobKey, out job)) return;
 
             _ongoingJobs.TryAdd(jobKey, job);
-            // Manager?.OnJobStarted(this);
 
             try
             {
@@ -128,7 +110,6 @@ namespace GameTranslator.Patches.Translatons
             {
                 _concurrencyLimiter.Release();
                 _ongoingJobs.TryRemove(jobKey, out _);
-                // Manager?.OnJobCompleted(this);
 
                 if (_unstartedJobs.IsEmpty)
                 {
@@ -167,25 +148,6 @@ namespace GameTranslator.Patches.Translatons
                         job.TranslatedText = null;
                         Manager?.InvokeJobCompleted(job);
                     }
-                    /*
-                    else
-                    {
-                        if (job.RetryCount < _maxRetries)
-                        {
-                            job.RetryCount++;
-                            _unstartedJobs.TryAdd(jobKey, job);
-                            await Task.Delay(TimeSpan.FromSeconds(_translationDelay));
-                            Manager?.ScheduleUnstartedJobs(this);
-                        }
-                        else
-                        {
-                            job.State = TranslationJobState.Failed;
-                            job.ErrorMessage = "Max retries exceeded.";
-                            RegisterTranslationFailure(job.OriginalText, job.Scope);
-                            Manager?.InvokeJobFailed(job);
-                        }
-                    }
-                    */
                 }
             }
             catch (Exception ex)
@@ -249,17 +211,6 @@ namespace GameTranslator.Patches.Translatons
                 {
                     translatedText = normalText.TryTranslate(translatedText, scope);
                 }
-                /*
-                if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.shouldTranslate && config.normal.Count > 0)
-                {
-                    StringBuffer buffer = new StringBuffer(translatedText);
-                    foreach (KeyValuePair<string, string> kv in config._normalOrdered)
-                    {
-                        buffer.ReplaceFull(kv.Key, kv.Value);
-                    }
-                    translatedText = buffer.ToString();
-                }
-                */
             }
             catch (System.Threading.ThreadAbortException)
             {

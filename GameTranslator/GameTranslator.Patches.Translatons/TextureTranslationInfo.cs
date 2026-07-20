@@ -17,12 +17,6 @@ namespace GameTranslator.Patches.Translatons
 
         public bool IsTranslated { get; set; }
 
-        /*
-        public Sprite TranslatedSprite { get; set; }
-
-        public bool IsDumped { get; set; }
-        */
-
         public bool UsingReplacedTexture { get; set; }
 
         public long ChangeTime { get; set; }
@@ -86,44 +80,6 @@ namespace GameTranslator.Patches.Translatons
             return this._key;
         }
 
-        /*
-        public void CreateOriginalTexture()
-        {
-            if (!this.Original.IsAlive && this._originalData != null)
-            {
-                Texture2D texture2D = TextureTranslationInfo.CreateEmptyTexture2D(this._textureFormat);
-                texture2D.LoadImageEx(this._originalData, TranslateExtensions.ImageFormat.PNG, null);
-                this.SetOriginal(texture2D);
-            }
-        }
-
-        public byte[] GetOriginalData()
-        {
-            this.SetupHashAndData(this.Original.Target);
-            return this._originalData;
-        }
-
-        public byte[] GetOrCreateOriginalData()
-        {
-            this.SetupHashAndData(this.Original.Target);
-            byte[] array;
-            if (this._originalData != null)
-            {
-                array = this._originalData;
-            }
-            else
-            {
-                array = this.Original.Target.GetTextureData().Data;
-            }
-            return array;
-        }
-
-        public static void AddDuplicateName(string name)
-        {
-            TextureTranslationInfo.DuplicateTextureNames.Add(name);
-        }
-        */
-
         private TextureDataResult SetupKeyForNameWithFallback(string name, Texture2D texture)
         {
             if (TranslatePlugin.disableDuplicateTextureCheck.Value)
@@ -150,7 +106,6 @@ namespace GameTranslator.Patches.Translatons
                 {
                     XuaLogger.AutoTranslator.Warn("Detected duplicate image name: " + name);
                     flag = true;
-                    // TextureTranslationInfo.AddDuplicateName(name);
                 }
             }
             else
@@ -174,12 +129,6 @@ namespace GameTranslator.Patches.Translatons
                 if (textureName != null)
                 {
                     TextureDataResult textureDataResult = this.SetupKeyForNameWithFallback(textureName, texture);
-                    /*
-                    if (textureDataResult != null)
-                    {
-                        this._originalData = textureDataResult.Data;
-                    }
-                    */
                 }
             }
         }
@@ -214,16 +163,5 @@ namespace GameTranslator.Patches.Translatons
         private bool _initialized;
 
         private TextureFormat _textureFormat;
-
-        /*
-        public static Texture2D CreateEmptyTexture2D(Texture2D texture)
-        {
-            return new Texture2D(texture.width, texture.height, texture.format, false);
-        }
-
-        private byte[] _originalData;
-        
-        public static HashSet<string> DuplicateTextureNames = new HashSet<string>();
-        */
     }
 }

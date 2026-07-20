@@ -70,7 +70,6 @@ namespace GameTranslator.Patches.Translatons
                         this.RegisterImageFromFile(text);
                     }
                     Interlocked.Increment(ref TextureTranslate.ChangeTime);
-                    // TextureTranslationInfo.ClearNameToHash();
                     this.CleanupInvalidEntries();
                     float realtimeSinceStartup2 = Time.realtimeSinceStartup;
                     XuaLogger.AutoTranslator.Debug(string.Format("Loaded texture files (took {0} seconds)", Math.Round((double)(realtimeSinceStartup2 - realtimeSinceStartup), 2)));
@@ -382,28 +381,6 @@ namespace GameTranslator.Patches.Translatons
                 this._lastCleanupTime = DateTime.Now;
             }
         }
-
-        /*
-        public void PreloadCommonTextures()
-        {
-            try
-            {
-                foreach (string key in (from kvp in this._textureAccessTime.OrderByDescending((KeyValuePair<string, DateTime> kvp) => kvp.Value).Take(10)
-                                        select kvp.Key).ToList<string>())
-                {
-                    string fileName;
-                    if (!this._translatedImages.ContainsKey(key) && this._keyToFileName.TryGetValue(key, out fileName) && File.Exists(fileName))
-                    {
-                        this.RegisterImageFromFile(fileName);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                XuaLogger.AutoTranslator.Error(ex, "Error during texture preloading");
-            }
-        }
-        */
 
         public void UpdateTextureStatistics(string key)
         {

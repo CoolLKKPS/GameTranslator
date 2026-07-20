@@ -20,9 +20,5 @@ namespace GameTranslator.Patches.Hooks
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref value);
         }
-
-        /*
-        public static FieldInfo m_Text = typeof(Text).GetField("m_Text", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-        */
     }
 }

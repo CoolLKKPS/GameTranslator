@@ -35,21 +35,5 @@ namespace GameTranslator.Patches.Utils
         }
 
         public static bool EnableTranslationScoping = true;
-
-        /*
-        public static void RegisterSceneLoadCallback(Action<int> sceneLoaded)
-        {
-            UnityTypes.SceneManager_Methods.add_sceneLoaded(delegate (Scene scene, LoadSceneMode mode)
-            {
-                sceneLoaded(scene.buildIndex);
-            });
-            // SceneManagerLoader.EnableSceneLoadScanInternal(sceneLoaded);
-        }
-
-        internal static class TranslationScopes
-        {
-            public const int None = -1;
-        }
-        */
     }
 }

@@ -176,23 +176,6 @@ namespace GameTranslator
             }
         }
 
-        /*
-        public static bool IsStringContainsEnglish(string input)
-        {
-            return !string.IsNullOrEmpty(input) && new Regex("[a-zA-Z]").IsMatch(input);
-        }
-
-        public static bool IsStringContainsChinese(string input)
-        {
-            return !string.IsNullOrEmpty(input) && new Regex("[\\u4e00-\\u9fa5]").IsMatch(input);
-        }
-
-        public static string useRegularExpression(string raw, string pattern, string result)
-        {
-            return Regex.Replace(raw, pattern, result);
-        }
-        */
-
         public static string replaceByMap(string text, TranslateConfig.TranslateConfigFile file)
         {
             if (file.normal.Count == 0 && file.regexTranslations.Count == 0 && file.splitterRegexTranslations.Count == 0)

@@ -42,27 +42,6 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                             object obj = ((field != null) ? field.GetValue(textWindow) : null);
                             if (obj != null && object.Equals(obj, ui))
                             {
-                                /*
-                                if (new StackTrace().GetFrames().Any((StackFrame x) => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType))
-                                {
-                                    object previousCurText = textWindow.GetType().GetField("curText", flags).GetValue(textWindow);
-                                    textWindow.GetType().GetField("curText", flags).SetValue(textWindow, text);
-                                    DefaultTextComponentManipulator.SetCurText = delegate (object textWindowInner)
-                                    {
-                                        object value3 = textWindow.GetType().GetField("curText", flags).GetValue(textWindow);
-                                        if (object.Equals(text, value3))
-                                        {
-                                            textWindowInner.GetType().GetMethod("FinishTyping", flags).Invoke(textWindowInner, null);
-                                            textWindowInner.GetType().GetField("curText", flags).SetValue(textWindowInner, previousCurText);
-                                            object value4 = textWindowInner.GetType().GetField("TextMesh", flags).GetValue(textWindowInner);
-                                            object value5 = textWindowInner.GetType().GetField("Keyword", flags).GetValue(textWindowInner);
-                                            value5.GetType().GetMethod("UpdateTextMesh", flags).Invoke(value5, new object[] { value4, true });
-                                        }
-                                        DefaultTextComponentManipulator.SetCurText = null;
-                                    };
-                                    return;
-                                }
-                                */
                                 CachedProperty cachedProperty = type.CachedProperty(DefaultTextComponentManipulator.TextPropertyName);
                                 if (cachedProperty != null)
                                 {
@@ -117,67 +96,5 @@ namespace GameTranslator.Patches.Translatons.Manipulator
         private readonly Type _type;
 
         private readonly CachedProperty _property;
-
-        /*
-        public static Action<object> SetCurText = null;
-
-        private static DefaultTextComponentManipulator.TypeAndMethod GetTextPropertySetterInParent(Type type)
-        {
-            Type type2 = type.BaseType;
-            while (type2 != null)
-            {
-                DefaultTextComponentManipulator.TypeAndMethod typeAndMethod;
-                DefaultTextComponentManipulator.TypeAndMethod typeAndMethod2;
-                if (DefaultTextComponentManipulator._textSetters.TryGetValue(type, out typeAndMethod))
-                {
-                    typeAndMethod2 = typeAndMethod;
-                }
-                else
-                {
-                    PropertyInfo property = type2.GetProperty(DefaultTextComponentManipulator.TextPropertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                    if (!(property != null) || !property.CanWrite)
-                    {
-                        type2 = type2.BaseType;
-                        continue;
-                    }
-                    DefaultTextComponentManipulator.TypeAndMethod typeAndMethod3 = new DefaultTextComponentManipulator.TypeAndMethod(type2, property.GetSetMethod());
-                    DefaultTextComponentManipulator._textSetters[type2] = typeAndMethod3;
-                    typeAndMethod2 = typeAndMethod3;
-                }
-                return typeAndMethod2;
-            }
-            return null;
-        }
-        
-        private static Dictionary<Type, DefaultTextComponentManipulator.TypeAndMethod> _textSetters = new Dictionary<Type, DefaultTextComponentManipulator.TypeAndMethod>();
-
-        private class TypeAndMethod
-        {
-            public TypeAndMethod(Type type, MethodBase method)
-            {
-                this.Type = type;
-                this.SetterMethod = method;
-            }
-
-            public Type Type { get; }
-
-            public MethodBase SetterMethod { get; }
-
-            public FastReflectionDelegate SetterInvoker
-            {
-                get
-                {
-                    FastReflectionDelegate fastReflectionDelegate;
-                    if ((fastReflectionDelegate = this._setterInvoker) == null)
-                    {
-                        fastReflectionDelegate = (this._setterInvoker = this.SetterMethod.CreateFastDelegate(true, true));
-                    }
-                    return fastReflectionDelegate;
-                }
-            }
-
-            private FastReflectionDelegate _setterInvoker;
-        }
-        */
     }
 }

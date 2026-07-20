@@ -12,19 +12,12 @@ namespace GameTranslator.Patches.Translatons
 
         private readonly List<TranslationEndpointManager> _endpointsWithUnstartedJobs;
         private readonly Timer _processingTimer;
-        /*
-        private readonly List<IMonoBehaviour_Update> _updateCallbacks;
-        */
 
         public TranslationManager()
         {
             _endpointsWithUnstartedJobs = new List<TranslationEndpointManager>();
             Endpoints = new List<TranslationEndpointManager>();
             _processingTimer = new Timer(ProcessPendingJobs, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
-            /*
-            _updateCallbacks = new List<IMonoBehaviour_Update>();
-            AllEndpoints = new List<TranslationEndpointManager>();
-            */
         }
 
         public List<TranslationEndpointManager> Endpoints { get; private set; }
@@ -32,82 +25,6 @@ namespace GameTranslator.Patches.Translatons
         public List<TranslationEndpointManager> ConfiguredEndpoints => Endpoints.Where(e => e.Manager != null).ToList();
 
         public TranslationEndpointManager PrimaryEndpoint { get; set; }
-
-        /*
-        public List<TranslationEndpointManager> AllEndpoints { get; private set; }
-
-        public int OngoingJobsCount { get; set; }
-
-        public int UnstartedJobsCount { get; set; }
-
-        public TranslationEndpointManager FallbackEndpoint { get; set; }
-
-        public TranslationEndpointManager PassthroughEndpoint { get; private set; }
-        
-        public int OngoingTranslations { get; set; }
-
-        public int UnstartedTranslations { get; set; }
-        
-        public TranslationEndpointManager CurrentEndpoint { get; set; }
-
-        public bool IsFallbackAvailableFor(TranslationEndpointManager endpoint)
-        {
-            return endpoint != null && FallbackEndpoint != null
-                && endpoint == CurrentEndpoint
-                && FallbackEndpoint != endpoint;
-        }
-
-        public void InitializeEndpoints()
-        {
-            try
-            {
-                TranslatePlugin.logger.LogInfo("TranslationManager endpoints initialized.");
-            }
-            catch (Exception e)
-            {
-                TranslatePlugin.logger.LogError($"An error occurred while constructing endpoints: {e.Message}");
-            }
-        }
-
-        public void CreateEndpoints(object httpSecurity)
-        {
-            TranslatePlugin.logger.LogInfo("Creating translation endpoints.");
-        }
-        public void RebootAllEndpoints()
-        {
-            foreach (var endpoint in ConfiguredEndpoints)
-            {
-                endpoint.ConsecutiveErrors = 0;
-            }
-        }
-
-        public void Update()
-        {
-            var len = _updateCallbacks.Count;
-            for (int i = 0; i < len; i++)
-            {
-                try
-                {
-                    _updateCallbacks[i].Update();
-                }
-                catch (Exception e)
-                {
-                    TranslatePlugin.logger.LogError($"An error occurred while calling update on {_updateCallbacks[i].GetType().Name}: {e.Message}");
-                }
-            }
-        }
-
-        public void OnJobStarted(TranslationEndpointManager endpoint)
-        {
-            UnstartedJobsCount++;
-            OngoingJobsCount--;
-        }
-
-        public void OnJobCompleted(TranslationEndpointManager endpoint)
-        {
-            OngoingJobsCount--;
-        }
-        */
 
         // Still using for other purposes
         public void Dispose()
@@ -186,13 +103,6 @@ namespace GameTranslator.Patches.Translatons
         public void RegisterEndpoint(TranslationEndpointManager translationEndpointManager)
         {
             translationEndpointManager.Manager = this;
-            /*
-            AllEndpoints.Add(translationEndpointManager);
-            if (translationEndpointManager.Error == null)
-            {
-                ConfiguredEndpoints.Add(translationEndpointManager);
-            }
-            */
 
             if (PrimaryEndpoint == null)
             {
@@ -205,11 +115,4 @@ namespace GameTranslator.Patches.Translatons
             KickoffTranslations();
         }
     }
-
-    /*
-    public interface IMonoBehaviour_Update
-    {
-        void Update();
-    }
-    */
 }

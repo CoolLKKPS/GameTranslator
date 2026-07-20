@@ -90,38 +90,6 @@ namespace GameTranslator.Patches.Utils
                             tti.IsTranslated = true;
                         }
                     }
-
-                    /*
-                    if (source != null)
-                    {
-                        if (!tti.IsTranslated)
-                        {
-                            try
-                            {
-                                if (!isCompatible)
-                                {
-                                    var newSprite = source.SetTexture(tti.Translated, sprite, isPrefixHooked);
-                                    if (newSprite != null)
-                                    {
-                                        tti.TranslatedSprite = newSprite;
-                                        if (isPrefixHooked && sprite != null)
-                                        {
-                                            sprite = newSprite;
-                                        }
-                                    }
-                                }
-
-                                if (!isPrefixHooked)
-                                {
-                                    source.SetAllDirtyEx();
-                                }
-                            }
-                            finally
-                            {
-                            }
-                        }
-                    }
-                    */
                 }
 
                 if (previousTextureValue == null)
@@ -199,15 +167,6 @@ namespace GameTranslator.Patches.Utils
             }
             return true;
         }
-
-        /*
-        private bool IsTextureFormatCompatible(Texture2D texture, TranslateExtensions.ImageFormat format)
-        {
-            var textureFormat = texture.format;
-            return format == TranslateExtensions.ImageFormat.PNG
-                || (format == TranslateExtensions.ImageFormat.TGA && (textureFormat == TextureFormat.ARGB32 || textureFormat == TextureFormat.RGBA32 || textureFormat == TextureFormat.RGB24));
-        }
-        */
 
         public static TextureTranslate Instance = new TextureTranslate();
 

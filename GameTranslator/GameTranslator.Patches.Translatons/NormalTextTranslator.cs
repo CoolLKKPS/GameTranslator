@@ -48,11 +48,6 @@ namespace GameTranslator.Patches.Translatons
                     this._registeredSplitterRegexes.Clear();
                     this._failedRegexLookups.Clear();
                     this._scopedTranslations.Clear();
-                    /*
-                    this._partialTranslations.Clear();
-                    this._tokenTranslations.Clear();
-                    this._reverseTokenTranslations.Clear();
-                    */
                     this.LoadTranslationsInStream(this.FilePath, true);
                     this.PrecompileAndCacheRegexes();
                 }
@@ -279,22 +274,9 @@ namespace GameTranslator.Patches.Translatons
             return false;
         }
 
-        /*
-        private bool IsTokenTranslation(string translation)
-        {
-            return this._reverseTokenTranslations.ContainsKey(translation);
-        }
-        */
-
         public bool IsTranslatable(string text, bool isToken, int scope = -1)
         {
             bool flag = !this.IsTranslation(text, scope);
-            /*
-            if (isToken && flag)
-            {
-                flag = !this.IsTokenTranslation(text);
-            }
-            */
             return flag;
         }
 
@@ -464,29 +446,6 @@ namespace GameTranslator.Patches.Translatons
             }
             return text2;
         }
-
-        /*
-        public static string getRegex(string pattern)
-        {
-            if (string.IsNullOrEmpty(pattern))
-            {
-                return pattern;
-            }
-            return pattern.Replace("=", "\\=");
-        }
-
-        private bool HasTranslated(string key)
-        {
-            return this._translations.ContainsKey(key);
-        }
-
-        [CompilerGenerated]
-        internal static string ChangeRegexReplaceFunc(Match match)
-        {
-            int num = int.Parse(match.Groups[1].Value);
-            return "{" + (num - 1).ToString() + "}";
-        }
-        */
 
         private static void CheckAndCleanupRegexCache()
         {
@@ -666,14 +625,6 @@ namespace GameTranslator.Patches.Translatons
         private ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
 
         private ConcurrentDictionary<int, ScopedTranslationData> _scopedTranslations = new ConcurrentDictionary<int, ScopedTranslationData>();
-
-        /*
-        private ConcurrentDictionary<string, string> _tokenTranslations = new ConcurrentDictionary<string, string>();
-
-        private ConcurrentDictionary<string, string> _reverseTokenTranslations = new ConcurrentDictionary<string, string>();
-
-        private ConcurrentDictionary<string, string> _partialTranslations = new ConcurrentDictionary<string, string>();
-        */
 
         internal class ScopedTranslationData
         {
