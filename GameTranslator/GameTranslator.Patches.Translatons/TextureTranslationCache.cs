@@ -69,7 +69,7 @@ namespace GameTranslator.Patches.Translatons
                     {
                         this.RegisterImageFromFile(text);
                     }
-                    TextureTranslate.ChangeTime += 1L;
+                    Interlocked.Increment(ref TextureTranslate.ChangeTime);
                     // TextureTranslationInfo.ClearNameToHash();
                     this.CleanupInvalidEntries();
                     float realtimeSinceStartup2 = Time.realtimeSinceStartup;

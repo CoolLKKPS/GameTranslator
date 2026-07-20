@@ -126,7 +126,7 @@ namespace GameTranslator
                                         {
                                             moduleTranslator.Load();
                                         }
-                                        TextTranslate.ChangeTime += 1L;
+                                        Interlocked.Increment(ref TextTranslate.ChangeTime);
                                         hasChanges = true;
                                         break;
                                     }

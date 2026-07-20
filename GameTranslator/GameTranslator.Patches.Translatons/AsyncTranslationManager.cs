@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace GameTranslator.Patches.Translatons
@@ -260,6 +261,8 @@ namespace GameTranslator.Patches.Translatons
             var cachedTranslation = GetCachedTranslation(stabilizedText, context.Config, TranslationScopeHelper.GetScope(context.UI));
             if (cachedTranslation != null)
             {
+                if (TextTranslate.NeedsReplaceFull(context.Config))
+                    cachedTranslation = TextTranslate.ApplyReplaceFull(cachedTranslation, context.Config);
                 SafeUpdateUI(context.UI, cachedTranslation, stabilizedText, context.Info, context.Info?.ChangeTime ?? TextTranslate.ChangeTime);
                 return;
             }
@@ -496,7 +499,7 @@ namespace GameTranslator.Patches.Translatons
             _stabilizationContexts.Clear();
             _immediatelyTranslating.Clear();
             _pendingStabilizationUIs.Clear();
-            TextTranslate.ChangeTime += 1L;
+            Interlocked.Increment(ref TextTranslate.ChangeTime);
         }
 
         private string GetStabilizationKey(object ui, string text)

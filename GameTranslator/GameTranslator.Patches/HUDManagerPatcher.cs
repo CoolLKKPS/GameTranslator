@@ -63,7 +63,7 @@ namespace GameTranslator.Patches
             {
                 return;
             }
-            if (__instance == null || __instance.Equals(null))
+            if (__instance == null)
             {
                 return;
             }
@@ -90,7 +90,7 @@ namespace GameTranslator.Patches
             {
                 return;
             }
-            if (__instance == null || __instance.Equals(null))
+            if (__instance == null)
             {
                 return;
             }
@@ -113,7 +113,7 @@ namespace GameTranslator.Patches
             {
                 return;
             }
-            if (__instance == null || __instance.Equals(null))
+            if (__instance == null)
             {
                 return;
             }

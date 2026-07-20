@@ -117,7 +117,11 @@ namespace GameTranslator.Patches.Translatons
 
         public void KickoffTranslations()
         {
-            var endpoints = _endpointsWithUnstartedJobs;
+            List<TranslationEndpointManager> endpoints;
+            lock (_endpointsWithUnstartedJobs)
+            {
+                endpoints = _endpointsWithUnstartedJobs.ToList();
+            }
 
             for (int i = endpoints.Count - 1; i >= 0; i--)
             {

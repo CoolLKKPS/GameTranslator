@@ -1,7 +1,6 @@
 using GameTranslator.Patches.Utils;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -250,6 +249,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     translatedText = normalText.TryTranslate(translatedText, scope);
                 }
+                /*
                 if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.shouldTranslate && config.normal.Count > 0)
                 {
                     StringBuffer buffer = new StringBuffer(translatedText);
@@ -259,6 +259,7 @@ namespace GameTranslator.Patches.Translatons
                     }
                     translatedText = buffer.ToString();
                 }
+                */
             }
             catch (System.Threading.ThreadAbortException)
             {
