@@ -330,15 +330,8 @@ namespace GameTranslator.Patches.Translatons
                 if (!string.IsNullOrEmpty(job.TranslatedText))
                 {
                     string final = job.TranslatedText;
-                    if (TextTranslate.NeedsReplaceFull(job.Config) && job.Config.shouldTranslate && job.Config.normal.Count > 0)
-                    {
-                        StringBuffer buffer = new StringBuffer(job.TranslatedText);
-                        foreach (var kv in job.Config._normalOrdered)
-                        {
-                            buffer.ReplaceFull(kv.Key, kv.Value);
-                        }
-                        final = buffer.ToString();
-                    }
+                    if (TextTranslate.NeedsReplaceFull(job.Config))
+                        final = TextTranslate.ApplyReplaceFull(job.TranslatedText, job.Config);
                     foreach (var ui in job.AssociatedUIs)
                     {
                         if (TextTranslate.IsUIObjectValid(ui))
