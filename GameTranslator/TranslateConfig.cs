@@ -186,10 +186,13 @@ namespace GameTranslator
             string text5;
             try
             {
-                if (DateTime.Now - TranslateConfig._lastCleanupTime > TranslateConfig.CLEANUP_INTERVAL)
+                // Interlocked
+                var now = DateTime.Now;
+                var lastCleanup = new DateTime(Interlocked.Read(ref TranslateConfig._lastCleanupTicks));
+                if (now - lastCleanup > TranslateConfig.CLEANUP_INTERVAL)
                 {
                     TranslateConfig.CleanupTranslatePairs();
-                    TranslateConfig._lastCleanupTime = DateTime.Now;
+                    Interlocked.Exchange(ref TranslateConfig._lastCleanupTicks, now.Ticks);
                 }
                 if (!file.shouldTranslate)
                 {
@@ -364,7 +367,7 @@ namespace GameTranslator
 
         public static NormalTextTranslator interactiveTerminalAPIText;
 
-        private static DateTime _lastCleanupTime = DateTime.Now;
+        private static long _lastCleanupTicks = DateTime.Now.Ticks;
 
         private static readonly TimeSpan CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
 

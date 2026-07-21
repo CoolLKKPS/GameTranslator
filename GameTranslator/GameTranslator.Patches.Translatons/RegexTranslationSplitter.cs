@@ -20,7 +20,7 @@ namespace GameTranslator.Patches.Translatons
                 int num2 = key.LastIndexOf('"');
                 if (num2 <= num - 1)
                 {
-                    throw new Exception("Regex with key: '" + this.Key + "' starts with a \" but does not end with a \".");
+                    throw new Exception("Splitter regex with key: '" + this.Key + "' starts with a \" but does not end with a \".");
                 }
                 key = key.Substring(num, num2 - num);
             }
@@ -35,7 +35,7 @@ namespace GameTranslator.Patches.Translatons
                 int num3 = value.LastIndexOf('"');
                 if (num3 == num - 1)
                 {
-                    throw new Exception("Regex with value: '" + this.Value + "' starts with a \" but does not end with a \".");
+                    throw new Exception("Splitter regex with value: '" + this.Value + "' starts with a \" but does not end with a \".");
                 }
                 value = value.Substring(num, num3 - num);
             }

@@ -17,6 +17,32 @@ namespace GameTranslator.Patches.Hooks
 
         static MethodBase TargetMethod()
         {
+            return AccessToolsShim.Method(UnityTypes.TextWindow.ClrType, "SetText", new[] { typeof(string) });
+        }
+
+        [HarmonyPrefix]
+        static void Prefix()
+        {
+            TextTranslate._textWindowCallDepth++;
+        }
+
+        [HarmonyPostfix]
+        static void Postfix()
+        {
+            TextTranslate._textWindowCallDepth--;
+        }
+    }
+
+    [HarmonyPatch]
+    internal static class TextWindow_FinishTyping_Hook
+    {
+        static bool Prepare()
+        {
+            return UnityTypes.TextWindow != null;
+        }
+
+        static MethodBase TargetMethod()
+        {
             return AccessToolsShim.Method(UnityTypes.TextWindow.ClrType, "FinishTyping", new Type[0]);
         }
 
@@ -27,7 +53,7 @@ namespace GameTranslator.Patches.Hooks
             var textMesh = __instance.GetType().GetField("TextMesh", flags)?.GetValue(__instance);
             if (textMesh != null)
             {
-                TextTranslate._translatingFromFinishTyping.Add(textMesh);
+                TextTranslate._translatingFromFinishTyping.TryAdd(textMesh, 0);
                 try
                 {
                     TextTranslate.ClearTypingCacheForUI(textMesh);
@@ -35,7 +61,7 @@ namespace GameTranslator.Patches.Hooks
                 }
                 finally
                 {
-                    TextTranslate._translatingFromFinishTyping.Remove(textMesh);
+                    TextTranslate._translatingFromFinishTyping.TryRemove(textMesh, out _);
                 }
             }
         }

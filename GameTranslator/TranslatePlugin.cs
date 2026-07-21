@@ -85,6 +85,7 @@ namespace GameTranslator
             TranslatePlugin.enableFileWatcher = base.Config.Bind<bool>("Debug", "Enable File Watcher", false, "If true, enable file system watcher for file updates");
             TranslatePlugin.enablePollingCheck = base.Config.Bind<bool>("Debug", "Enable Polling Check", false, "If true, enable the 10-seconds polling fallback for file updates");
             TranslatePlugin.replaceUnsupportedCharacters = base.Config.Bind<bool>("Debug", "Replace Unsupported Characters", false, "Define whether to replace unsupported characters with Unicode character u25A1");
+            TranslatePlugin.enableTypingTranslation = base.Config.Bind<bool>("Debug", "Enable Typing Translation", false, "Define whether to enable typing translation");
             TranslatePlugin.cacheUnmodifiedTextures = base.Config.Bind<bool>("Debug", "Cache Unmodified Textures", false, "Define whether to cache textures that have not been modified");
             TranslatePlugin.stabilizationMinTextLength = base.Config.Bind<int>("Debug", "Stabilization Min Text Length", 100, "Define minimum text length to trigger stabilization. Set to 0 to disable stabilization");
             TranslatePlugin.stabilizationDelay = base.Config.Bind<float>("Debug", "Stabilization Delay", 0.9f, "Define delay in seconds between stabilization checks. Must be greater than 0");
@@ -151,6 +152,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProUGUIHook),
                 typeof(GameTranslator.Patches.Hooks.TextWindowHook),
+                typeof(GameTranslator.Patches.Hooks.TextWindow_FinishTyping_Hook),
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextMeshHook),
@@ -352,6 +354,8 @@ namespace GameTranslator
         public static ConfigEntry<bool> enablePollingCheck;
 
         public static ConfigEntry<bool> replaceUnsupportedCharacters;
+
+        public static ConfigEntry<bool> enableTypingTranslation;
 
         public static ConfigEntry<bool> cacheUnmodifiedTextures;
 

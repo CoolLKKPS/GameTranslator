@@ -25,6 +25,8 @@ namespace GameTranslator.Patches.Translatons
 
         public bool MustIgnore { get; set; }
 
+        internal NormalTextTranslator LastTranslator { get; set; }
+
         public long ChangeTime
         {
             get
@@ -41,10 +43,10 @@ namespace GameTranslator.Patches.Translatons
         {
             if (!this._initialized)
             {
-                this._initialized = true;
                 this.MustIgnore = false;
                 this.ShouldIgnore = ui.ShouldIgnoreTextComponent();
                 this.TextManipulator = ui.GetTextManipulator();
+                this._initialized = true;
             }
         }
 

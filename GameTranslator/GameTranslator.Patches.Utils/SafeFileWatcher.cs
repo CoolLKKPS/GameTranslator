@@ -104,7 +104,7 @@ namespace GameTranslator.Patches.Utils
         {
             while (IsFileLocked(file))
             {
-                Thread.Sleep(100);
+                Thread.Sleep(100);      // If the file always locked, just infinite loop here
             }
         }
 

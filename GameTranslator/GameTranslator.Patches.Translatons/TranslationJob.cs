@@ -1,5 +1,5 @@
 using GameTranslator.Patches.Utils;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace GameTranslator.Patches.Translatons
 {
@@ -10,7 +10,7 @@ namespace GameTranslator.Patches.Translatons
             UI = ui;
             OriginalText = originalText;
             State = TranslationJobState.Pending;
-            AssociatedUIs = new List<object>();
+            AssociatedUIs = new ConcurrentDictionary<object, byte>();
             RetryCount = 0;
             StartVersion = TextTranslate.ChangeTime;
         }
@@ -20,7 +20,7 @@ namespace GameTranslator.Patches.Translatons
         public string TranslatedText { get; set; }
         public TranslationJobState State { get; set; }
         public string ErrorMessage { get; set; }
-        public List<object> AssociatedUIs { get; set; }
+        public ConcurrentDictionary<object, byte> AssociatedUIs { get; set; }
         public object TranslationInfo { get; set; }
         public NormalTextTranslator NormalText { get; set; }
         public TranslateConfig.TranslateConfigFile Config { get; set; }
@@ -28,12 +28,9 @@ namespace GameTranslator.Patches.Translatons
         public long StartVersion { get; set; }
         public int Scope { get; set; } = -1;
 
-        public void Associate(string originalText, object ui, object info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool saveResult, bool allowFallback)
+        public void Associate(object ui, object info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
         {
-            if (!AssociatedUIs.Contains(ui))
-            {
-                AssociatedUIs.Add(ui);
-            }
+            AssociatedUIs.TryAdd(ui, 0);
 
             TranslationInfo = info;
             NormalText = normalText;

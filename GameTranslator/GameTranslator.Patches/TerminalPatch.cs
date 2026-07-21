@@ -264,8 +264,8 @@ namespace GameTranslator.Patches
         {
             if (TerminalPatch.info != null)
             {
-                TerminalPatch.texdAdded = __instance.currentText.Length - TerminalPatch.info.OriginalText.Length;
-                if (TerminalPatch.texdAdded != 0)
+                int texdAdded = __instance.currentText.Length - TerminalPatch.info.OriginalText.Length;
+                if (texdAdded != 0)
                 {
                     TerminalPatch.info.Reset(__instance.currentText);
                 }
@@ -288,10 +288,11 @@ namespace GameTranslator.Patches
                             TranslatePlugin.logger.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'");
                         }
 
-                        string text = TranslateConfig.replaceByMap(__instance.currentText, TranslateConfig.terminal);
+                        string originalText = __instance.currentText;
+                        string text = TranslateConfig.replaceByMap(originalText, TranslateConfig.terminal);
+                        TerminalPatch.info.OriginalText = originalText;
                         TerminalPatch.info.SetTranslatedText(text);
                         TerminalPatch.SetText(TerminalPatch.info.TranslatedText, __instance);
-                        TerminalPatch.info.OriginalText = __instance.currentText;
                     }
                 }
             }
@@ -335,8 +336,6 @@ namespace GameTranslator.Patches
         private static TextTranslationInfo info;
 
         public static HashSet<object> ig = new HashSet<object>();
-
-        private static int texdAdded = 0;
 
         private static FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 

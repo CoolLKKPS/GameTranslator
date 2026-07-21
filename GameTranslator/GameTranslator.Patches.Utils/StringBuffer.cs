@@ -148,7 +148,9 @@ namespace GameTranslator.Patches.Utils
             }
             int num = oldValue.Length;
             int num2 = newValue.Length;
-            for (int i = this.IndexOfWord(oldValue, 0, this.length); i >= 0; i = this.IndexOfWord(oldValue, i + num2, this.length - (i + num2)))
+            int[] lps = new int[num];
+            this.computeLPSArray(oldValue, num, lps);
+            for (int i = this.IndexOfWord(oldValue, 0, this.length, lps); i >= 0; i = this.IndexOfWord(oldValue, i + num2, this.length - (i + num2), lps))
             {
                 this.Remove(i, num);
                 this.Insert(i, newValue);
@@ -172,8 +174,14 @@ namespace GameTranslator.Patches.Utils
             }
             int num = str.Length;
             int[] array = new int[num];
-            int num2 = 0;
             this.computeLPSArray(str, num, array);
+            return this.IndexOfWord(str, startIndex, count, array);
+        }
+
+        private int IndexOfWord(string str, int startIndex, int count, int[] lps)
+        {
+            int num = str.Length;
+            int num2 = 0;
 
             static bool IsWordChar(char c)
             {
@@ -194,13 +202,13 @@ namespace GameTranslator.Patches.Utils
                     {
                         return i - num2;
                     }
-                    num2 = array[num2 - 1];
+                    num2 = lps[num2 - 1];
                 }
                 else if (i < startIndex + count && str[num2] != this.value[i])
                 {
                     if (num2 != 0)
                     {
-                        num2 = array[num2 - 1];
+                        num2 = lps[num2 - 1];
                     }
                     else
                     {

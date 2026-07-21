@@ -2,7 +2,6 @@ using GameTranslator.Patches.Utils;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -13,7 +12,7 @@ namespace GameTranslator.Patches.Translatons
         private readonly TranslationManager _translationManager;
         private readonly ConcurrentQueue<Action> _mainThreadActions;
         private readonly ConcurrentDictionary<string, byte> _immediatelyTranslating;
-        private readonly Dictionary<string, TextStabilizationContext> _stabilizationContexts;
+        private readonly ConcurrentDictionary<string, TextStabilizationContext> _stabilizationContexts;
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, byte>> _pendingStabilizationUIs;
 
         public static AsyncTranslationManager Instance { get; } = new AsyncTranslationManager();
@@ -23,7 +22,7 @@ namespace GameTranslator.Patches.Translatons
             _translationManager = new TranslationManager();
             _mainThreadActions = new ConcurrentQueue<Action>();
             _immediatelyTranslating = new ConcurrentDictionary<string, byte>();
-            _stabilizationContexts = new Dictionary<string, TextStabilizationContext>();
+            _stabilizationContexts = new ConcurrentDictionary<string, TextStabilizationContext>();
             _pendingStabilizationUIs = new ConcurrentDictionary<string, ConcurrentDictionary<object, byte>>();
             _translationManager.JobCompleted += OnTranslationJobCompleted;
             _translationManager.JobFailed += OnTranslationJobFailed;
@@ -55,7 +54,7 @@ namespace GameTranslator.Patches.Translatons
 
         public void QueueTranslation(object ui, string originalText, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
-            if (string.IsNullOrEmpty(originalText) || string.IsNullOrWhiteSpace(originalText)) return;
+            if (string.IsNullOrWhiteSpace(originalText)) return;
             int scope = TranslationScopeHelper.GetScope(ui);
             bool needsReplaceFull = TextTranslate.NeedsReplaceFull(config);
             try
@@ -70,6 +69,7 @@ namespace GameTranslator.Patches.Translatons
                     {
                         info.OriginalText = originalText;
                     }
+                    info.LastTranslator = normalText;
                 }
                 var cachedTranslation = GetCachedTranslation(originalText, config, scope);
                 if (cachedTranslation != null)
@@ -128,8 +128,7 @@ namespace GameTranslator.Patches.Translatons
                             info,
                             normalText,
                             config,
-                            isTranslatable,
-                            true
+                            isTranslatable
                         );
                     }
                 }
@@ -177,7 +176,7 @@ namespace GameTranslator.Patches.Translatons
                         OnTextStabilized(context, stabilizedText);
                         try
                         {
-                            _stabilizationContexts.Remove(GetStabilizationKey(ui, context.OriginalText));
+                            _stabilizationContexts.TryRemove(GetStabilizationKey(ui, context.OriginalText), out _);
                             _immediatelyTranslating.TryRemove(immKey, out _);
                         }
                         catch (Exception ex)
@@ -190,7 +189,7 @@ namespace GameTranslator.Patches.Translatons
                         OnStabilizationFailed(context);
                         try
                         {
-                            _stabilizationContexts.Remove(GetStabilizationKey(ui, context.OriginalText));
+                            _stabilizationContexts.TryRemove(GetStabilizationKey(ui, context.OriginalText), out _);
                             _immediatelyTranslating.TryRemove(immKey, out _);
                         }
                         catch (Exception ex)
@@ -202,7 +201,7 @@ namespace GameTranslator.Patches.Translatons
             else
             {
                 // GameObject is inactive or not a MonoBehaviour
-                _stabilizationContexts.Remove(key);
+                _stabilizationContexts.TryRemove(key, out _);
                 _immediatelyTranslating.TryRemove(immKey, out _);
             }
         }
@@ -267,16 +266,13 @@ namespace GameTranslator.Patches.Translatons
                 return;
             }
             var isTranslatable = context.NormalText == null || context.NormalText.IsTranslatable(stabilizedText, false);
-            var job = new TranslationJob(context.UI, stabilizedText, true, isTranslatable);
-            job.Associate(stabilizedText, context.UI, context.Info, context.NormalText, context.Config, true, true);
             _translationManager.PrimaryEndpoint.EnqueueTranslation(
                 context.UI,
                 stabilizedText,
                 context.Info,
                 context.NormalText,
                 context.Config,
-                isTranslatable,
-                true
+                isTranslatable
             );
         }
 
@@ -312,7 +308,7 @@ namespace GameTranslator.Patches.Translatons
                     string final = job.TranslatedText;
                     if (TextTranslate.NeedsReplaceFull(job.Config))
                         final = TextTranslate.ApplyReplaceFull(job.TranslatedText, job.Config);
-                    foreach (var ui in job.AssociatedUIs)
+                    foreach (var ui in job.AssociatedUIs.Keys)
                     {
                         if (TextTranslate.IsUIObjectValid(ui))
                         {

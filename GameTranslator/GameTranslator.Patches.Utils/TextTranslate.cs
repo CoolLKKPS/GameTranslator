@@ -2,8 +2,9 @@ using BepInEx;
 using BepInEx.Logging;
 using GameTranslator.Patches.Translatons;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using UnityEngine;
 using XUnity.Common.Constants;
 
@@ -11,16 +12,15 @@ namespace GameTranslator.Patches.Utils
 {
     internal class TextTranslate
     {
-        private static readonly Dictionary<string, DateTime> _debugOutputCache = new Dictionary<string, DateTime>();
+        private static readonly ConcurrentDictionary<string, DateTime> _debugOutputCache = new ConcurrentDictionary<string, DateTime>();
         private static readonly TimeSpan _debugOutputInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan _cacheCleanupInterval = TimeSpan.FromMinutes(5);
-        private static DateTime _lastCleanupTime = DateTime.Now;
-        internal static HashSet<object> _translatingFromFinishTyping = new HashSet<object>();
-        private static object _cachedTextWindowTextMesh;
-        private static object _cachedTextWindow;
+        private static long _lastCleanupTicks = DateTime.Now.Ticks;
+        internal static ConcurrentDictionary<object, byte> _translatingFromFinishTyping = new ConcurrentDictionary<object, byte>();
+        internal static object _cachedTextWindowTextMesh;
+        internal static object _cachedTextWindow;
         private static bool _textWindowTextMeshCached;
-        private static Dictionary<object, (string original, string translated)> _typingCache = new Dictionary<object, (string, string)>();
-        internal static bool EnableTypingTranslation = false;
+        private static ConcurrentDictionary<object, (string original, string translated)> _typingCache = new ConcurrentDictionary<object, (string, string)>();
 
         public static void ClearCache()
         {
@@ -40,10 +40,12 @@ namespace GameTranslator.Patches.Utils
 
             var now = DateTime.Now;
 
-            if (now - _lastCleanupTime > _cacheCleanupInterval)
+            // Interlocked
+            var lastCleanup = new DateTime(Interlocked.Read(ref _lastCleanupTicks));
+            if (now - lastCleanup > _cacheCleanupInterval)
             {
                 CleanupDebugCache();
-                _lastCleanupTime = now;
+                Interlocked.Exchange(ref _lastCleanupTicks, now.Ticks);
             }
 
             if (_debugOutputCache.TryGetValue(text, out var lastOutputTime))
@@ -78,7 +80,7 @@ namespace GameTranslator.Patches.Utils
 
             foreach (var key in keysToRemove)
             {
-                _debugOutputCache.Remove(key);
+                _debugOutputCache.TryRemove(key, out _);
             }
 
             if (TranslatePlugin.showOtherDebug.Value && keysToRemove.Count > 0)
@@ -96,6 +98,7 @@ namespace GameTranslator.Patches.Utils
                 var terminalPatchType = Type.GetType("GameTranslator.Patches.TerminalPatch, GameTranslator");
                 if (terminalPatchType != null)
                 {
+                    // This is for other game support
                     var igField = terminalPatchType.GetField("ig", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                     if (igField != null)
                     {
@@ -113,7 +116,7 @@ namespace GameTranslator.Patches.Utils
             return false;
         }
 
-        private static bool IsTextWindowTextMesh(object ui)
+        internal static bool IsTextWindowTextMesh(object ui)
         {
             if (UnityTypes.TextWindow == null || UnityTypes.TextMeshPro == null)
                 return false;
@@ -145,11 +148,8 @@ namespace GameTranslator.Patches.Utils
             return _cachedTextWindowTextMesh != null && object.Equals(_cachedTextWindowTextMesh, ui);
         }
 
-        private static bool IsCallFromTextWindow()
-        {
-            return new System.Diagnostics.StackTrace().GetFrames().Any(
-                x => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType);
-        }
+        [ThreadStatic]
+        internal static int _textWindowCallDepth;
 
         private static string GetPartialTypingTranslation(object ui, string currentPartialText)
         {
@@ -165,16 +165,26 @@ namespace GameTranslator.Patches.Utils
             {
                 var info = ui.GetOrCreateTextTranslationInfo();
                 var config = TranslateConfig.text;
-                string t = Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, config, false);
-                if (string.IsNullOrEmpty(t))
-                    t = Instance.TranslateOrQueue(ui, fullText, info, TranslateConfig.normalText, config, false);
-                bool isAsync = fullText.Length > TranslatePlugin.syncTranslationThreshold.Value;
-                if (!isAsync || t != null)
-                    t = Instance.ApplyPostTranslation(t, fullText, info, TranslateConfig.normalText, config);
-                if (string.IsNullOrEmpty(t) || t == fullText)
-                    return null;
-                cached = (fullText, t);
-                _typingCache[ui] = cached;
+                var normalText = TranslateConfig.normalText;
+                bool savedMustIgnore = info.MustIgnore;
+                info.MustIgnore = false;
+                try
+                {
+                    string t = Instance.TranslateImmediate(ui, fullText, info, normalText, config, false);
+                    if (string.IsNullOrEmpty(t))
+                        t = Instance.TranslateOrQueue(ui, fullText, info, normalText, config, false);
+                    bool isAsync = fullText.Length > TranslatePlugin.syncTranslationThreshold.Value;
+                    if (!isAsync || t != null)
+                        t = Instance.ApplyPostTranslation(t, fullText, info, normalText, config);
+                    if (string.IsNullOrEmpty(t) || t == fullText)
+                        return null;
+                    cached = (fullText, t);
+                    _typingCache[ui] = cached;
+                }
+                finally
+                {
+                    info.MustIgnore = savedMustIgnore;
+                }
             }
 
             float progress = (float)currentPartialText.Length / fullText.Length;
@@ -188,7 +198,7 @@ namespace GameTranslator.Patches.Utils
 
         internal static void ClearTypingCacheForUI(object ui)
         {
-            _typingCache.Remove(ui);
+            _typingCache.TryRemove(ui, out _);
         }
 
         private bool TryTranslateChangedText(object ui, ref string text, out string translated, out TextTranslationInfo info,
@@ -200,11 +210,11 @@ namespace GameTranslator.Patches.Utils
             info = null;
             if (IsTerminalIgnoredUI(ui))
                 return false;
-            if (IsTextWindowTextMesh(ui) && IsCallFromTextWindow())
+            if (IsTextWindowTextMesh(ui) && _textWindowCallDepth > 0)
             {
-                if (!_translatingFromFinishTyping.Contains(ui))
+                if (!_translatingFromFinishTyping.ContainsKey(ui))
                 {
-                    if (EnableTypingTranslation)
+                    if (TranslatePlugin.enableTypingTranslation.Value)
                     {
                         translated = GetPartialTypingTranslation(ui, text);
                         if (translated != null)
@@ -235,7 +245,7 @@ namespace GameTranslator.Patches.Utils
             string currentText = null;
             if (TryTranslateChangedText(ui, ref currentText, out var translated, out var info, normalText, config))
             {
-                this.SetText(ui, translated, true, currentText, info);
+                this.SetText(ui, translated, info);
             }
         }
 
@@ -250,35 +260,9 @@ namespace GameTranslator.Patches.Utils
 
         public string TranslateOrQueue(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
-            if (info != null && (info.IsCurrentlySettingText || info.MustIgnore || info.ShouldIgnore))
-            {
-                return null;
-            }
-
-            text = text ?? ui.GetText(info);
-            if (text.IsNullOrWhiteSpace())
-            {
-                return null;
-            }
-
-            if (info != null && info.IsTranslated)
-            {
-                if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
-                {
-                    if (info.ChangeTime != TextTranslate.ChangeTime)
-                    {
-                        info.Reset(text);
-                    }
-                    else
-                    {
-                        return info.TranslatedText;
-                    }
-                }
-                else
-                {
-                    info.Reset(text);
-                }
-            }
+            string immediate = GuardAndPrepareText(ui, ref text, info, normalText, out bool shouldContinue);
+            if (!shouldContinue)
+                return immediate;
 
             string cachedTranslation = GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.GetCachedTranslation(text, config, TranslationScopeHelper.GetScope(ui));
             if (cachedTranslation != null)
@@ -291,6 +275,7 @@ namespace GameTranslator.Patches.Utils
                 {
                     info.OriginalText = text;
                     info.SetTranslatedText(cachedTranslation);
+                    info.LastTranslator = normalText;
                 }
                 return cachedTranslation;
             }
@@ -299,7 +284,7 @@ namespace GameTranslator.Patches.Utils
             {
                 if (text.Length <= TranslatePlugin.syncTranslationThreshold.Value)
                 {
-                    var translatedText = TranslateImmediate(ui, text, info, normalText, config, ignoreComponentState);
+                    var translatedText = TranslateInternal(ui, text, info, normalText, config, ignoreComponentState);
                     if (translatedText != null)
                     {
                         return translatedText;
@@ -325,6 +310,17 @@ namespace GameTranslator.Patches.Utils
 
         public string TranslateImmediate(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
+            string immediate = GuardAndPrepareText(ui, ref text, info, normalText, out bool shouldContinue);
+            if (!shouldContinue)
+                return immediate;
+
+            return TranslateInternal(ui, text, info, normalText, config, ignoreComponentState);
+        }
+
+        private static string GuardAndPrepareText(object ui, ref string text, TextTranslationInfo info, NormalTextTranslator normalText, out bool shouldContinue)
+        {
+            shouldContinue = false;
+
             if (info != null && (info.IsCurrentlySettingText || info.MustIgnore || info.ShouldIgnore))
             {
                 return null;
@@ -338,7 +334,11 @@ namespace GameTranslator.Patches.Utils
 
             if (info != null && info.IsTranslated)
             {
-                if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
+                if (info.LastTranslator != null && info.LastTranslator != normalText)
+                {
+                    info.Reset(text);
+                }
+                else if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
                 {
                     if (info.ChangeTime != TextTranslate.ChangeTime)
                     {
@@ -355,7 +355,13 @@ namespace GameTranslator.Patches.Utils
                 }
             }
 
-            string text3 = null;
+            shouldContinue = true;
+            return null;
+        }
+
+        private string TranslateInternal(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
+        {
+            string result = null;
             if ((normalText == null || normalText.IsTranslatable(text, false, TranslationScopeHelper.GetScope(ui))) && (ignoreComponentState || ui.IsComponentActive()))
             {
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
@@ -365,15 +371,16 @@ namespace GameTranslator.Patches.Utils
                         TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'");
                     }
                     int scope = TranslationScopeHelper.GetScope(ui);
-                    text3 = normalText.TryTranslate(text, scope);
+                    result = normalText.TryTranslate(text, scope);
                 }
-                if (text3 != null && info != null)
+                if (result != null && info != null)
                 {
                     info.OriginalText = text;
-                    info.SetTranslatedText(text3);
+                    info.SetTranslatedText(result);
+                    info.LastTranslator = normalText;
                 }
             }
-            return text3;
+            return result;
         }
 
         internal static string ApplyReplaceFull(string text, TranslateConfig.TranslateConfigFile config)
@@ -454,7 +461,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        private void SetText(object ui, string text, bool isTranslated, string originalText, TextTranslationInfo info)
+        private void SetText(object ui, string text, TextTranslationInfo info)
         {
             if (info == null || !info.IsCurrentlySettingText)
             {
@@ -512,7 +519,7 @@ namespace GameTranslator.Patches.Utils
                     }
                 }
 
-                return ui != null;
+                return true;
             }
             catch
             {
