@@ -200,12 +200,6 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Utils.Textures.LoadImageImageLoader),
                 typeof(GameTranslator.Patches.Utils.Textures.TextureLoader),
                 typeof(GameTranslator.Patches.Utils.Textures.TgaImageLoader),
-                /*
-                typeof(GameTranslator.Patches.Hooks.TextArea2DHook),
-                typeof(GameTranslator.Patches.Hooks.TextFieldHook),
-                typeof(GameTranslator.Patches.Translatons.ImageTranslationInfo),
-                typeof(GameTranslator.Patches.Utils.SceneManagerLoader),
-                */
                 };
                 var patchNames = patchTypes.Select(t => t.Name).ToList();
                 TranslatePlugin.logger.LogDebug($"Found {patchNames.Count} basic patch types: {string.Join(", ", patchNames)}");

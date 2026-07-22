@@ -235,15 +235,6 @@ namespace GameTranslator.Patches.Utils
                 }
                 if (result != null)
                 {
-                    if (!normalText.IsScopedTranslation(text, scope) && config.shouldTranslate && config.normal.Count > 0)
-                    {
-                        StringBuffer buffer = new StringBuffer(result);
-                        foreach (KeyValuePair<string, string> kv in config._normalOrdered)
-                        {
-                            buffer.ReplaceFull(kv.Key, kv.Value);
-                        }
-                        result = buffer.ToString();
-                    }
                     if (info != null)
                     {
                         info.OriginalText = text;

@@ -1,7 +1,6 @@
 using GameTranslator.Patches.Utils;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -211,15 +210,6 @@ namespace GameTranslator.Patches.Translatons
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false, scope))
                 {
                     translatedText = normalText.TryTranslate(translatedText, scope);
-                }
-                if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.shouldTranslate && config.normal.Count > 0)
-                {
-                    StringBuffer buffer = new StringBuffer(translatedText);
-                    foreach (KeyValuePair<string, string> kv in config._normalOrdered)
-                    {
-                        buffer.ReplaceFull(kv.Key, kv.Value);
-                    }
-                    translatedText = buffer.ToString();
                 }
             }
             catch (System.Threading.ThreadAbortException)
