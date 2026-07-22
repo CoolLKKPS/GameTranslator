@@ -1,10 +1,10 @@
 ## v2.2.2
 
-- Made some fixes for HUD and GUI translate
-- Rework Readme
-- Added TextWindowHook basic patch
+Breaking change:
 - [Config] ShortCutCommand config name changed, setting will be reset to default value, but won't affect old config
-- [SpecialText] SpecialText will now always work after normal-translate, no matter normal-translate handle the text or not
+- [SpecialText/HUDText/ItemText] Removed, translator should **ONLY** affect UI, and i don't want to maintain many translate modules for now
+- Some fixes and code cleanup
+- Rework Readme
 
 ## v2.2.1
 
