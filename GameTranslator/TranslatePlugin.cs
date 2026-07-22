@@ -129,11 +129,6 @@ namespace GameTranslator
             TranslateExtensions.Load();
         }
 
-        internal static List<char> getShouldRemoveChars()
-        {
-            return TranslatePlugin.shouldRemoveChar.Value.ToCharArray().ToList<char>();
-        }
-
         private void ApplyBasicPatches()
         {
             try

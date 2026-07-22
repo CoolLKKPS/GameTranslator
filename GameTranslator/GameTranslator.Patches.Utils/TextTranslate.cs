@@ -156,34 +156,6 @@ namespace GameTranslator.Patches.Utils
                     return null;
                 }
 
-                try
-                {
-                    if (info != null)
-                    {
-                        info.IsCurrentlySettingText = true;
-                    }
-
-                    ui.SetText(cachedTranslation, info);
-                }
-                catch (System.NullReferenceException)
-                {
-                }
-                catch (System.IndexOutOfRangeException ex)
-                {
-                    TranslatePlugin.logger.LogError($"IndexOutOfRangeException in cached translation: {ex.Message}");
-                }
-                catch (System.Exception ex)
-                {
-                    TranslatePlugin.logger.LogError($"Exception in cached translation: {ex.Message}");
-                }
-                finally
-                {
-                    if (info != null)
-                    {
-                        info.IsCurrentlySettingText = false;
-                    }
-                }
-
                 return cachedTranslation;
             }
 

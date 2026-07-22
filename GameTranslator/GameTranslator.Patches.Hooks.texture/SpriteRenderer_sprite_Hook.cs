@@ -26,10 +26,11 @@ namespace GameTranslator.Patches.Hooks.texture
         {
             bool imageHooksEnabled = TextureTranslate.ImageHooksEnabled;
             TextureTranslate.ImageHooksEnabled = false;
-            Texture2D texture;
+            Texture2D texture = null;
             try
             {
-                texture = value.texture;
+                if (value != null)
+                    texture = value.texture;
             }
             finally
             {

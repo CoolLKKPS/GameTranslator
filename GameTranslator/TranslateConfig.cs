@@ -23,25 +23,25 @@ namespace GameTranslator
 
         public static void Load()
         {
-            TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate");
+            TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true);
             TranslateConfig.terminal.shouldTranslate = TranslatePlugin.shouldTranslateTerimal.Value;
             TranslateConfig.terminalText = new NormalTextTranslator(TranslateConfig.terminal.ConfigFileName + ".cfg");
             TranslateConfig.terminalText.Load();
-            TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate");
+            TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true);
             TranslateConfig.cmdPyText = new NormalTextTranslator(TranslateConfig.cmd_py.ConfigFileName + ".cfg");
             TranslateConfig.cmdPyText.Load();
-            TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate");
+            TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true);
             TranslateConfig.cmdZhText = new NormalTextTranslator(TranslateConfig.cmd_zh.ConfigFileName + ".cfg");
             TranslateConfig.cmdZhText.Load();
-            TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate");
+            TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate", true);
             TranslateConfig.gui.shouldTranslate = TranslatePlugin.shouldTranslateGui.Value;
             TranslateConfig.guiText = new NormalTextTranslator(TranslateConfig.gui.ConfigFileName + ".cfg");
             TranslateConfig.guiText.Load();
-            TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate");
+            TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate", true);
             TranslateConfig.interactiveTerminalAPI.shouldTranslate = TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value;
             TranslateConfig.interactiveTerminalAPIText = new NormalTextTranslator(TranslateConfig.interactiveTerminalAPI.ConfigFileName + ".cfg");
             TranslateConfig.interactiveTerminalAPIText.Load();
-            TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate");
+            TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate", true);
             TranslateConfig.normal.shouldTranslate = TranslatePlugin.shouldTranslateNormalText.Value;
             TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
             TranslateConfig.normalText.Load();
@@ -296,11 +296,6 @@ namespace GameTranslator
             }
         }
 
-        private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName)
-        {
-            return TranslateConfig.CreateNewConfig(fileName, true);
-        }
-
         public static TranslateConfig.TranslateConfigFile normal;
 
         public static TranslateConfig.TranslateConfigFile terminal;
@@ -354,7 +349,6 @@ namespace GameTranslator
                 this.translatePairs.Clear();
                 this._translatePairLastAccess.Clear();
                 this.normal.Clear();
-                this.special.Clear();
                 this.regexTranslations.Clear();
                 this.splitterRegexTranslations.Clear();
                 Dictionary<string, int> normalKeyLineOrder = new Dictionary<string, int>();
@@ -405,16 +399,11 @@ namespace GameTranslator
                             if (this.normal.ContainsKey(text2))
                             {
                                 this.normal[text2] = text3;
-                                this.special[text3] = text2;
                             }
                             else
                             {
                                 this.normal.Add(text2, text3);
                                 normalKeyLineOrder[text2] = i;
-                                if (!this.special.ContainsKey(text3))
-                                {
-                                    this.special.Add(text3, text2);
-                                }
                             }
                             if (text2.Length < this.shouldTranslateMinLength)
                             {
@@ -498,8 +487,6 @@ namespace GameTranslator
             public bool shouldLoad = true;
 
             public IDictionary<string, string> normal = new ConcurrentDictionary<string, string>();
-
-            public IDictionary<string, string> special = new ConcurrentDictionary<string, string>();
 
             public static HashSet<TranslateConfig.TranslateConfigFile> configs = new HashSet<TranslateConfig.TranslateConfigFile>();
 

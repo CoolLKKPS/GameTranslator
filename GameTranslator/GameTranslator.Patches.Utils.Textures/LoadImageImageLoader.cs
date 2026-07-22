@@ -20,8 +20,7 @@ namespace GameTranslator.Patches.Utils.Textures
 
         public bool Verify()
         {
-            return UnityTypes.Texture2D_Methods.LoadImage != null
-                || UnityTypes.ImageConversion_Methods.LoadImage != null;
+            return UnityTypes.Texture2D_Methods.LoadImage != null || UnityTypes.ImageConversion_Methods.LoadImage != null;
         }
     }
 }

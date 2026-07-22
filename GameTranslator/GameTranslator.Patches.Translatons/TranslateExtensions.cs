@@ -116,21 +116,17 @@ namespace GameTranslator.Patches.Translatons
         {
             int width = texture.width;
             int height = texture.height;
-            byte[] array = null;
-            if (array == null)
-            {
-                RenderTexture temporary = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Default);
-                GL.Clear(false, true, new Color(0f, 0f, 0f, 0f));
-                Graphics.Blit(texture, temporary);
-                RenderTexture active = RenderTexture.active;
-                RenderTexture.active = temporary;
-                Texture2D texture2D = new Texture2D(width, height);
-                texture2D.ReadPixels(new Rect(0f, 0f, (float)temporary.width, (float)temporary.height), 0, 0);
-                array = TranslateExtensions.EncodeToPNGEx(texture2D);
-                global::UnityEngine.Object.DestroyImmediate(texture2D);
-                RenderTexture.active = ((active == temporary) ? null : active);
-                RenderTexture.ReleaseTemporary(temporary);
-            }
+            RenderTexture temporary = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Default);
+            GL.Clear(false, true, new Color(0f, 0f, 0f, 0f));
+            Graphics.Blit(texture, temporary);
+            RenderTexture active = RenderTexture.active;
+            RenderTexture.active = temporary;
+            Texture2D texture2D = new Texture2D(width, height);
+            texture2D.ReadPixels(new Rect(0f, 0f, (float)temporary.width, (float)temporary.height), 0, 0);
+            byte[] array = TranslateExtensions.EncodeToPNGEx(texture2D);
+            global::UnityEngine.Object.DestroyImmediate(texture2D);
+            RenderTexture.active = ((active == temporary) ? null : active);
+            RenderTexture.ReleaseTemporary(temporary);
             return new TextureDataResult(array);
         }
 

@@ -142,12 +142,9 @@ namespace GameTranslator.Patches.Translatons
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(translatedText) || translatedText.Equals(job.OriginalText))
-                    {
-                        job.State = TranslationJobState.Succeeded;
-                        job.TranslatedText = null;
-                        Manager?.InvokeJobCompleted(job);
-                    }
+                    job.State = TranslationJobState.Succeeded;
+                    job.TranslatedText = null;
+                    Manager?.InvokeJobCompleted(job);
                 }
             }
             catch (Exception ex)
@@ -178,18 +175,11 @@ namespace GameTranslator.Patches.Translatons
                 return count < 3;
             }
 
-            if (ShouldSkipTranslation(untranslatedText))
+            if (string.IsNullOrEmpty(untranslatedText))
             {
                 return false;
             }
             return true;
-        }
-
-        private bool ShouldSkipTranslation(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return true;
-
-            return false;
         }
 
         private void RegisterTranslationFailure(string untranslatedText, int scope = -1)

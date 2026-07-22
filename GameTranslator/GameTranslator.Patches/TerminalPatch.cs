@@ -142,7 +142,6 @@ namespace GameTranslator.Patches
                 {
                     if (!__instance.terminalNodes.allKeywords[i].isVerb || !(bool)TerminalPatch.hasGottenVerb.GetValue(__instance))
                     {
-                        bool accessTerminalObjects = __instance.terminalNodes.allKeywords[i].accessTerminalObjects;
                         if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).EqualsIgnoreCase(playerWord) ||
                             TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).EqualsIgnoreCase(playerWord))
                         {

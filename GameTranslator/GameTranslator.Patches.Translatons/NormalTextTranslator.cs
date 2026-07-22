@@ -346,11 +346,12 @@ namespace GameTranslator.Patches.Translatons
                 if (text2 == null)
                 {
                     string text3 = text;
+                    string regexCacheKey = text3;
                     try
                     {
                         bool skipRegex = scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedCheck)
-                            ? scopedCheck.FailedRegexLookups.ContainsKey(text3)
-                            : this._failedRegexLookups.ContainsKey(text3);
+                            ? scopedCheck.FailedRegexLookups.ContainsKey(regexCacheKey)
+                            : this._failedRegexLookups.ContainsKey(regexCacheKey);
 
                         if (!skipRegex)
                         {
@@ -401,11 +402,13 @@ namespace GameTranslator.Patches.Translatons
                                 }
                             }
 
+                            if (text3 != regexCacheKey) regexMatched = true;
+
                             if (!regexMatched)
                             {
                                 if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedFail))
                                 {
-                                    scopedFail.FailedRegexLookups.TryAdd(text3, 0);
+                                    scopedFail.FailedRegexLookups.TryAdd(regexCacheKey, 0);
                                     if (scopedFail.FailedRegexLookups.Count > 10000)
                                     {
                                         scopedFail.FailedRegexLookups.Clear();
@@ -414,7 +417,7 @@ namespace GameTranslator.Patches.Translatons
                                 }
                                 else
                                 {
-                                    this._failedRegexLookups.TryAdd(text3, 0);
+                                    this._failedRegexLookups.TryAdd(regexCacheKey, 0);
                                     if (this._failedRegexLookups.Count > 10000)
                                     {
                                         this._failedRegexLookups.Clear();
@@ -636,12 +639,6 @@ namespace GameTranslator.Patches.Translatons
             internal List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
             internal HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
             internal ConcurrentDictionary<string, byte> FailedRegexLookups { get; set; } = new ConcurrentDictionary<string, byte>();
-        }
-
-        internal bool IsScopedTranslation(string text, int scope)
-        {
-            return scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
-                && scoped.Translations.ContainsKey(text);
         }
 
         internal ScopedTranslationData GetOrCreateScopedData(int scope)

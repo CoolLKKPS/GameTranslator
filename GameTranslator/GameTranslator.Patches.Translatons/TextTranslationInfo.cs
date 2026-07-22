@@ -83,7 +83,7 @@ namespace GameTranslator.Patches.Translatons
                             if (!TextTranslationInfo._processedFonts.Contains(originalFont))
                             {
                                 TextTranslationInfo._processedFonts.Add(originalFont);
-                                foreach (char c in TranslatePlugin.getShouldRemoveChars())
+                                foreach (char c in TranslatePlugin.shouldRemoveChar.Value.ToCharArray())
                                 {
                                     originalFont.TryRemoveCharacter((uint)c);
                                 }

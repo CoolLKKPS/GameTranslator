@@ -110,6 +110,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
+        // This can be simplified but i will keep it
         private void ProcessPendingJobs(object state)
         {
             KickoffTranslations();
