@@ -1,4 +1,3 @@
-using GameTranslator.Patches;
 using GameTranslator.Patches.Translatons;
 using GameTranslator.Patches.Utils;
 using System;
@@ -24,14 +23,6 @@ namespace GameTranslator
 
         public static void Load()
         {
-            TranslateConfig.hud = TranslateConfig.CreateNewConfig("HUD-Translate");
-            TranslateConfig.hud.shouldTranslate = TranslatePlugin.shouldTranslateHUD.Value;
-            TranslateConfig.hudText = new NormalTextTranslator(TranslateConfig.hud.ConfigFileName + ".cfg");
-            TranslateConfig.hudText.Load();
-            TranslateConfig.items = TranslateConfig.CreateNewConfig("Item-Translate");
-            TranslateConfig.items.shouldTranslate = TranslatePlugin.shouldTranslateItems.Value;
-            TranslateConfig.itemsText = new NormalTextTranslator(TranslateConfig.items.ConfigFileName + ".cfg");
-            TranslateConfig.itemsText.Load();
             TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate");
             TranslateConfig.terminal.shouldTranslate = TranslatePlugin.shouldTranslateTerimal.Value;
             TranslateConfig.terminalText = new NormalTextTranslator(TranslateConfig.terminal.ConfigFileName + ".cfg");
@@ -42,10 +33,6 @@ namespace GameTranslator
             TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate");
             TranslateConfig.cmdZhText = new NormalTextTranslator(TranslateConfig.cmd_zh.ConfigFileName + ".cfg");
             TranslateConfig.cmdZhText.Load();
-            TranslateConfig.text = TranslateConfig.CreateNewConfig("SpecialText-Translate");
-            TranslateConfig.text.shouldTranslate = TranslatePlugin.shouldTranslateSpecialText.Value;
-            TranslateConfig.textText = new NormalTextTranslator(TranslateConfig.text.ConfigFileName + ".cfg");
-            TranslateConfig.textText.Load();
             TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate");
             TranslateConfig.gui.shouldTranslate = TranslatePlugin.shouldTranslateGui.Value;
             TranslateConfig.guiText = new NormalTextTranslator(TranslateConfig.gui.ConfigFileName + ".cfg");
@@ -78,6 +65,7 @@ namespace GameTranslator
                 }
             }
             GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
+            GameTranslator.Patches.Translatons.Manipulator.DefaultTextComponentManipulator.ClearCache();
             if (TranslatePlugin.enablePollingCheck?.Value ?? false)
             {
                 _pollingTimer = new Timer(_ => OnDirectoryUpdated(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
@@ -94,8 +82,7 @@ namespace GameTranslator
             _pollingTimer?.Dispose();
             _pollingTimer = null;
             GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
-            GrabbableObjectPatcher.ClearCache();
-            GameTranslator.Patches.Utils.TextTranslate.ClearCache();
+            GameTranslator.Patches.Translatons.Manipulator.DefaultTextComponentManipulator.ClearCache();
         }
 
         private static void OnDirectoryUpdated()
@@ -126,7 +113,7 @@ namespace GameTranslator
                                         {
                                             moduleTranslator.Load();
                                         }
-                                        Interlocked.Increment(ref TextTranslate.ChangeTime);
+                                        TextTranslate.ChangeTime += 1L;
                                         hasChanges = true;
                                         break;
                                     }
@@ -150,7 +137,7 @@ namespace GameTranslator
                     if (hasChanges)
                     {
                         GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
-                        GrabbableObjectPatcher.ClearCache();
+                        GameTranslator.Patches.Translatons.Manipulator.DefaultTextComponentManipulator.ClearCache();
                         TranslatePlugin.logger.LogInfo("Translate files reloaded due to file changes.");
                     }
                 }
@@ -186,13 +173,10 @@ namespace GameTranslator
             string text5;
             try
             {
-                // Interlocked
-                var now = DateTime.Now;
-                var lastCleanup = new DateTime(Interlocked.Read(ref TranslateConfig._lastCleanupTicks));
-                if (now - lastCleanup > TranslateConfig.CLEANUP_INTERVAL)
+                if (DateTime.Now - TranslateConfig._lastCleanupTime > TranslateConfig.CLEANUP_INTERVAL)
                 {
                     TranslateConfig.CleanupTranslatePairs();
-                    Interlocked.Exchange(ref TranslateConfig._lastCleanupTicks, now.Ticks);
+                    TranslateConfig._lastCleanupTime = DateTime.Now;
                 }
                 if (!file.shouldTranslate)
                 {
@@ -255,21 +239,9 @@ namespace GameTranslator
             {
                 return TranslateConfig.normalText;
             }
-            if (file == TranslateConfig.hud)
-            {
-                return TranslateConfig.hudText;
-            }
-            if (file == TranslateConfig.items)
-            {
-                return TranslateConfig.itemsText;
-            }
             if (file == TranslateConfig.terminal)
             {
                 return TranslateConfig.terminalText;
-            }
-            if (file == TranslateConfig.text)
-            {
-                return TranslateConfig.textText;
             }
             if (file == TranslateConfig.cmd_py)
             {
@@ -331,13 +303,7 @@ namespace GameTranslator
 
         public static TranslateConfig.TranslateConfigFile normal;
 
-        public static TranslateConfig.TranslateConfigFile hud;
-
-        public static TranslateConfig.TranslateConfigFile items;
-
         public static TranslateConfig.TranslateConfigFile terminal;
-
-        public static TranslateConfig.TranslateConfigFile text;
 
         public static TranslateConfig.TranslateConfigFile cmd_py;
 
@@ -349,17 +315,11 @@ namespace GameTranslator
 
         public static NormalTextTranslator normalText;
 
-        public static NormalTextTranslator hudText;
-
         public static NormalTextTranslator guiText;
 
         public static TextureTranslationCache cache;
 
-        public static NormalTextTranslator itemsText;
-
         public static NormalTextTranslator terminalText;
-
-        public static NormalTextTranslator textText;
 
         public static NormalTextTranslator cmdPyText;
 
@@ -367,7 +327,7 @@ namespace GameTranslator
 
         public static NormalTextTranslator interactiveTerminalAPIText;
 
-        private static long _lastCleanupTicks = DateTime.Now.Ticks;
+        private static DateTime _lastCleanupTime = DateTime.Now;
 
         private static readonly TimeSpan CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
 

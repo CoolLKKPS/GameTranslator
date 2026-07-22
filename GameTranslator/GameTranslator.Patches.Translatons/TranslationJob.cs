@@ -31,7 +31,6 @@ namespace GameTranslator.Patches.Translatons
         public void Associate(object ui, object info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
         {
             AssociatedUIs.TryAdd(ui, 0);
-
             TranslationInfo = info;
             NormalText = normalText;
             Config = config;

@@ -48,7 +48,7 @@ namespace GameTranslator.Patches.Utils
                                     flag = false;
                                     continue;
                                 }
-                                if (i + 1 >= length || i + 2 >= length || i + 3 >= length || i + 4 >= length)
+                                if (i + 4 >= length)
                                 {
                                     throw new Exception("Invalid unicode escape sequence at position " + i + " in line: " + str);
                                 }

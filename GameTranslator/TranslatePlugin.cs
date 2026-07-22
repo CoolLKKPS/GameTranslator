@@ -29,8 +29,6 @@ namespace GameTranslator
             HookingHelper.PatchAll(ImageHooks.Sprite, false);
             HookingHelper.PatchAll(ImageHooks.SpriteRenderer, false);
             this.ApplyBasicPatches();
-            this.ApplyGrabbableObjectPatch();
-            this.ApplyHUDManagerPatch();
             this.ApplyTerminalPatch();
             this.ApplyInteractiveTerminalAPIPatch();
             if (TranslatePlugin.replaceUnsupportedCharacters.Value)
@@ -85,27 +83,22 @@ namespace GameTranslator
             TranslatePlugin.enableFileWatcher = base.Config.Bind<bool>("Debug", "Enable File Watcher", false, "If true, enable file system watcher for file updates");
             TranslatePlugin.enablePollingCheck = base.Config.Bind<bool>("Debug", "Enable Polling Check", false, "If true, enable the 10-seconds polling fallback for file updates");
             TranslatePlugin.replaceUnsupportedCharacters = base.Config.Bind<bool>("Debug", "Replace Unsupported Characters", false, "Define whether to replace unsupported characters with Unicode character u25A1");
-            TranslatePlugin.enableTypingTranslation = base.Config.Bind<bool>("Debug", "Enable Typing Translation", false, "Define whether to enable typing translation");
+            TranslatePlugin.enableTypingTranslation = base.Config.Bind<bool>("Debug", "Enable Typing Translation", false, "Define whether to display translated text letter-by-letter during the typing animation instead of waiting for the animation to complete");
             TranslatePlugin.cacheUnmodifiedTextures = base.Config.Bind<bool>("Debug", "Cache Unmodified Textures", false, "Define whether to cache textures that have not been modified");
             TranslatePlugin.stabilizationMinTextLength = base.Config.Bind<int>("Debug", "Stabilization Min Text Length", 100, "Define minimum text length to trigger stabilization. Set to 0 to disable stabilization");
             TranslatePlugin.stabilizationDelay = base.Config.Bind<float>("Debug", "Stabilization Delay", 0.9f, "Define delay in seconds between stabilization checks. Must be greater than 0");
             TranslatePlugin.stabilizationMaxRetries = base.Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
-            TranslatePlugin.enableGrabbableObjectPatch = base.Config.Bind<bool>("Debug", "Enable GrabbableObject Patch", true, "Define whether to patch GrabbableObject");
-            TranslatePlugin.enableHUDManagerPatch = base.Config.Bind<bool>("Debug", "Enable HUDManager Patch", true, "Define whether to patch HUDManager");
             TranslatePlugin.enableTerminalPatch = base.Config.Bind<bool>("Debug", "Enable Terminal Patch", true, "Define whether to patch Terminal");
             TranslatePlugin.changeFont = base.Config.Bind<bool>("Font", "Change Font", false, "Define whether to change the font");
             TranslatePlugin.fallbackFontTextMeshPro = base.Config.Bind<string>("Font", "FallbackFontTextMeshPro", "", "Define the fallback font file used");
             TranslatePlugin.shouldRemoveChar = base.Config.Bind<string>("Font", "Custom Characters", "", "Define what vanilla characters will use custom ones");
             TranslatePlugin.language = base.Config.Bind<string>("General", "Language", "Default", "Define what language folder is used");
             TranslatePlugin.shouldTranslateNormalText = base.Config.Bind<bool>("General", "Translate Normal Text", true, "Define whether to use Normal Translate method");
-            TranslatePlugin.shouldTranslateSpecialText = base.Config.Bind<bool>("General", "Translate Special Text", false, "Define whether to use SpecialText Translate method");
             TranslatePlugin.shouldTranslateTerimal = base.Config.Bind<bool>("General", "Translate Terminal", false, "Define whether translate Terminal");
             TranslatePlugin.shouldTranslateInteractiveTerminalAPI = base.Config.Bind<bool>("General", "Translate InteractiveTerminalAPI", false, "Define whether translate InteractiveTerminalAPI");
             TranslatePlugin.TerimalCanUseShortCutOne = base.Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category ZH", false, "Define whether the terminal can use category ZH shortcut commands");
             TranslatePlugin.TerimalCanUseShortCutTwo = base.Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category PY", false, "Define whether the terminal can use category PY shortcut commands");
             TranslatePlugin.shouldTranslateGui = base.Config.Bind<bool>("General", "Translate Gui", false, "Define whether translate Gui");
-            TranslatePlugin.shouldTranslateItems = base.Config.Bind<bool>("General", "Translate Items", false, "Define whether translate Items");
-            TranslatePlugin.shouldTranslateHUD = base.Config.Bind<bool>("General", "Translate HUD", false, "Define whether translate HUD");
             TranslatePlugin.changeTexture = base.Config.Bind<bool>("Texture", "Change Texture", false, "Define whether to change the texture");
             TranslatePlugin.cacheTexturesInMemory = base.Config.Bind<bool>("Texture", "Cache Textures In Memory", true, "Define whether to cache texture data in memory for faster loading");
             TranslatePlugin.disableDuplicateTextureCheck = base.Config.Bind<bool>("Texture", "Disable Duplicate Texture Check", true, "Define whether to disable duplicate texture name check");
@@ -151,8 +144,6 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.GuiContentHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProUGUIHook),
-                typeof(GameTranslator.Patches.Hooks.TextWindowHook),
-                typeof(GameTranslator.Patches.Hooks.TextWindow_FinishTyping_Hook),
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextMeshHook),
@@ -251,46 +242,6 @@ namespace GameTranslator
             }
         }
 
-        private void ApplyGrabbableObjectPatch()
-        {
-            try
-            {
-                if (TranslatePlugin.enableGrabbableObjectPatch != null && TranslatePlugin.enableGrabbableObjectPatch.Value)
-                {
-                    this.harmony.PatchAll(typeof(GameTranslator.Patches.GrabbableObjectPatcher));
-                    TranslatePlugin.logger?.LogInfo("GrabbableObject patch applied successfully");
-                }
-                else
-                {
-                    TranslatePlugin.logger?.LogInfo("GrabbableObject patch disabled by config");
-                }
-            }
-            catch (Exception ex)
-            {
-                TranslatePlugin.logger?.LogWarning($"Error applying GrabbableObject patch: {ex.Message}");
-            }
-        }
-
-        private void ApplyHUDManagerPatch()
-        {
-            try
-            {
-                if (TranslatePlugin.enableHUDManagerPatch != null && TranslatePlugin.enableHUDManagerPatch.Value)
-                {
-                    this.harmony.PatchAll(typeof(GameTranslator.Patches.HUDManagerPatcher));
-                    TranslatePlugin.logger?.LogInfo("HUDManager patch applied successfully");
-                }
-                else
-                {
-                    TranslatePlugin.logger?.LogInfo("HUDManager patch disabled by config");
-                }
-            }
-            catch (Exception ex)
-            {
-                TranslatePlugin.logger?.LogWarning($"Error applying HUDManager patch: {ex.Message}");
-            }
-        }
-
         private void ApplyTerminalPatch()
         {
             try
@@ -365,10 +316,6 @@ namespace GameTranslator
 
         public static ConfigEntry<int> stabilizationMaxRetries;
 
-        public static ConfigEntry<bool> enableGrabbableObjectPatch;
-
-        public static ConfigEntry<bool> enableHUDManagerPatch;
-
         public static ConfigEntry<bool> enableTerminalPatch;
 
         public static ConfigEntry<bool> changeFont;
@@ -381,8 +328,6 @@ namespace GameTranslator
 
         public static ConfigEntry<bool> shouldTranslateNormalText;
 
-        public static ConfigEntry<bool> shouldTranslateSpecialText;
-
         public static ConfigEntry<bool> shouldTranslateTerimal;
 
         public static ConfigEntry<bool> shouldTranslateInteractiveTerminalAPI;
@@ -392,10 +337,6 @@ namespace GameTranslator
         public static ConfigEntry<bool> TerimalCanUseShortCutTwo;
 
         public static ConfigEntry<bool> shouldTranslateGui;
-
-        public static ConfigEntry<bool> shouldTranslateItems;
-
-        public static ConfigEntry<bool> shouldTranslateHUD;
 
         public static ConfigEntry<bool> changeTexture;
 

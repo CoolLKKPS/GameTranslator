@@ -69,7 +69,7 @@ namespace GameTranslator.Patches.Translatons
                     {
                         this.RegisterImageFromFile(text);
                     }
-                    Interlocked.Increment(ref TextureTranslate.ChangeTime);
+                    TextureTranslate.ChangeTime += 1L;
                     this.CleanupInvalidEntries();
                     float realtimeSinceStartup2 = Time.realtimeSinceStartup;
                     XuaLogger.AutoTranslator.Debug(string.Format("Loaded texture files (took {0} seconds)", Math.Round((double)(realtimeSinceStartup2 - realtimeSinceStartup), 2)));

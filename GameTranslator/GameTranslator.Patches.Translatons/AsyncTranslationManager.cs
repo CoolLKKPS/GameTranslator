@@ -2,7 +2,6 @@ using GameTranslator.Patches.Utils;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Threading;
 using UnityEngine;
 
 namespace GameTranslator.Patches.Translatons
@@ -56,7 +55,6 @@ namespace GameTranslator.Patches.Translatons
         {
             if (string.IsNullOrWhiteSpace(originalText)) return;
             int scope = TranslationScopeHelper.GetScope(ui);
-            bool needsReplaceFull = TextTranslate.NeedsReplaceFull(config);
             try
             {
                 if (info != null)
@@ -69,13 +67,10 @@ namespace GameTranslator.Patches.Translatons
                     {
                         info.OriginalText = originalText;
                     }
-                    info.LastTranslator = normalText;
                 }
                 var cachedTranslation = GetCachedTranslation(originalText, config, scope);
                 if (cachedTranslation != null)
                 {
-                    if (needsReplaceFull)
-                        cachedTranslation = TextTranslate.ApplyReplaceFull(cachedTranslation, config);
                     if (TextTranslate.IsUIObjectValid(ui))
                     {
                         _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, cachedTranslation, originalText, info, TextTranslate.ChangeTime));
@@ -87,12 +82,11 @@ namespace GameTranslator.Patches.Translatons
                     var translatedText = TranslationEndpointManager.TranslateText(originalText, normalText, config, scope);
                     if (!string.IsNullOrEmpty(translatedText) && !translatedText.Equals(originalText))
                     {
-                        var finalText = needsReplaceFull ? TextTranslate.ApplyReplaceFull(translatedText, config) : translatedText;
                         string cacheKey = TranslationEndpointManager.GetCacheKey(originalText, config, scope);
                         _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, translatedText);
                         if (TextTranslate.IsUIObjectValid(ui))
                         {
-                            _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, finalText, originalText, info, TextTranslate.ChangeTime));
+                            _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, translatedText, originalText, info, TextTranslate.ChangeTime));
                         }
                     }
                     return;
@@ -112,7 +106,7 @@ namespace GameTranslator.Patches.Translatons
                             var cached = GetCachedTranslation(originalText, config, scope);
                             if (cached != null && TextTranslate.IsUIObjectValid(ui))
                             {
-                                _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, needsReplaceFull ? TextTranslate.ApplyReplaceFull(cached, config) : cached, originalText, info, TextTranslate.ChangeTime));
+                                _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, cached, originalText, info, TextTranslate.ChangeTime));
                             }
                             else if (cached == null)
                             {
@@ -260,8 +254,6 @@ namespace GameTranslator.Patches.Translatons
             var cachedTranslation = GetCachedTranslation(stabilizedText, context.Config, TranslationScopeHelper.GetScope(context.UI));
             if (cachedTranslation != null)
             {
-                if (TextTranslate.NeedsReplaceFull(context.Config))
-                    cachedTranslation = TextTranslate.ApplyReplaceFull(cachedTranslation, context.Config);
                 SafeUpdateUI(context.UI, cachedTranslation, stabilizedText, context.Info, context.Info?.ChangeTime ?? TextTranslate.ChangeTime);
                 return;
             }
@@ -306,8 +298,6 @@ namespace GameTranslator.Patches.Translatons
                 if (!string.IsNullOrEmpty(job.TranslatedText))
                 {
                     string final = job.TranslatedText;
-                    if (TextTranslate.NeedsReplaceFull(job.Config))
-                        final = TextTranslate.ApplyReplaceFull(job.TranslatedText, job.Config);
                     foreach (var ui in job.AssociatedUIs.Keys)
                     {
                         if (TextTranslate.IsUIObjectValid(ui))
@@ -326,7 +316,7 @@ namespace GameTranslator.Patches.Translatons
                         }
                     }
                     string cacheKey = TranslationEndpointManager.GetCacheKey(job.OriginalText, job.Config, job.Scope);
-                    _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, job.TranslatedText);
+                    _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, final);
                 }
             }
             catch (Exception ex)
@@ -407,7 +397,7 @@ namespace GameTranslator.Patches.Translatons
             _stabilizationContexts.Clear();
             _immediatelyTranslating.Clear();
             _pendingStabilizationUIs.Clear();
-            Interlocked.Increment(ref TextTranslate.ChangeTime);
+            TextTranslate.ChangeTime += 1L;
         }
 
         private string GetStabilizationKey(object ui, string text)

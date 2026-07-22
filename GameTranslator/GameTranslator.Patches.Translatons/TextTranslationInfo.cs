@@ -25,8 +25,6 @@ namespace GameTranslator.Patches.Translatons
 
         public bool MustIgnore { get; set; }
 
-        internal NormalTextTranslator LastTranslator { get; set; }
-
         public long ChangeTime
         {
             get

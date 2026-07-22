@@ -342,10 +342,7 @@ namespace GameTranslator.Patches.Translatons
             try
             {
                 NormalTextTranslator.CheckAndCleanupRegexCache();
-                lock (this._regexLock)
-                {
-                    this._translations.TryGetValue(text, out text2);
-                }
+                this._translations.TryGetValue(text, out text2);
                 if (text2 == null)
                 {
                     string text3 = text;
@@ -453,13 +450,9 @@ namespace GameTranslator.Patches.Translatons
 
         private static void CheckAndCleanupRegexCache()
         {
-            lock (NormalTextTranslator._cleanupLock)
+            if (DateTime.Now - NormalTextTranslator._lastRegexCacheCleanupTime <= NormalTextTranslator.REGEX_CACHE_CLEANUP_INTERVAL)
             {
-                if (DateTime.Now - NormalTextTranslator._lastRegexCacheCleanupTime <= NormalTextTranslator.REGEX_CACHE_CLEANUP_INTERVAL)
-                {
-                    return;
-                }
-                NormalTextTranslator._lastRegexCacheCleanupTime = DateTime.Now;
+                return;
             }
             try
             {
@@ -502,6 +495,8 @@ namespace GameTranslator.Patches.Translatons
                         TranslatePlugin.logger.LogInfo($"Cleaned {removedCount} regex cache entries. Remaining: {NormalTextTranslator._regexCache.Count}");
                     }
                 }
+
+                NormalTextTranslator._lastRegexCacheCleanupTime = DateTime.Now;
             }
             catch (Exception ex)
             {
@@ -663,8 +658,6 @@ namespace GameTranslator.Patches.Translatons
         private static readonly ConcurrentDictionary<string, DateTime> _regexCacheLastAccess = new ConcurrentDictionary<string, DateTime>();
 
         private static DateTime _lastRegexCacheCleanupTime = DateTime.Now;
-
-        private static readonly object _cleanupLock = new object();
 
         private static readonly TimeSpan REGEX_CACHE_CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
 

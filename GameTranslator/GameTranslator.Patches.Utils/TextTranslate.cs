@@ -2,34 +2,17 @@ using BepInEx;
 using BepInEx.Logging;
 using GameTranslator.Patches.Translatons;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
-using XUnity.Common.Constants;
 
 namespace GameTranslator.Patches.Utils
 {
     internal class TextTranslate
     {
-        private static readonly ConcurrentDictionary<string, DateTime> _debugOutputCache = new ConcurrentDictionary<string, DateTime>();
+        private static readonly Dictionary<string, DateTime> _debugOutputCache = new Dictionary<string, DateTime>();
         private static readonly TimeSpan _debugOutputInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan _cacheCleanupInterval = TimeSpan.FromMinutes(5);
-        private static long _lastCleanupTicks = DateTime.Now.Ticks;
-        internal static ConcurrentDictionary<object, byte> _translatingFromFinishTyping = new ConcurrentDictionary<object, byte>();
-        internal static object _cachedTextWindowTextMesh;
-        internal static object _cachedTextWindow;
-        private static bool _textWindowTextMeshCached;
-        private static ConcurrentDictionary<object, (string original, string translated)> _typingCache = new ConcurrentDictionary<object, (string, string)>();
-
-        public static void ClearCache()
-        {
-            _cachedTextWindowTextMesh = null;
-            _cachedTextWindow = null;
-            _textWindowTextMeshCached = false;
-            _translatingFromFinishTyping.Clear();
-            _typingCache.Clear();
-        }
+        private static DateTime _lastCleanupTime = DateTime.Now;
 
         public static bool ShouldOutputDebug(string text)
         {
@@ -40,12 +23,10 @@ namespace GameTranslator.Patches.Utils
 
             var now = DateTime.Now;
 
-            // Interlocked
-            var lastCleanup = new DateTime(Interlocked.Read(ref _lastCleanupTicks));
-            if (now - lastCleanup > _cacheCleanupInterval)
+            if (now - _lastCleanupTime > _cacheCleanupInterval)
             {
                 CleanupDebugCache();
-                Interlocked.Exchange(ref _lastCleanupTicks, now.Ticks);
+                _lastCleanupTime = now;
             }
 
             if (_debugOutputCache.TryGetValue(text, out var lastOutputTime))
@@ -80,7 +61,7 @@ namespace GameTranslator.Patches.Utils
 
             foreach (var key in keysToRemove)
             {
-                _debugOutputCache.TryRemove(key, out _);
+                _debugOutputCache.Remove(key);
             }
 
             if (TranslatePlugin.showOtherDebug.Value && keysToRemove.Count > 0)
@@ -98,7 +79,6 @@ namespace GameTranslator.Patches.Utils
                 var terminalPatchType = Type.GetType("GameTranslator.Patches.TerminalPatch, GameTranslator");
                 if (terminalPatchType != null)
                 {
-                    // This is for other game support
                     var igField = terminalPatchType.GetField("ig", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                     if (igField != null)
                     {
@@ -116,134 +96,28 @@ namespace GameTranslator.Patches.Utils
             return false;
         }
 
-        internal static bool IsTextWindowTextMesh(object ui)
+        private bool TryTranslateChangedText(object ui, ref string text, out string translated, out TextTranslationInfo info)
         {
-            if (UnityTypes.TextWindow == null || UnityTypes.TextMeshPro == null)
-                return false;
-            var type = ui.GetType();
-            if (!UnityTypes.TextMeshPro.ClrType.IsAssignableFrom(type))
-                return false;
-            if (_textWindowTextMeshCached &&
-                (_cachedTextWindowTextMesh == null ||
-                 (_cachedTextWindowTextMesh is UnityEngine.Object uObj1 && !uObj1) ||
-                 (_cachedTextWindow is UnityEngine.Object uObj2 && !uObj2)))
-            {
-                _textWindowTextMeshCached = false;
-                _cachedTextWindowTextMesh = null;
-                _cachedTextWindow = null;
-            }
-            if (!_textWindowTextMeshCached)
-            {
-                var textWindow = global::UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
-                if (textWindow == null)
-                    return false;
-                var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
-                var field = textWindow.GetType().GetField("TextMesh", flags);
-                if (field == null)
-                    return false;
-                _cachedTextWindow = textWindow;
-                _cachedTextWindowTextMesh = field.GetValue(textWindow);
-                _textWindowTextMeshCached = true;
-            }
-            return _cachedTextWindowTextMesh != null && object.Equals(_cachedTextWindowTextMesh, ui);
-        }
-
-        [ThreadStatic]
-        internal static int _textWindowCallDepth;
-
-        private static string GetPartialTypingTranslation(object ui, string currentPartialText)
-        {
-            if (UnityTypes.TextWindow == null || _cachedTextWindow == null)
-                return null;
-            var textWindow = _cachedTextWindow;
-            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
-            string fullText = textWindow.GetType().GetField("curText", flags)?.GetValue(textWindow) as string;
-            if (string.IsNullOrEmpty(fullText) || string.IsNullOrEmpty(currentPartialText))
-                return null;
-
-            if (!_typingCache.TryGetValue(ui, out var cached) || cached.original != fullText)
-            {
-                var info = ui.GetOrCreateTextTranslationInfo();
-                var config = TranslateConfig.text;
-                var normalText = TranslateConfig.normalText;
-                bool savedMustIgnore = info.MustIgnore;
-                info.MustIgnore = false;
-                try
-                {
-                    string t = Instance.TranslateImmediate(ui, fullText, info, normalText, config, false);
-                    if (string.IsNullOrEmpty(t))
-                        t = Instance.TranslateOrQueue(ui, fullText, info, normalText, config, false);
-                    bool isAsync = fullText.Length > TranslatePlugin.syncTranslationThreshold.Value;
-                    if (!isAsync || t != null)
-                        t = Instance.ApplyPostTranslation(t, fullText, info, normalText, config);
-                    if (string.IsNullOrEmpty(t) || t == fullText)
-                        return null;
-                    cached = (fullText, t);
-                    _typingCache[ui] = cached;
-                }
-                finally
-                {
-                    info.MustIgnore = savedMustIgnore;
-                }
-            }
-
-            float progress = (float)currentPartialText.Length / fullText.Length;
-            int len = (int)System.Math.Ceiling(cached.translated.Length * progress);
-            if (len > cached.translated.Length)
-                len = cached.translated.Length;
-            if (len <= 0)
-                len = 1;
-            return cached.translated.Substring(0, len);
-        }
-
-        internal static void ClearTypingCacheForUI(object ui)
-        {
-            _typingCache.TryRemove(ui, out _);
-        }
-
-        private bool TryTranslateChangedText(object ui, ref string text, out string translated, out TextTranslationInfo info,
-            NormalTextTranslator normalText = null, TranslateConfig.TranslateConfigFile config = null)
-        {
-            normalText = normalText ?? TranslateConfig.normalText;
-            config = config ?? TranslateConfig.text;
             translated = null;
             info = null;
             if (IsTerminalIgnoredUI(ui))
                 return false;
-            if (IsTextWindowTextMesh(ui) && _textWindowCallDepth > 0)
-            {
-                if (!_translatingFromFinishTyping.ContainsKey(ui))
-                {
-                    if (TranslatePlugin.enableTypingTranslation.Value)
-                    {
-                        translated = GetPartialTypingTranslation(ui, text);
-                        if (translated != null)
-                            return true;
-                    }
-                    return false;
-                }
-            }
             info = ui.GetOrCreateTextTranslationInfo();
             bool componentState = this.DiscoverComponent(ui, info);
 
-            if (!TranslatePlugin.shouldTranslateSpecialText.Value && !TranslatePlugin.shouldTranslateNormalText.Value)
+            if (!TranslatePlugin.shouldTranslateNormalText.Value)
                 return false;
 
             if (text == null)
                 text = ui.GetText(info);
-            translated = this.TranslateOrQueue(ui, text, info, normalText, config, componentState);
-            bool isAsync = text.Length > TranslatePlugin.syncTranslationThreshold.Value;
-            if (!isAsync || translated != null)
-                translated = ApplyPostTranslation(translated, text, info, normalText, config);
+            translated = this.TranslateOrQueue(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, componentState);
             return !string.IsNullOrEmpty(translated) && !translated.Equals(text) && IsUIObjectValid(ui);
         }
 
-        internal void OnComponentTextChanged(object ui, NormalTextTranslator normalText = null, TranslateConfig.TranslateConfigFile config = null)
+        internal void OnComponentTextChanged(object ui)
         {
-            normalText = normalText ?? TranslateConfig.normalText;
-            config = config ?? TranslateConfig.text;
             string currentText = null;
-            if (TryTranslateChangedText(ui, ref currentText, out var translated, out var info, normalText, config))
+            if (TryTranslateChangedText(ui, ref currentText, out var translated, out var info))
             {
                 this.SetText(ui, translated, info);
             }
@@ -260,7 +134,7 @@ namespace GameTranslator.Patches.Utils
 
         public string TranslateOrQueue(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
-            string immediate = GuardAndPrepareText(ui, ref text, info, normalText, out bool shouldContinue);
+            string immediate = GuardAndPrepareText(ui, ref text, info, out bool shouldContinue);
             if (!shouldContinue)
                 return immediate;
 
@@ -275,8 +149,41 @@ namespace GameTranslator.Patches.Utils
                 {
                     info.OriginalText = text;
                     info.SetTranslatedText(cachedTranslation);
-                    info.LastTranslator = normalText;
                 }
+
+                if (!IsUIObjectValid(ui))
+                {
+                    return null;
+                }
+
+                try
+                {
+                    if (info != null)
+                    {
+                        info.IsCurrentlySettingText = true;
+                    }
+
+                    ui.SetText(cachedTranslation, info);
+                }
+                catch (System.NullReferenceException)
+                {
+                }
+                catch (System.IndexOutOfRangeException ex)
+                {
+                    TranslatePlugin.logger.LogError($"IndexOutOfRangeException in cached translation: {ex.Message}");
+                }
+                catch (System.Exception ex)
+                {
+                    TranslatePlugin.logger.LogError($"Exception in cached translation: {ex.Message}");
+                }
+                finally
+                {
+                    if (info != null)
+                    {
+                        info.IsCurrentlySettingText = false;
+                    }
+                }
+
                 return cachedTranslation;
             }
 
@@ -284,7 +191,7 @@ namespace GameTranslator.Patches.Utils
             {
                 if (text.Length <= TranslatePlugin.syncTranslationThreshold.Value)
                 {
-                    var translatedText = TranslateInternal(ui, text, info, normalText, config, ignoreComponentState);
+                    var translatedText = TranslateImmediate(ui, text, info, normalText, config, ignoreComponentState);
                     if (translatedText != null)
                     {
                         return translatedText;
@@ -310,14 +217,44 @@ namespace GameTranslator.Patches.Utils
 
         public string TranslateImmediate(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
-            string immediate = GuardAndPrepareText(ui, ref text, info, normalText, out bool shouldContinue);
+            string immediate = GuardAndPrepareText(ui, ref text, info, out bool shouldContinue);
             if (!shouldContinue)
                 return immediate;
 
-            return TranslateInternal(ui, text, info, normalText, config, ignoreComponentState);
+            string result = null;
+            int scope = TranslationScopeHelper.GetScope(ui);
+            if ((normalText == null || normalText.IsTranslatable(text, false, scope)) && (ignoreComponentState || ui.IsComponentActive()))
+            {
+                if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
+                {
+                    if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"available:{text}"))
+                    {
+                        TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'");
+                    }
+                    result = normalText.TryTranslate(text, scope);
+                }
+                if (result != null)
+                {
+                    if (!normalText.IsScopedTranslation(text, scope) && config.shouldTranslate && config.normal.Count > 0)
+                    {
+                        StringBuffer buffer = new StringBuffer(result);
+                        foreach (KeyValuePair<string, string> kv in config._normalOrdered)
+                        {
+                            buffer.ReplaceFull(kv.Key, kv.Value);
+                        }
+                        result = buffer.ToString();
+                    }
+                    if (info != null)
+                    {
+                        info.OriginalText = text;
+                        info.SetTranslatedText(result);
+                    }
+                }
+            }
+            return result;
         }
 
-        private static string GuardAndPrepareText(object ui, ref string text, TextTranslationInfo info, NormalTextTranslator normalText, out bool shouldContinue)
+        private static string GuardAndPrepareText(object ui, ref string text, TextTranslationInfo info, out bool shouldContinue)
         {
             shouldContinue = false;
 
@@ -334,11 +271,7 @@ namespace GameTranslator.Patches.Utils
 
             if (info != null && info.IsTranslated)
             {
-                if (info.LastTranslator != null && info.LastTranslator != normalText)
-                {
-                    info.Reset(text);
-                }
-                else if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
+                if (info.OriginalText.Equals(text) || info.TranslatedText.Equals(text))
                 {
                     if (info.ChangeTime != TextTranslate.ChangeTime)
                     {
@@ -357,69 +290,6 @@ namespace GameTranslator.Patches.Utils
 
             shouldContinue = true;
             return null;
-        }
-
-        private string TranslateInternal(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
-        {
-            string result = null;
-            if ((normalText == null || normalText.IsTranslatable(text, false, TranslationScopeHelper.GetScope(ui))) && (ignoreComponentState || ui.IsComponentActive()))
-            {
-                if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
-                {
-                    if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"available:{text}"))
-                    {
-                        TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'");
-                    }
-                    int scope = TranslationScopeHelper.GetScope(ui);
-                    result = normalText.TryTranslate(text, scope);
-                }
-                if (result != null && info != null)
-                {
-                    info.OriginalText = text;
-                    info.SetTranslatedText(result);
-                    info.LastTranslator = normalText;
-                }
-            }
-            return result;
-        }
-
-        internal static string ApplyReplaceFull(string text, TranslateConfig.TranslateConfigFile config)
-        {
-            if (!config.shouldTranslate || config.normal.Count == 0 || string.IsNullOrEmpty(text))
-                return text;
-            StringBuffer buffer = new StringBuffer(text);
-            foreach (KeyValuePair<string, string> kv in config._normalOrdered)
-            {
-                buffer.ReplaceFull(kv.Key, kv.Value);
-            }
-            return buffer.ToString();
-        }
-
-        internal static bool NeedsReplaceFull(TranslateConfig.TranslateConfigFile config)
-        {
-            return object.ReferenceEquals(config, TranslateConfig.text) || object.ReferenceEquals(config, TranslateConfig.hud);
-        }
-
-        private string ApplyPostTranslation(string translated, string original, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
-        {
-            if (config == null || !config.shouldTranslate || config.normal.Count == 0 || !NeedsReplaceFull(config))
-                return translated;
-
-            if (object.ReferenceEquals(config, TranslateConfig.text))
-            {
-                translated = ApplyReplaceFull(translated ?? original, config);
-            }
-            else if (object.ReferenceEquals(config, TranslateConfig.hud) && translated == null)
-            {
-                translated = ApplyReplaceFull(original, config);
-            }
-
-            if (translated != null && info != null && !translated.Equals(original))
-            {
-                info.OriginalText = original;
-                info.SetTranslatedText(translated);
-            }
-            return translated;
         }
 
         internal void SetTranslatedText(object ui, string translatedText, string originalText, TextTranslationInfo info)

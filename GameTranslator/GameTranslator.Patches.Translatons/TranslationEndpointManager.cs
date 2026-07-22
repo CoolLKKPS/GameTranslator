@@ -1,6 +1,7 @@
 using GameTranslator.Patches.Utils;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,7 +56,8 @@ namespace GameTranslator.Patches.Translatons
             object translationInfo,
             NormalTextTranslator normalText,
             TranslateConfig.TranslateConfigFile config,
-            bool isTranslatable)
+            bool isTranslatable,
+            bool allowFallback = true)
         {
             var jobKey = GetCacheKey(key, config, TranslationScopeHelper.GetScope(ui));
 
@@ -90,7 +92,6 @@ namespace GameTranslator.Patches.Translatons
         {
             if (_unstartedJobs.IsEmpty) return;
 
-            int genStart = _clearGeneration;
             var kvp = _unstartedJobs.FirstOrDefault();
             if (kvp.Value == null) return;
 
@@ -99,18 +100,11 @@ namespace GameTranslator.Patches.Translatons
 
             if (!_unstartedJobs.TryRemove(jobKey, out job)) return;
 
-            if (_clearGeneration != genStart) return;
-
-            if (!_ongoingJobs.TryAdd(jobKey, job))
-            {
-                _unstartedJobs.TryAdd(jobKey, job);
-                return;
-            }
+            _ongoingJobs.TryAdd(jobKey, job);
 
             try
             {
                 await _concurrencyLimiter.WaitAsync();
-                if (_clearGeneration != genStart) return;
                 await ProcessTranslationJob(job, jobKey);
             }
             finally
@@ -149,9 +143,12 @@ namespace GameTranslator.Patches.Translatons
                 }
                 else
                 {
-                    job.State = TranslationJobState.Succeeded;
-                    job.TranslatedText = null;
-                    Manager?.InvokeJobCompleted(job);
+                    if (string.IsNullOrEmpty(translatedText) || translatedText.Equals(job.OriginalText))
+                    {
+                        job.State = TranslationJobState.Succeeded;
+                        job.TranslatedText = null;
+                        Manager?.InvokeJobCompleted(job);
+                    }
                 }
             }
             catch (Exception ex)
@@ -177,17 +174,23 @@ namespace GameTranslator.Patches.Translatons
 
         private bool CanTranslate(string untranslatedText, int scope = -1)
         {
-            if (string.IsNullOrEmpty(untranslatedText))
-            {
-                return false;
-            }
-
             if (_failedTranslations.TryGetValue($"{scope}:{untranslatedText}", out var count))
             {
                 return count < 3;
             }
 
+            if (ShouldSkipTranslation(untranslatedText))
+            {
+                return false;
+            }
             return true;
+        }
+
+        private bool ShouldSkipTranslation(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return true;
+
+            return false;
         }
 
         private void RegisterTranslationFailure(string untranslatedText, int scope = -1)
@@ -209,6 +212,15 @@ namespace GameTranslator.Patches.Translatons
                 {
                     translatedText = normalText.TryTranslate(translatedText, scope);
                 }
+                if ((normalText == null || !normalText.IsScopedTranslation(text, scope)) && config.shouldTranslate && config.normal.Count > 0)
+                {
+                    StringBuffer buffer = new StringBuffer(translatedText);
+                    foreach (KeyValuePair<string, string> kv in config._normalOrdered)
+                    {
+                        buffer.ReplaceFull(kv.Key, kv.Value);
+                    }
+                    translatedText = buffer.ToString();
+                }
             }
             catch (System.Threading.ThreadAbortException)
             {
@@ -229,8 +241,6 @@ namespace GameTranslator.Patches.Translatons
 
         public void ClearAllJobs()
         {
-            // Interlocked
-            Interlocked.Increment(ref _clearGeneration);
             var unstartedJobs = _unstartedJobs.Values.ToList();
             var ongoingJobs = _ongoingJobs.Values.ToList();
 
@@ -244,8 +254,6 @@ namespace GameTranslator.Patches.Translatons
                 Manager?.InvokeJobFailed(job);
             }
         }
-
-        private volatile int _clearGeneration;
 
         public void ClearTranslationCaches()
         {

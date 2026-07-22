@@ -1,4 +1,8 @@
+using GameTranslator.Patches.Utils;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using XUnity.Common.Constants;
 using XUnity.Common.Utilities;
@@ -29,33 +33,37 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             try
             {
                 Type type = this._type;
-                if (UnityTypes.TextWindow != null)
+                if (UnityTypes.TextWindow != null && UnityTypes.TextMeshPro != null && UnityTypes.TextMeshPro.ClrType.IsAssignableFrom(type))
                 {
-                    TypeContainer textMeshPro = UnityTypes.TextMeshPro;
-                    if (textMeshPro != null && textMeshPro.ClrType.IsAssignableFrom(type))
+                    if (IsTextWindowTextMesh(ui))
                     {
-                        global::UnityEngine.Object textWindow = global::UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
-                        if (textWindow != null)
+                        BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+                        if (new StackTrace().GetFrames().Any((StackFrame x) => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType))
                         {
-                            BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-                            FieldInfo field = textWindow.GetType().GetField("TextMesh", flags);
-                            object obj = ((field != null) ? field.GetValue(textWindow) : null);
-                            if (obj != null && object.Equals(obj, ui))
+                            if (TranslatePlugin.enableTypingTranslation.Value)
                             {
-                                CachedProperty cachedProperty = type.CachedProperty(DefaultTextComponentManipulator.TextPropertyName);
-                                if (cachedProperty != null)
+                                string partial = GetPartialTypingTranslation(ui, text);
+                                if (partial != null)
                                 {
-                                    cachedProperty.Set(ui, text);
+                                    type.CachedProperty(DefaultTextComponentManipulator.TextPropertyName)?.Set(ui, partial);
                                 }
-                                object value = textWindow.GetType().GetField("curText", flags).GetValue(textWindow);
-                                textWindow.GetType().GetField("curText", flags).SetValue(textWindow, text);
-                                textWindow.GetType().GetMethod("FinishTyping", flags).Invoke(textWindow, null);
-                                textWindow.GetType().GetField("curText", flags).SetValue(textWindow, value);
-                                object value2 = textWindow.GetType().GetField("Keyword", flags).GetValue(textWindow);
-                                value2.GetType().GetMethod("UpdateTextMesh", flags).Invoke(value2, new object[] { obj, true });
-                                return;
+                            }
+                            else
+                            {
+                                _cachedTextWindow.GetType().GetField("curText", flags).SetValue(_cachedTextWindow, text);
                             }
                         }
+                        else
+                        {
+                            type.CachedProperty(DefaultTextComponentManipulator.TextPropertyName)?.Set(ui, text);
+                            object previousCurText = _cachedTextWindow.GetType().GetField("curText", flags).GetValue(_cachedTextWindow);
+                            _cachedTextWindow.GetType().GetField("curText", flags).SetValue(_cachedTextWindow, text);
+                            _cachedTextWindow.GetType().GetMethod("FinishTyping", flags).Invoke(_cachedTextWindow, null);
+                            _cachedTextWindow.GetType().GetField("curText", flags).SetValue(_cachedTextWindow, previousCurText);
+                            object keyword = _cachedTextWindow.GetType().GetField("Keyword", flags).GetValue(_cachedTextWindow);
+                            keyword.GetType().GetMethod("UpdateTextMesh", flags).Invoke(keyword, new object[] { _cachedTextWindowTextMesh, true });
+                        }
+                        return;
                     }
                 }
                 CachedProperty property = this._property;
@@ -91,10 +99,97 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
         }
 
+        internal static bool IsTextWindowTextMesh(object ui)
+        {
+            if (UnityTypes.TextWindow == null || UnityTypes.TextMeshPro == null)
+                return false;
+            var type = ui.GetType();
+            if (!UnityTypes.TextMeshPro.ClrType.IsAssignableFrom(type))
+                return false;
+            if (_textWindowTextMeshCached &&
+                (_cachedTextWindowTextMesh == null ||
+                 (_cachedTextWindowTextMesh is UnityEngine.Object uObj1 && !uObj1) ||
+                 (_cachedTextWindow is UnityEngine.Object uObj2 && !uObj2)))
+            {
+                _textWindowTextMeshCached = false;
+                _cachedTextWindowTextMesh = null;
+                _cachedTextWindow = null;
+            }
+            if (!_textWindowTextMeshCached)
+            {
+                var textWindow = UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
+                if (textWindow == null)
+                    return false;
+                var flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+                var field = textWindow.GetType().GetField("TextMesh", flags);
+                if (field == null)
+                    return false;
+                _cachedTextWindow = textWindow;
+                _cachedTextWindowTextMesh = field.GetValue(textWindow);
+                _textWindowTextMeshCached = true;
+            }
+            return _cachedTextWindowTextMesh != null && object.Equals(_cachedTextWindowTextMesh, ui);
+        }
+
+        internal static string GetPartialTypingTranslation(object ui, string currentPartialText)
+        {
+            if (_cachedTextWindow == null || UnityTypes.TextWindow == null)
+                return null;
+            var flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            string fullText = _cachedTextWindow.GetType().GetField("curText", flags)?.GetValue(_cachedTextWindow) as string;
+            if (string.IsNullOrEmpty(fullText) || string.IsNullOrEmpty(currentPartialText))
+                return null;
+
+            if (!_typingCache.TryGetValue(ui, out var cached) || cached.original != fullText)
+            {
+                var info = ui.GetOrCreateTextTranslationInfo();
+                bool savedMustIgnore = info.MustIgnore;
+                info.MustIgnore = false;
+                try
+                {
+                    string t = TextTranslate.Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.normal, false);
+                    if (string.IsNullOrEmpty(t))
+                        t = TextTranslate.Instance.TranslateOrQueue(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.normal, false);
+                    bool isAsync = fullText.Length > TranslatePlugin.syncTranslationThreshold.Value;
+                    if (isAsync && t == null)
+                        return null;
+                    if (string.IsNullOrEmpty(t) || t == fullText)
+                        return null;
+                    cached = (fullText, t);
+                    _typingCache[ui] = cached;
+                }
+                finally
+                {
+                    info.MustIgnore = savedMustIgnore;
+                }
+            }
+
+            float progress = (float)currentPartialText.Length / fullText.Length;
+            int len = (int)System.Math.Ceiling(cached.translated.Length * progress);
+            if (len > cached.translated.Length)
+                len = cached.translated.Length;
+            if (len <= 0)
+                len = 1;
+            return cached.translated.Substring(0, len);
+        }
+
+        internal static void ClearCache()
+        {
+            _cachedTextWindowTextMesh = null;
+            _cachedTextWindow = null;
+            _textWindowTextMeshCached = false;
+            _typingCache.Clear();
+        }
+
         private static readonly string TextPropertyName = "text";
 
         private readonly Type _type;
 
         private readonly CachedProperty _property;
+
+        private static object _cachedTextWindowTextMesh;
+        private static object _cachedTextWindow;
+        private static bool _textWindowTextMeshCached;
+        private static Dictionary<object, (string original, string translated)> _typingCache = new Dictionary<object, (string, string)>();
     }
 }

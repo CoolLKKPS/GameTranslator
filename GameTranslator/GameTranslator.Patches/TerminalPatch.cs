@@ -117,7 +117,9 @@ namespace GameTranslator.Patches
                 if (TerminalPatch.GetCmd(array[i].objectCode, true).EqualsIgnoreCase(word) || TerminalPatch.GetCmd(array[i].objectCode, false).EqualsIgnoreCase(word))
                 {
                     Debug.Log("Found accessible terminal object with corresponding string, calling function");
-                    __instance.GetType().GetField("broadcastedCodeThisFrame", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(TranslateConfig.terminal, true);
+                    var field = __instance.GetType().GetField("broadcastedCodeThisFrame", BindingFlags.Instance | BindingFlags.NonPublic);
+                    if (field != null)
+                        field.SetValue(__instance, true);
                     array[i].CallFunctionFromTerminal();
                     return;
                 }
