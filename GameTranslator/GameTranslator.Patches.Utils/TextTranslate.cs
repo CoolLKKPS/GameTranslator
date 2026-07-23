@@ -199,9 +199,9 @@ namespace GameTranslator.Patches.Utils
             {
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
                 {
-                    if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"newavailable:{text}"))
+                    if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"available:{text}"))
                     {
-                        TranslatePlugin.logger.LogInfo($"[Debug] Found new available text: '{text}'");
+                        TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'");
                     }
                     result = normalText.TryTranslate(text, scope);
                 }
@@ -242,10 +242,6 @@ namespace GameTranslator.Patches.Utils
                     }
                     else
                     {
-                        if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"available:{text}"))
-                        {
-                            TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'");
-                        }
                         return info.TranslatedText;
                     }
                 }
