@@ -12,7 +12,6 @@ namespace GameTranslator.Patches.Translatons
         private readonly ConcurrentDictionary<string, TranslationJob> _unstartedJobs;
         private readonly ConcurrentDictionary<string, TranslationJob> _ongoingJobs;
         private readonly ConcurrentDictionary<string, byte> _failedTranslations;
-        private readonly ConcurrentDictionary<string, string> _translationCache;
         private readonly SemaphoreSlim _concurrencyLimiter;
         private readonly int _maxConcurrency;
         private readonly int _maxRetries;
@@ -23,7 +22,6 @@ namespace GameTranslator.Patches.Translatons
             _unstartedJobs = new ConcurrentDictionary<string, TranslationJob>();
             _ongoingJobs = new ConcurrentDictionary<string, TranslationJob>();
             _failedTranslations = new ConcurrentDictionary<string, byte>();
-            _translationCache = new ConcurrentDictionary<string, string>();
             _concurrencyLimiter = new SemaphoreSlim(maxConcurrency, maxConcurrency);
             _maxConcurrency = maxConcurrency;
             _maxRetries = maxRetries;
@@ -35,19 +33,6 @@ namespace GameTranslator.Patches.Translatons
         public bool HasUnstartedJob => !_unstartedJobs.IsEmpty;
 
         public TranslationManager Manager { get; set; }
-
-        public bool TryGetTranslation(string key, out string value)
-        {
-            return _translationCache.TryGetValue(key, out value);
-        }
-
-        public void AddTranslationToCache(string key, string value)
-        {
-            if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
-            {
-                _translationCache.TryAdd(key, value);
-            }
-        }
 
         public TranslationJob EnqueueTranslation(
             object ui,
@@ -136,8 +121,6 @@ namespace GameTranslator.Patches.Translatons
                 {
                     job.TranslatedText = translatedText;
                     job.State = TranslationJobState.Succeeded;
-                    var cacheKey = GetCacheKey(job.OriginalText, job.Config, job.Scope);
-                    AddTranslationToCache(cacheKey, translatedText);
                     Manager?.InvokeJobCompleted(job);
                 }
                 else
@@ -235,9 +218,9 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        public void ClearTranslationCaches()
+        // This can be simplified but i will keep it
+        public void ClearEndpointManagerCaches()
         {
-            _translationCache.Clear();
             _failedTranslations.Clear();
         }
     }

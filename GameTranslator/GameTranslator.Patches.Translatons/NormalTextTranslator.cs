@@ -464,6 +464,16 @@ namespace GameTranslator.Patches.Translatons
             return text2;
         }
 
+        public string TryGetCachedTranslation(string text, int scope = -1)
+        {
+            if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped) && scoped.Translations.TryGetValue(text, out var scopedResult))
+            {
+                return scopedResult;
+            }
+            _translations.TryGetValue(text, out var result);
+            return result;
+        }
+
         private static void CheckAndCleanupRegexCache()
         {
             if (DateTime.Now - NormalTextTranslator._lastRegexCacheCleanupTime <= NormalTextTranslator.REGEX_CACHE_CLEANUP_INTERVAL)

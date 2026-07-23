@@ -44,13 +44,6 @@ namespace GameTranslator.Patches.Translatons
             _stabilizationContexts.Clear();
         }
 
-        public string GetCachedTranslation(string originalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
-        {
-            if (_translationManager?.PrimaryEndpoint == null) return null;
-            string cacheKey = TranslationEndpointManager.GetCacheKey(originalText, config, scope);
-            return _translationManager.PrimaryEndpoint.TryGetTranslation(cacheKey, out var translation) ? translation : null;
-        }
-
         public void QueueTranslation(object ui, string originalText, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
             if (string.IsNullOrWhiteSpace(originalText)) return;
@@ -68,7 +61,7 @@ namespace GameTranslator.Patches.Translatons
                         info.OriginalText = originalText;
                     }
                 }
-                var cachedTranslation = GetCachedTranslation(originalText, config, scope);
+                var cachedTranslation = normalText?.TryGetCachedTranslation(originalText, scope);
                 if (cachedTranslation != null)
                 {
                     if (TextTranslate.IsUIObjectValid(ui))
@@ -82,8 +75,6 @@ namespace GameTranslator.Patches.Translatons
                     var translatedText = TranslationEndpointManager.TranslateText(originalText, normalText, config, scope);
                     if (!string.IsNullOrEmpty(translatedText) && !translatedText.Equals(originalText))
                     {
-                        string cacheKey = TranslationEndpointManager.GetCacheKey(originalText, config, scope);
-                        _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, translatedText);
                         if (TextTranslate.IsUIObjectValid(ui))
                         {
                             _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, translatedText, originalText, info, TextTranslate.ChangeTime));
@@ -103,7 +94,7 @@ namespace GameTranslator.Patches.Translatons
                         }
                         else
                         {
-                            var cached = GetCachedTranslation(originalText, config, scope);
+                            var cached = normalText?.TryGetCachedTranslation(originalText, scope);
                             if (cached != null && TextTranslate.IsUIObjectValid(ui))
                             {
                                 _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, cached, originalText, info, TextTranslate.ChangeTime));
@@ -251,7 +242,7 @@ namespace GameTranslator.Patches.Translatons
             if (context.Info?.IsTranslated == true) return;
             context.Info?.Reset(stabilizedText);
             if (string.IsNullOrWhiteSpace(stabilizedText)) return;
-            var cachedTranslation = GetCachedTranslation(stabilizedText, context.Config, TranslationScopeHelper.GetScope(context.UI));
+            var cachedTranslation = context.NormalText?.TryGetCachedTranslation(stabilizedText, TranslationScopeHelper.GetScope(context.UI));
             if (cachedTranslation != null)
             {
                 SafeUpdateUI(context.UI, cachedTranslation, stabilizedText, context.Info, context.Info?.ChangeTime ?? TextTranslate.ChangeTime);
@@ -315,8 +306,6 @@ namespace GameTranslator.Patches.Translatons
                             }
                         }
                     }
-                    string cacheKey = TranslationEndpointManager.GetCacheKey(job.OriginalText, job.Config, job.Scope);
-                    _translationManager.PrimaryEndpoint?.AddTranslationToCache(cacheKey, final);
                 }
             }
             catch (Exception ex)
@@ -393,7 +382,7 @@ namespace GameTranslator.Patches.Translatons
         public void ClearCache()
         {
             _translationManager?.ClearAllJobs();
-            _translationManager?.PrimaryEndpoint?.ClearTranslationCaches();
+            _translationManager?.PrimaryEndpoint?.ClearEndpointManagerCaches();
             _stabilizationContexts.Clear();
             _immediatelyTranslating.Clear();
             _pendingStabilizationUIs.Clear();

@@ -138,7 +138,7 @@ namespace GameTranslator.Patches.Utils
             if (!shouldContinue)
                 return immediate;
 
-            string cachedTranslation = GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.GetCachedTranslation(text, config, TranslationScopeHelper.GetScope(ui));
+            string cachedTranslation = normalText?.TryGetCachedTranslation(text, TranslationScopeHelper.GetScope(ui));
             if (cachedTranslation != null)
             {
                 if (TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached:{text}"))
