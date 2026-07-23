@@ -17,6 +17,10 @@
       Version="" />-->
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+
 	<ItemGroup Condition="'$(TargetFramework)' == 'net481'">
 		<PackageReference
 			Include="UnityEngine.Modules"

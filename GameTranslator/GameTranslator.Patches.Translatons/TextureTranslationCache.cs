@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
@@ -21,6 +22,8 @@ namespace GameTranslator.Patches.Translatons
         private Timer _texturePollingTimer;
 
         private readonly object _loadLock = new object();
+
+        private readonly ConcurrentDictionary<string, ZipArchive> _openZipArchives = new ConcurrentDictionary<string, ZipArchive>(StringComparer.OrdinalIgnoreCase);
 
         public TextureTranslationCache()
         {
@@ -60,6 +63,11 @@ namespace GameTranslator.Patches.Translatons
                 try
                 {
                     float realtimeSinceStartup = Time.realtimeSinceStartup;
+                    foreach (var zip in _openZipArchives.Values)
+                    {
+                        try { zip.Dispose(); } catch { }
+                    }
+                    _openZipArchives.Clear();
                     this._translatedImages.Clear();
                     this._untranslatedImages.Clear();
                     this._keyToFileName.Clear();
@@ -115,7 +123,7 @@ namespace GameTranslator.Patches.Translatons
                     this._keyToFileName[text] = fullFileName;
                     if (flag || TranslatePlugin.cacheUnmodifiedTextures.Value)
                     {
-                        this.RegisterTranslatedImage(fullFileName, text, data);
+                        this.RegisterTranslatedImage(fullFileName, text, data, source);
                         if (!flag)
                         {
                             XuaLogger.AutoTranslator.Debug("Image loaded (Unmodified): " + fullFileName + ".");
@@ -146,9 +154,40 @@ namespace GameTranslator.Patches.Translatons
         {
             if (File.Exists(fullFileName))
             {
-                TextureTranslationCache.FileSystemTranslatedImageSource fileSystemTranslatedImageSource = new TextureTranslationCache.FileSystemTranslatedImageSource(fullFileName);
-                this.RegisterImageFromStream(fullFileName, fileSystemTranslatedImageSource);
-                _textureFileLastModifiedTimes[fullFileName] = File.GetLastWriteTime(fullFileName);
+                if (fullFileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                {
+                    _textureFileLastModifiedTimes[fullFileName] = File.GetLastWriteTime(fullFileName);
+                    var zip = new ZipArchive(File.OpenRead(fullFileName), ZipArchiveMode.Read);
+                    if (!TranslatePlugin.cacheTexturesInMemory.Value)
+                    {
+                        _openZipArchives.AddOrUpdate(fullFileName, zip,
+                            (key, oldZip) => { oldZip.Dispose(); return zip; });
+                    }
+                    try
+                    {
+                        foreach (var entry in zip.Entries)
+                        {
+                            if (entry.Name.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var source = new ZipArchiveTranslatedImageSource(zip, entry.FullName);
+                                RegisterImageFromStream(fullFileName + Path.DirectorySeparatorChar + entry.FullName, source);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        if (TranslatePlugin.cacheTexturesInMemory.Value)
+                        {
+                            zip.Dispose();
+                        }
+                    }
+                }
+                else
+                {
+                    TextureTranslationCache.FileSystemTranslatedImageSource fileSystemTranslatedImageSource = new TextureTranslationCache.FileSystemTranslatedImageSource(fullFileName);
+                    this.RegisterImageFromStream(fullFileName, fileSystemTranslatedImageSource);
+                    _textureFileLastModifiedTimes[fullFileName] = File.GetLastWriteTime(fullFileName);
+                }
             }
         }
 
@@ -203,7 +242,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        private void RegisterTranslatedImage(string fileName, string key, byte[] data)
+        private void RegisterTranslatedImage(string fileName, string key, byte[] data, TranslatedImage.ITranslatedImageSource source = null)
         {
             if (TranslatePlugin.cacheTexturesInMemory.Value)
             {
@@ -211,8 +250,7 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                TranslatedImage.ITranslatedImageSource source = new FileSystemTranslatedImageSource(fileName);
-                this._translatedImages[key] = new TranslatedImage(fileName, null, source);
+                this._translatedImages[key] = new TranslatedImage(fileName, null, source ?? new FileSystemTranslatedImageSource(fileName));
             }
         }
 
@@ -256,24 +294,28 @@ namespace GameTranslator.Patches.Translatons
             data = null;
             image = null;
             string text2;
-            if (this._keyToFileName.TryGetValue(key, out text2) && File.Exists(text2))
+            if (this._keyToFileName.TryGetValue(key, out text2))
             {
-                try
+                TryGetPhysicalFilePath(text2, out string physicalPath);
+                if (File.Exists(physicalPath))
                 {
-                    this.RegisterImageFromFile(text2);
-                    if (this._translatedImages.TryGetValue(key, out image))
+                    try
                     {
-                        data = image.GetData();
-                        if (data != null)
+                        this.RegisterImageFromFile(physicalPath);
+                        if (this._translatedImages.TryGetValue(key, out image))
                         {
-                            this._textureAccessTime.AddOrUpdate(key, DateTime.Now, (string k, DateTime v) => DateTime.Now);
+                            data = image.GetData();
+                            if (data != null)
+                            {
+                                this._textureAccessTime.AddOrUpdate(key, DateTime.Now, (string k, DateTime v) => DateTime.Now);
+                            }
+                            return data != null;
                         }
-                        return data != null;
                     }
-                }
-                catch (Exception ex3)
-                {
-                    XuaLogger.AutoTranslator.Error(ex3, "Error reloading image: " + text2);
+                    catch (Exception ex3)
+                    {
+                        XuaLogger.AutoTranslator.Error(ex3, "Error reloading image: " + text2);
+                    }
                 }
             }
             return false;
@@ -320,6 +362,11 @@ namespace GameTranslator.Patches.Translatons
             {
                 if (disposing)
                 {
+                    foreach (var zip in _openZipArchives.Values)
+                    {
+                        try { zip.Dispose(); } catch { }
+                    }
+                    _openZipArchives.Clear();
                     _textureFileWatcher?.Dispose();
                     _textureFileWatcher = null;
                     _texturePollingTimer?.Dispose();
@@ -357,8 +404,8 @@ namespace GameTranslator.Patches.Translatons
             }
             foreach (string text2 in this._keyToFileName.Where(delegate (KeyValuePair<string, string> kv)
             {
-                KeyValuePair<string, string> keyValuePair4 = kv;
-                return !File.Exists(keyValuePair4.Value);
+                TryGetPhysicalFilePath(kv.Value, out string physicalPath);
+                return !File.Exists(physicalPath);
             }).Select(delegate (KeyValuePair<string, string> kv)
             {
                 KeyValuePair<string, string> keyValuePair5 = kv;
@@ -385,6 +432,20 @@ namespace GameTranslator.Patches.Translatons
         public void UpdateTextureStatistics(string key)
         {
             this._textureAccessTime.AddOrUpdate(key, DateTime.Now, (string k, DateTime v) => DateTime.Now);
+        }
+
+        internal static void TryGetPhysicalFilePath(string storedPath, out string physicalPath)
+        {
+            int idx = storedPath.IndexOf(".zip\\", StringComparison.OrdinalIgnoreCase);
+            if (idx < 0) idx = storedPath.IndexOf(".zip/", StringComparison.OrdinalIgnoreCase);
+            if (idx >= 0)
+            {
+                physicalPath = storedPath.Substring(0, idx + 4);
+            }
+            else
+            {
+                physicalPath = storedPath;
+            }
         }
 
         public ConcurrentDictionary<string, byte> _untranslatedImages = new ConcurrentDictionary<string, byte>();
@@ -427,6 +488,27 @@ namespace GameTranslator.Patches.Translatons
                 throw new IOException($"Unable to read file '{_fileName}' after 3 attempts due to sharing violation.");
             }
             private readonly string _fileName;
+        }
+
+        private class ZipArchiveTranslatedImageSource : TranslatedImage.ITranslatedImageSource
+        {
+            public ZipArchiveTranslatedImageSource(ZipArchive archive, string entryFullName)
+            {
+                _archive = archive;
+                _entryFullName = entryFullName;
+            }
+
+            public byte[] GetData()
+            {
+                var entry = _archive.GetEntry(_entryFullName);
+                using (var stream = entry.Open())
+                {
+                    return stream.ReadFully(16384);
+                }
+            }
+
+            private readonly ZipArchive _archive;
+            private readonly string _entryFullName;
         }
 
         internal static class HashHelper
