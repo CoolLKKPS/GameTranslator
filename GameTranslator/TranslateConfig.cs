@@ -23,28 +23,46 @@ namespace GameTranslator
 
         public static void Load()
         {
-            TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true);
-            TranslateConfig.terminal.shouldTranslate = TranslatePlugin.shouldTranslateTerimal.Value;
-            TranslateConfig.terminalText = new NormalTextTranslator(TranslateConfig.terminal.ConfigFileName + ".cfg");
-            TranslateConfig.terminalText.Load();
-            TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true);
-            TranslateConfig.cmdPyText = new NormalTextTranslator(TranslateConfig.cmd_py.ConfigFileName + ".cfg");
-            TranslateConfig.cmdPyText.Load();
-            TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true);
-            TranslateConfig.cmdZhText = new NormalTextTranslator(TranslateConfig.cmd_zh.ConfigFileName + ".cfg");
-            TranslateConfig.cmdZhText.Load();
-            TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate", true);
-            TranslateConfig.gui.shouldTranslate = TranslatePlugin.shouldTranslateGui.Value;
-            TranslateConfig.guiText = new NormalTextTranslator(TranslateConfig.gui.ConfigFileName + ".cfg");
-            TranslateConfig.guiText.Load();
-            TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate", true);
-            TranslateConfig.interactiveTerminalAPI.shouldTranslate = TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value;
-            TranslateConfig.interactiveTerminalAPIText = new NormalTextTranslator(TranslateConfig.interactiveTerminalAPI.ConfigFileName + ".cfg");
-            TranslateConfig.interactiveTerminalAPIText.Load();
-            TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate", true);
-            TranslateConfig.normal.shouldTranslate = TranslatePlugin.shouldTranslateNormalText.Value;
-            TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
-            TranslateConfig.normalText.Load();
+            if (TranslatePlugin.shouldTranslateTerimal.Value)
+            {
+                TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true);
+                TranslateConfig.terminal.shouldTranslate = true;
+                TranslateConfig.terminalText = new NormalTextTranslator(TranslateConfig.terminal.ConfigFileName + ".cfg");
+                TranslateConfig.terminalText.Load();
+            }
+            if (TranslatePlugin.TerimalCanUseShortCutTwo.Value)
+            {
+                TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true);
+                TranslateConfig.cmdPyText = new NormalTextTranslator(TranslateConfig.cmd_py.ConfigFileName + ".cfg");
+                TranslateConfig.cmdPyText.Load();
+            }
+            if (TranslatePlugin.TerimalCanUseShortCutOne.Value)
+            {
+                TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true);
+                TranslateConfig.cmdZhText = new NormalTextTranslator(TranslateConfig.cmd_zh.ConfigFileName + ".cfg");
+                TranslateConfig.cmdZhText.Load();
+            }
+            if (TranslatePlugin.shouldTranslateGui.Value)
+            {
+                TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate", true);
+                TranslateConfig.gui.shouldTranslate = true;
+                TranslateConfig.guiText = new NormalTextTranslator(TranslateConfig.gui.ConfigFileName + ".cfg");
+                TranslateConfig.guiText.Load();
+            }
+            if (TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
+            {
+                TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate", true);
+                TranslateConfig.interactiveTerminalAPI.shouldTranslate = true;
+                TranslateConfig.interactiveTerminalAPIText = new NormalTextTranslator(TranslateConfig.interactiveTerminalAPI.ConfigFileName + ".cfg");
+                TranslateConfig.interactiveTerminalAPIText.Load();
+            }
+            if (TranslatePlugin.shouldTranslateNormalText.Value)
+            {
+                TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate", true);
+                TranslateConfig.normal.shouldTranslate = true;
+                TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
+                TranslateConfig.normalText.Load();
+            }
             if (TranslatePlugin.changeTexture.Value)
             {
                 TranslateConfig.cache = new TextureTranslationCache();
@@ -165,6 +183,7 @@ namespace GameTranslator
 
         public static string replaceByMap(string text, TranslateConfig.TranslateConfigFile file)
         {
+            if (file == null) return text;
             if (file.normal.Count == 0 && file.regexTranslations.Count == 0 && file.splitterRegexTranslations.Count == 0)
             {
                 return text;
