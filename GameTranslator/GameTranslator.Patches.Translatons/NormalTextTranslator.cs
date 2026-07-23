@@ -425,6 +425,19 @@ namespace GameTranslator.Patches.Translatons
                                     }
                                 }
                             }
+                            else
+                            {
+                                if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedHit))
+                                {
+                                    scopedHit.Translations[text] = text3;
+                                    scopedHit.ReverseTranslations[text3] = text;
+                                }
+                                else
+                                {
+                                    this._translations[text] = text3;
+                                    this._reverseTranslations[text3] = text;
+                                }
+                            }
                         }
                     }
                     catch (System.Threading.ThreadAbortException)
