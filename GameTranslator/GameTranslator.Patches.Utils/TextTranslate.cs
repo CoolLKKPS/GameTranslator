@@ -16,7 +16,7 @@ namespace GameTranslator.Patches.Utils
 
         public static bool ShouldOutputDebug(string text)
         {
-            if (!TranslatePlugin.showOtherDebug.Value && !TranslatePlugin.showAvailableText.Value)
+            if (!TranslatePlugin.showAvailableText.Value && !TranslatePlugin.showOtherDebug.Value)
             {
                 return false;
             }
@@ -42,7 +42,7 @@ namespace GameTranslator.Patches.Utils
 
         private static void CleanupDebugCache()
         {
-            if (!TranslatePlugin.showOtherDebug.Value && !TranslatePlugin.showAvailableText.Value)
+            if (!TranslatePlugin.showAvailableText.Value && !TranslatePlugin.showOtherDebug.Value)
             {
                 _debugOutputCache.Clear();
                 return;
@@ -242,6 +242,10 @@ namespace GameTranslator.Patches.Utils
                     }
                     else
                     {
+                        if (TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached:{text}"))
+                        {
+                            TranslatePlugin.logger.LogInfo($"[Debug] Cached translation found for: '{text}' -> '{info.TranslatedText}'");
+                        }
                         return info.TranslatedText;
                     }
                 }
