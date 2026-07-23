@@ -87,7 +87,7 @@ namespace GameTranslator.Patches.Translatons
                     var isTranslatable = normalText == null || normalText.IsTranslatable(originalText, false, scope);
                     if (ShouldStabilizeText(ui, originalText))
                     {
-                        string immKey = TranslationEndpointManager.GetCacheKey(originalText, config, scope);
+                        string immKey = TranslationEndpointManager.BuildKey(originalText, config, scope);
                         if (_immediatelyTranslating.TryAdd(immKey, 0))
                         {
                             StartTextStabilization(ui, originalText, info, normalText, config, immKey, scope);
@@ -284,7 +284,7 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                string immKey = TranslationEndpointManager.GetCacheKey(job.OriginalText, job.Config, job.Scope);
+                string immKey = TranslationEndpointManager.BuildKey(job.OriginalText, job.Config, job.Scope);
                 _immediatelyTranslating.TryRemove(immKey, out _);
                 if (!string.IsNullOrEmpty(job.TranslatedText))
                 {
@@ -319,7 +319,7 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                string immKey = TranslationEndpointManager.GetCacheKey(job.OriginalText, job.Config, job.Scope);
+                string immKey = TranslationEndpointManager.BuildKey(job.OriginalText, job.Config, job.Scope);
                 _immediatelyTranslating.TryRemove(immKey, out _);
                 _pendingStabilizationUIs.TryRemove(immKey, out _);
 

@@ -43,7 +43,7 @@ namespace GameTranslator.Patches.Translatons
             bool isTranslatable,
             bool allowFallback = true)
         {
-            var jobKey = GetCacheKey(key, config, TranslationScopeHelper.GetScope(ui));
+            var jobKey = BuildKey(key, config, TranslationScopeHelper.GetScope(ui));
 
             if (_unstartedJobs.TryGetValue(jobKey, out var existingUnstartedJob))
             {
@@ -197,7 +197,7 @@ namespace GameTranslator.Patches.Translatons
             return translatedText;
         }
 
-        internal static string GetCacheKey(string text, TranslateConfig.TranslateConfigFile config, int scope = -1)
+        internal static string BuildKey(string text, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
             return $"{config?.ConfigFileName ?? "global"}:{scope}:{text}";
         }
