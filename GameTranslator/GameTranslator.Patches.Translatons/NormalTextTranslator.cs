@@ -39,17 +39,16 @@ namespace GameTranslator.Patches.Translatons
             {
                 lock (this._regexLock)
                 {
-                    this.CleanupCurrentFileRegexCache();
-                    this._defaultRegexes.Clear();
                     this._translations.Clear();
                     this._reverseTranslations.Clear();
-                    this._splitterRegexes.Clear();
+                    this._scopedTranslations.Clear();
+                    this._defaultRegexes.Clear();
                     this._registeredRegexes.Clear();
+                    this._splitterRegexes.Clear();
                     this._registeredSplitterRegexes.Clear();
                     this._failedRegexLookups.Clear();
-                    this._scopedTranslations.Clear();
+                    this._translationLastAccess.Clear();
                     this.LoadTranslationsInStream(this.FilePath, true);
-                    this.PrecompileAndCacheRegexes();
                 }
             }
             catch (Exception ex)
@@ -264,6 +263,53 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
+        private static void EvictTranslationCache(ConcurrentDictionary<string, string> translations, ConcurrentDictionary<string, string> reverseTranslations, ConcurrentDictionary<string, DateTime> lastAccess)
+        {
+            bool isMemoryPressure = GC.GetTotalMemory(false) > MEMORY_PRESSURE_THRESHOLD;
+            int num = 0;
+            if (isMemoryPressure)
+            {
+                num = (int)(translations.Count * TRANSLATION_CACHE_EVICT_RATIO);
+                num = Math.Max(1, Math.Min(num, translations.Count));
+            }
+            else if (translations.Count > TRANSLATION_CACHE_MAX)
+            {
+                num = translations.Count - TRANSLATION_CACHE_MAX;
+            }
+            if (num <= 0) return;
+            var keysToRemove = lastAccess.OrderBy(kv => kv.Value).Take(num).Select(kv => kv.Key).ToList();
+            foreach (var key in keysToRemove)
+            {
+                if (translations.TryRemove(key, out var value))
+                {
+                    reverseTranslations.TryRemove(value, out _);
+                }
+                lastAccess.TryRemove(key, out _);
+            }
+            TranslatePlugin.logger.LogInfo(string.Format("Translation cache evicted {0} entries, {1} remaining", keysToRemove.Count, translations.Count));
+        }
+
+        private void PeriodicCacheCleanup()
+        {
+            EvictTranslationCache(this._translations, this._reverseTranslations, this._translationLastAccess);
+            foreach (var kvp in _scopedTranslations)
+            {
+                EvictTranslationCache(kvp.Value.Translations, kvp.Value.ReverseTranslations, kvp.Value.LastAccess);
+            }
+
+            if (this._failedRegexLookups.Count > FAILED_LOOKUP_CACHE_MAX)
+            {
+                this._failedRegexLookups.Clear();
+            }
+            foreach (var kvp in _scopedTranslations)
+            {
+                if (kvp.Value.FailedRegexLookups.Count > FAILED_LOOKUP_CACHE_MAX)
+                {
+                    kvp.Value.FailedRegexLookups.Clear();
+                }
+            }
+        }
+
         private bool IsTranslation(string translation, int scope = -1)
         {
             if (this._reverseTranslations.ContainsKey(translation))
@@ -334,15 +380,25 @@ namespace GameTranslator.Patches.Translatons
             if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
                 && scoped.Translations.TryGetValue(text, out var scopedResult))
             {
+                scoped.LastAccess[text] = DateTime.Now;
                 return scopedResult;
+            }
+
+            if (DateTime.Now - NormalTextTranslator._lastCacheCleanupTime > NormalTextTranslator.CACHE_CLEANUP_INTERVAL)
+            {
+                PeriodicCacheCleanup();
+                NormalTextTranslator._lastCacheCleanupTime = DateTime.Now;
             }
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             string text2;
             try
             {
-                NormalTextTranslator.CheckAndCleanupRegexCache();
                 this._translations.TryGetValue(text, out text2);
+                if (text2 != null)
+                {
+                    this._translationLastAccess[text] = DateTime.Now;
+                }
                 if (text2 == null)
                 {
                     string text3 = text;
@@ -391,13 +447,9 @@ namespace GameTranslator.Patches.Translatons
                             for (int i = 0; i < regexSnapshot.Length; i++)
                             {
                                 RegexTranslation regexTrans = regexSnapshot[i];
-                                string text5 = "default_" + regexTrans.Original;
-                                Regex orAdd = NormalTextTranslator._regexCache.GetOrAdd(text5, (string _) => new Regex(regexTrans.Original, RegexOptions.Multiline | _regexCompiledSupportedFlag | RegexOptions.Singleline));
-                                NormalTextTranslator._regexCacheLastAccess[text5] = DateTime.Now;
-
-                                if (orAdd.IsMatch(text3))
+                                if (regexTrans.CompiledRegex.IsMatch(text3))
                                 {
-                                    text3 = orAdd.Replace(text3, regexTrans.Translation);
+                                    text3 = regexTrans.CompiledRegex.Replace(text3, regexTrans.Translation);
                                     regexMatched = true;
                                 }
                             }
@@ -409,7 +461,7 @@ namespace GameTranslator.Patches.Translatons
                                 if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedFail))
                                 {
                                     scopedFail.FailedRegexLookups.TryAdd(regexCacheKey, 0);
-                                    if (scopedFail.FailedRegexLookups.Count > 10000)
+                                    if (scopedFail.FailedRegexLookups.Count > FAILED_LOOKUP_CACHE_MAX)
                                     {
                                         scopedFail.FailedRegexLookups.Clear();
                                         TranslatePlugin.logger.LogInfo($"Scoped failed regex lookup cache reached limit for scope {scope}, cleared");
@@ -418,7 +470,7 @@ namespace GameTranslator.Patches.Translatons
                                 else
                                 {
                                     this._failedRegexLookups.TryAdd(regexCacheKey, 0);
-                                    if (this._failedRegexLookups.Count > 10000)
+                                    if (this._failedRegexLookups.Count > FAILED_LOOKUP_CACHE_MAX)
                                     {
                                         this._failedRegexLookups.Clear();
                                         TranslatePlugin.logger.LogInfo("Failed regex lookup cache reached limit, cleared");
@@ -431,11 +483,15 @@ namespace GameTranslator.Patches.Translatons
                                 {
                                     scopedHit.Translations[text] = text3;
                                     scopedHit.ReverseTranslations[text3] = text;
+                                    scopedHit.LastAccess[text] = DateTime.Now;
+                                    EvictTranslationCache(scopedHit.Translations, scopedHit.ReverseTranslations, scopedHit.LastAccess);
                                 }
                                 else
                                 {
                                     this._translations[text] = text3;
                                     this._reverseTranslations[text3] = text;
+                                    this._translationLastAccess[text] = DateTime.Now;
+                                    EvictTranslationCache(this._translations, this._reverseTranslations, this._translationLastAccess);
                                 }
                             }
                         }
@@ -468,101 +524,14 @@ namespace GameTranslator.Patches.Translatons
         {
             if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped) && scoped.Translations.TryGetValue(text, out var scopedResult))
             {
+                scoped.LastAccess[text] = DateTime.Now;
                 return scopedResult;
             }
-            _translations.TryGetValue(text, out var result);
+            if (_translations.TryGetValue(text, out var result))
+            {
+                _translationLastAccess[text] = DateTime.Now;
+            }
             return result;
-        }
-
-        private static void CheckAndCleanupRegexCache()
-        {
-            if (DateTime.Now - NormalTextTranslator._lastRegexCacheCleanupTime <= NormalTextTranslator.REGEX_CACHE_CLEANUP_INTERVAL)
-            {
-                return;
-            }
-            try
-            {
-                bool isMemoryPressure = GC.GetTotalMemory(false) > 104857600L;
-                int numToRemove = 0;
-
-                if (isMemoryPressure)
-                {
-                    numToRemove = (int)((float)NormalTextTranslator._regexCache.Count * 0.3f);
-                    numToRemove = Math.Max(1, Math.Min(numToRemove, NormalTextTranslator._regexCache.Count));
-                }
-                else if (NormalTextTranslator._regexCache.Count > 800)
-                {
-                    numToRemove = NormalTextTranslator._regexCache.Count - 800;
-                }
-
-                if (numToRemove > 0)
-                {
-                    List<string> keysToRemove = NormalTextTranslator._regexCacheLastAccess
-                        .Where(kv => NormalTextTranslator._regexCache.ContainsKey(kv.Key))
-                        .OrderBy(kv => kv.Value)
-                        .Take(numToRemove)
-                        .Select(kv => kv.Key)
-                        .ToList();
-
-                    int removedCount = 0;
-                    foreach (string key in keysToRemove)
-                    {
-                        Regex regex;
-                        DateTime dateTime;
-                        if (NormalTextTranslator._regexCache.TryRemove(key, out regex) &&
-                            NormalTextTranslator._regexCacheLastAccess.TryRemove(key, out dateTime))
-                        {
-                            removedCount++;
-                        }
-                    }
-
-                    if (removedCount > 0)
-                    {
-                        TranslatePlugin.logger.LogInfo($"Cleaned {removedCount} regex cache entries. Remaining: {NormalTextTranslator._regexCache.Count}");
-                    }
-                }
-
-                NormalTextTranslator._lastRegexCacheCleanupTime = DateTime.Now;
-            }
-            catch (Exception ex)
-            {
-                TranslatePlugin.logger.LogError("Error cleaning up regex cache: " + ex.Message + "\n" + ex.StackTrace);
-            }
-        }
-
-        private void CleanupCurrentFileRegexCache()
-        {
-            List<string> list = this._defaultRegexes.Select((RegexTranslation r) => "default_" + r.Original).ToList<string>();
-            foreach (var scoped in _scopedTranslations.Values)
-            {
-                list.AddRange(scoped.DefaultRegexes.Select((RegexTranslation r) => "default_" + r.Original));
-            }
-            int num = 0;
-            foreach (string text in list)
-            {
-                Regex regex;
-                if (NormalTextTranslator._regexCache.TryRemove(text, out regex))
-                {
-                    num++;
-                }
-                DateTime dateTime;
-                NormalTextTranslator._regexCacheLastAccess.TryRemove(text, out dateTime);
-            }
-            TranslatePlugin.logger.LogInfo(string.Format("Cleaned {0} old regex cache entries for {1}", num, this.FileName));
-        }
-
-        private void PrecompileAndCacheRegexes()
-        {
-            using (List<RegexTranslation>.Enumerator enumerator2 = this._defaultRegexes.GetEnumerator())
-            {
-                while (enumerator2.MoveNext())
-                {
-                    RegexTranslation regexTrans = enumerator2.Current;
-                    string text2 = "default_" + regexTrans.Original;
-                    NormalTextTranslator._regexCache.GetOrAdd(text2, (string _) => new Regex(regexTrans.Original, RegexOptions.Multiline | _regexCompiledSupportedFlag | RegexOptions.Singleline));
-                    NormalTextTranslator._regexCacheLastAccess[text2] = DateTime.Now;
-                }
-            }
         }
 
         internal static string GetTextSnippet(string text, int maxLength)
@@ -635,11 +604,11 @@ namespace GameTranslator.Patches.Translatons
             return stringBuilder.ToString();
         }
 
+        internal readonly object _regexLock = new object();
+
         private ConcurrentDictionary<string, string> _translations = new ConcurrentDictionary<string, string>();
 
         private ConcurrentDictionary<string, string> _reverseTranslations = new ConcurrentDictionary<string, string>();
-
-        internal readonly object _regexLock = new object();
 
         internal List<RegexTranslation> _defaultRegexes = new List<RegexTranslation>();
 
@@ -650,6 +619,8 @@ namespace GameTranslator.Patches.Translatons
         private HashSet<string> _registeredSplitterRegexes = new HashSet<string>();
 
         private ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
+
+        private ConcurrentDictionary<string, DateTime> _translationLastAccess = new ConcurrentDictionary<string, DateTime>();
 
         private ConcurrentDictionary<int, ScopedTranslationData> _scopedTranslations = new ConcurrentDictionary<int, ScopedTranslationData>();
 
@@ -662,6 +633,7 @@ namespace GameTranslator.Patches.Translatons
             internal List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
             internal HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
             internal ConcurrentDictionary<string, byte> FailedRegexLookups { get; set; } = new ConcurrentDictionary<string, byte>();
+            internal ConcurrentDictionary<string, DateTime> LastAccess { get; set; } = new ConcurrentDictionary<string, DateTime>();
         }
 
         internal ScopedTranslationData GetOrCreateScopedData(int scope)
@@ -673,13 +645,17 @@ namespace GameTranslator.Patches.Translatons
 
         public string FilePath;
 
-        private static readonly ConcurrentDictionary<string, Regex> _regexCache = new ConcurrentDictionary<string, Regex>();
+        private static DateTime _lastCacheCleanupTime = DateTime.Now;
 
-        private static readonly ConcurrentDictionary<string, DateTime> _regexCacheLastAccess = new ConcurrentDictionary<string, DateTime>();
+        private static readonly TimeSpan CACHE_CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
 
-        private static DateTime _lastRegexCacheCleanupTime = DateTime.Now;
+        private const long MEMORY_PRESSURE_THRESHOLD = 104857600L;
 
-        private static readonly TimeSpan REGEX_CACHE_CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
+        private const float TRANSLATION_CACHE_EVICT_RATIO = 0.2f;
+
+        private const int TRANSLATION_CACHE_MAX = 8000;
+
+        private const int FAILED_LOOKUP_CACHE_MAX = 10000;
 
         private static RegexOptions _regexCompiledSupportedFlag = RegexOptions.None;
 

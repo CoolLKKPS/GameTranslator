@@ -283,18 +283,18 @@ namespace GameTranslator
 
         private static void CleanupTranslatePairs()
         {
-            bool flag = GC.GetTotalMemory(false) > 104857600L;
+            bool flag = GC.GetTotalMemory(false) > TRANSLATE_PAIR_MEMORY_PRESSURE;
             foreach (TranslateConfig.TranslateConfigFile translateConfigFile in TranslateConfig.TranslateConfigFile.configs)
             {
                 int num = 0;
                 if (flag)
                 {
-                    num = (int)((float)translateConfigFile.translatePairs.Count * 0.2f);
+                    num = (int)((float)translateConfigFile.translatePairs.Count * TRANSLATE_PAIR_EVICT_RATIO);
                     num = Math.Max(1, Math.Min(num, translateConfigFile.translatePairs.Count));
                 }
-                else if (translateConfigFile.translatePairs.Count > 6000)
+                else if (translateConfigFile.translatePairs.Count > TRANSLATE_PAIR_MAX)
                 {
-                    num = translateConfigFile.translatePairs.Count - 6000;
+                    num = translateConfigFile.translatePairs.Count - TRANSLATE_PAIR_MAX;
                 }
                 if (num > 0)
                 {
@@ -344,6 +344,12 @@ namespace GameTranslator
         private static DateTime _lastCleanupTime = DateTime.Now;
 
         private static readonly TimeSpan CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
+
+        private const long TRANSLATE_PAIR_MEMORY_PRESSURE = 104857600L;
+
+        private const float TRANSLATE_PAIR_EVICT_RATIO = 0.2f;
+
+        private const int TRANSLATE_PAIR_MAX = 6000;
 
         internal class TranslateConfigFile
         {
