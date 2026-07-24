@@ -169,7 +169,7 @@ namespace GameTranslator
         private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should)
         {
             TranslatePlugin.logger.LogInfo("GameTranslator is loading config file call " + fileName);
-            return new TranslateConfig.TranslateConfigFile(fileName, true, should);
+            return new TranslateConfig.TranslateConfigFile(fileName, should);
         }
 
         // Still using for other purposes
@@ -353,7 +353,7 @@ namespace GameTranslator
 
         internal class TranslateConfigFile
         {
-            public TranslateConfigFile(string configName, bool saveOnInit, bool shouldLoad)
+            public TranslateConfigFile(string configName, bool shouldLoad)
             {
                 this.ConfigFileName = configName;
                 this.ConfigFilePath = Path.GetFullPath(TranslatePlugin.DefaultPath + configName + ".cfg");
@@ -362,9 +362,9 @@ namespace GameTranslator
                 {
                     this.Reload();
                 }
-                else if (saveOnInit)
+                else if (!File.Exists(this.ConfigFilePath))
                 {
-                    this.Save();
+                    this.Touch();
                 }
                 TranslateConfig.TranslateConfigFile.configs.Add(this);
             }
@@ -376,9 +376,18 @@ namespace GameTranslator
                 this.normal.Clear();
                 this.regexTranslations.Clear();
                 this.splitterRegexTranslations.Clear();
+                List<string> errors = ParseTranslationFile(this.ConfigFilePath);
+                if (errors.Count > 0)
+                {
+                    File.AppendAllLines(Path.Combine(Path.GetDirectoryName(this.ConfigFilePath), this.ConfigFileName + "_errors.log"), errors);
+                }
+            }
+
+            private List<string> ParseTranslationFile(string filePath)
+            {
                 Dictionary<string, int> normalKeyLineOrder = new Dictionary<string, int>();
-                List<string> list = new List<string>();
-                string[] lines = File.ReadAllLines(this.ConfigFilePath);
+                List<string> errors = new List<string>();
+                string[] lines = File.ReadAllLines(filePath);
                 for (int i = 0; i < lines.Length; i++)
                 {
                     string text = lines[i];
@@ -400,7 +409,7 @@ namespace GameTranslator
                                 catch (Exception ex)
                                 {
                                     string text4 = text2 + "=" + text3;
-                                    list.Add("Invalid regex: " + text4 + " - " + ex.Message);
+                                    errors.Add("Invalid regex: " + text4 + " - " + ex.Message);
                                     TranslatePlugin.logger.LogWarning("Failed to parse regex: " + text4 + ". Error: " + ex.Message);
                                     continue;
                                 }
@@ -416,7 +425,7 @@ namespace GameTranslator
                                 catch (Exception ex2)
                                 {
                                     string text5 = text2 + "=" + text3;
-                                    list.Add("Invalid splitter regex: " + text5 + " - " + ex2.Message);
+                                    errors.Add("Invalid splitter regex: " + text5 + " - " + ex2.Message);
                                     TranslatePlugin.logger.LogWarning("Failed to parse splitter regex: " + text5 + ". Error: " + ex2.Message);
                                     continue;
                                 }
@@ -442,13 +451,10 @@ namespace GameTranslator
                     }
                 }
                 this.GetNormalOrderedByLength(normalKeyLineOrder);
-                if (list.Count > 0)
-                {
-                    File.AppendAllLines(Path.Combine(Path.GetDirectoryName(this.ConfigFilePath), this.ConfigFileName + "_errors.log"), list);
-                }
+                return errors;
             }
 
-            public void Save()
+            public void Touch()
             {
                 string directoryName = Path.GetDirectoryName(this.ConfigFilePath);
                 if (!Directory.Exists(directoryName))
@@ -458,29 +464,6 @@ namespace GameTranslator
                 if (!File.Exists(this.ConfigFilePath))
                 {
                     File.Create(this.ConfigFilePath).Close();
-                    return;
-                }
-                if (this.shouldLoad)
-                {
-                    List<string> list = new List<string>();
-                    list.Add("##" + this.ConfigFileName);
-                    foreach (KeyValuePair<string, string> keyValuePair in this.normal)
-                    {
-                        string text = keyValuePair.Key.Replace("=", "\\=");
-                        string text2 = keyValuePair.Value.Replace("=", "\\=");
-                        list.Add(text + "=" + text2);
-                    }
-                    list.Add("##RegularExpression");
-                    foreach (RegexTranslation regexTranslation in this.regexTranslations)
-                    {
-                        list.Add("r:" + regexTranslation.Key + "=" + regexTranslation.Value);
-                    }
-                    list.Add("##SplitterRegularExpression");
-                    foreach (RegexTranslationSplitter regexTranslationSplitter in this.splitterRegexTranslations)
-                    {
-                        list.Add("sr:" + regexTranslationSplitter.Key + "=" + regexTranslationSplitter.Value);
-                    }
-                    File.WriteAllLines(this.ConfigFilePath, list.ToArray());
                 }
             }
 
