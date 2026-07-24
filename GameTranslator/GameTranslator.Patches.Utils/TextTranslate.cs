@@ -1,6 +1,7 @@
 using BepInEx;
 using BepInEx.Logging;
 using GameTranslator.Patches.Translatons;
+using GameTranslator.Patches.Translatons.Manipulator;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -116,6 +117,8 @@ namespace GameTranslator.Patches.Utils
 
         internal void OnComponentTextChanged(object ui)
         {
+            if (DefaultTextComponentManipulator.IsTextWindowTextMesh(ui))
+                return;
             string currentText = null;
             if (TryTranslateChangedText(ui, ref currentText, out var translated, out var info))
             {
@@ -125,6 +128,11 @@ namespace GameTranslator.Patches.Utils
 
         internal void OnTranslateIncomingText(object ui, ref string value)
         {
+            if (DefaultTextComponentManipulator.IsTextWindowTextMesh(ui))
+            {
+                DefaultTextComponentManipulator.HandleTextWindowText(ui, ref value);
+                return;
+            }
             string text = value;
             if (TryTranslateChangedText(ui, ref text, out var translated, out _))
             {
@@ -141,9 +149,13 @@ namespace GameTranslator.Patches.Utils
             string cachedTranslation = normalText?.TryGetCachedTranslation(text, TranslationScopeHelper.GetScope(ui));
             if (cachedTranslation != null)
             {
-                if (TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached:{text}"))
+                if (!TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached-result:{text}"))
                 {
                     TranslatePlugin.logger.LogInfo($"[Debug] Cached translation found for: '{text}' -> '{cachedTranslation}'");
+                }
+                else if (TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached:{text}"))
+                {
+                    TranslatePlugin.logger.LogInfo($"[Debug] Cached translation hit for: '{text}'");
                 }
                 if (info != null)
                 {

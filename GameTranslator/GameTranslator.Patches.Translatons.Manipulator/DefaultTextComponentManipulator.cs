@@ -131,6 +131,41 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             return _cachedTextWindowTextMesh != null && object.Equals(_cachedTextWindowTextMesh, ui);
         }
 
+        internal static bool IsPartialTypingText(string text)
+        {
+            if (_cachedTextWindow == null || UnityTypes.TextWindow == null)
+                return false;
+            var flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            var curText = _cachedTextWindow.GetType().GetField("curText", flags)?.GetValue(_cachedTextWindow) as string;
+            return !string.IsNullOrEmpty(curText) && text.Length < curText.Length;
+        }
+
+        internal static void HandleTextWindowText(object ui, ref string value)
+        {
+            if (IsPartialTypingText(value))
+            {
+                if (TranslatePlugin.enableTypingTranslation.Value)
+                {
+                    string partial = GetPartialTypingTranslation(ui, value);
+                    if (partial != null)
+                        value = partial;
+                }
+                return;
+            }
+            string text = value;
+            var info = ui.GetOrCreateTextTranslationInfo();
+            bool shouldSync = text.Length <= TranslatePlugin.syncTranslationThreshold.Value || !TranslatePlugin.enableAsyncDuringTyping.Value;
+            string translated = null;
+            if (shouldSync)
+                translated = TextTranslate.Instance.TranslateImmediate(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, true);
+            if (string.IsNullOrEmpty(translated) && TranslatePlugin.enableAsyncDuringTyping.Value)
+                translated = TextTranslate.Instance.TranslateOrQueue(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, true);
+            if (!string.IsNullOrEmpty(translated) && !translated.Equals(text))
+            {
+                TextTranslate.Instance.SetTranslatedText(ui, translated, text, info);
+            }
+        }
+
         internal static string GetPartialTypingTranslation(object ui, string currentPartialText)
         {
             if (_cachedTextWindow == null || UnityTypes.TextWindow == null)
@@ -147,8 +182,11 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                 info.MustIgnore = false;
                 try
                 {
-                    string t = TextTranslate.Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.normal, false);
-                    if (string.IsNullOrEmpty(t))
+                    bool shouldSync = fullText.Length <= TranslatePlugin.syncTranslationThreshold.Value || !TranslatePlugin.enableAsyncDuringTyping.Value;
+                    string t = null;
+                    if (shouldSync)
+                        t = TextTranslate.Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.normal, false);
+                    if (string.IsNullOrEmpty(t) && TranslatePlugin.enableAsyncDuringTyping.Value)
                         t = TextTranslate.Instance.TranslateOrQueue(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.normal, false);
                     bool isAsync = fullText.Length > TranslatePlugin.syncTranslationThreshold.Value;
                     if (isAsync && t == null)
