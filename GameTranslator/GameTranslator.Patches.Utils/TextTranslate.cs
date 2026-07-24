@@ -142,7 +142,7 @@ namespace GameTranslator.Patches.Utils
 
         public string TranslateOrQueue(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
-            string immediate = GuardAndPrepareText(ui, ref text, info, out bool shouldContinue);
+            string immediate = GuardAndPrepareText(ui, ref text, info, out bool shouldContinue, ignoreComponentState);
             if (!shouldContinue)
                 return immediate;
 
@@ -201,13 +201,13 @@ namespace GameTranslator.Patches.Utils
 
         public string TranslateImmediate(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
-            string immediate = GuardAndPrepareText(ui, ref text, info, out bool shouldContinue);
+            string immediate = GuardAndPrepareText(ui, ref text, info, out bool shouldContinue, ignoreComponentState);
             if (!shouldContinue)
                 return immediate;
 
             string result = null;
             int scope = TranslationScopeHelper.GetScope(ui);
-            if ((normalText == null || normalText.IsTranslatable(text, false, scope)) && (ignoreComponentState || ui.IsComponentActive()))
+            if (normalText == null || normalText.IsTranslatable(text, false, scope))
             {
                 if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
                 {
@@ -229,9 +229,14 @@ namespace GameTranslator.Patches.Utils
             return result;
         }
 
-        private static string GuardAndPrepareText(object ui, ref string text, TextTranslationInfo info, out bool shouldContinue)
+        private static string GuardAndPrepareText(object ui, ref string text, TextTranslationInfo info, out bool shouldContinue, bool ignoreComponentState = false)
         {
             shouldContinue = false;
+
+            if (!ignoreComponentState && !ui.IsComponentActive())
+            {
+                return null;
+            }
 
             if (info != null && (info.IsCurrentlySettingText || info.MustIgnore || info.ShouldIgnore))
             {

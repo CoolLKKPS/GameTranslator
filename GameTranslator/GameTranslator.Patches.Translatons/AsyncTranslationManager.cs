@@ -153,7 +153,7 @@ namespace GameTranslator.Patches.Translatons
             };
             string key = GetStabilizationKey(ui, text);
             _stabilizationContexts[key] = context;
-            if (ui is MonoBehaviour behaviour && behaviour.gameObject.activeInHierarchy)
+            if (ui is MonoBehaviour behaviour)
             {
                 TranslatePlugin.Instance.StartCoroutine(WaitForTextStablization(ui, info, context.Delay, context.MaxTries, 0,
                     stabilizedText =>
@@ -185,7 +185,7 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                // GameObject is inactive or not a MonoBehaviour
+                // GameObject is not a MonoBehaviour, clean up stabilization context
                 _stabilizationContexts.TryRemove(key, out _);
                 _immediatelyTranslating.TryRemove(immKey, out _);
             }
@@ -291,19 +291,13 @@ namespace GameTranslator.Patches.Translatons
                     string final = job.TranslatedText;
                     foreach (var ui in job.AssociatedUIs.Keys)
                     {
-                        if (TextTranslate.IsUIObjectValid(ui))
-                        {
-                            _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, final, job.OriginalText, job.TranslationInfo, job.StartVersion));
-                        }
+                        _mainThreadActions.Enqueue(() => SafeUpdateUI(ui, final, job.OriginalText, job.TranslationInfo, job.StartVersion));
                     }
                     if (_pendingStabilizationUIs.TryRemove(immKey, out var pendingSet))
                     {
                         foreach (var kvp in pendingSet)
                         {
-                            if (TextTranslate.IsUIObjectValid(kvp.Key))
-                            {
-                                _mainThreadActions.Enqueue(() => SafeUpdateUI(kvp.Key, final, job.OriginalText, job.TranslationInfo, job.StartVersion));
-                            }
+                            _mainThreadActions.Enqueue(() => SafeUpdateUI(kvp.Key, final, job.OriginalText, job.TranslationInfo, job.StartVersion));
                         }
                     }
                 }
@@ -334,8 +328,10 @@ namespace GameTranslator.Patches.Translatons
 
         private void SafeUpdateUI(object ui, string translatedText, string originalText, object translationInfo, long expectedVersion)
         {
-            if (!TextTranslate.IsUIObjectValid(ui)) return;
-
+            if (!TextTranslate.IsUIObjectValid(ui))
+            {
+                return;
+            }
             try
             {
                 var info = translationInfo as TextTranslationInfo;
