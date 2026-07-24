@@ -47,7 +47,8 @@ namespace GameTranslator.Patches.Translatons
                     this._splitterRegexes.Clear();
                     this._registeredSplitterRegexes.Clear();
                     this._failedRegexLookups.Clear();
-                    this._translationLastAccess.Clear();
+                    this._regexResultCache.Clear();
+                    this._regexResultLastAccess.Clear();
                     this.LoadTranslationsInStream(this.FilePath, true);
                 }
             }
@@ -263,7 +264,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        private static void EvictTranslationCache(ConcurrentDictionary<string, string> translations, ConcurrentDictionary<string, string> reverseTranslations, ConcurrentDictionary<string, DateTime> lastAccess)
+        private static void EvictTranslationCache(ConcurrentDictionary<string, string> translations, ConcurrentDictionary<string, DateTime> lastAccess)
         {
             bool isMemoryPressure = GC.GetTotalMemory(false) > MEMORY_PRESSURE_THRESHOLD;
             int num = 0;
@@ -280,10 +281,7 @@ namespace GameTranslator.Patches.Translatons
             var keysToRemove = lastAccess.OrderBy(kv => kv.Value).Take(num).Select(kv => kv.Key).ToList();
             foreach (var key in keysToRemove)
             {
-                if (translations.TryRemove(key, out var value))
-                {
-                    reverseTranslations.TryRemove(value, out _);
-                }
+                translations.TryRemove(key, out _);
                 lastAccess.TryRemove(key, out _);
             }
             TranslatePlugin.logger.LogInfo(string.Format("Translation cache evicted {0} entries, {1} remaining", keysToRemove.Count, translations.Count));
@@ -291,10 +289,10 @@ namespace GameTranslator.Patches.Translatons
 
         private void PeriodicCacheCleanup()
         {
-            EvictTranslationCache(this._translations, this._reverseTranslations, this._translationLastAccess);
+            EvictTranslationCache(this._regexResultCache, this._regexResultLastAccess);
             foreach (var kvp in _scopedTranslations)
             {
-                EvictTranslationCache(kvp.Value.Translations, kvp.Value.ReverseTranslations, kvp.Value.LastAccess);
+                EvictTranslationCache(kvp.Value.RegexResultCache, kvp.Value.RegexResultLastAccess);
             }
 
             if (this._failedRegexLookups.Count > FAILED_LOOKUP_CACHE_MAX)
@@ -377,11 +375,17 @@ namespace GameTranslator.Patches.Translatons
                 return text;
             }
 
-            if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
-                && scoped.Translations.TryGetValue(text, out var scopedResult))
+            if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped))
             {
-                scoped.LastAccess[text] = DateTime.Now;
-                return scopedResult;
+                if (scoped.Translations.TryGetValue(text, out var scopedResult))
+                {
+                    return scopedResult;
+                }
+                if (scoped.RegexResultCache.TryGetValue(text, out scopedResult))
+                {
+                    scoped.RegexResultLastAccess[text] = DateTime.Now;
+                    return scopedResult;
+                }
             }
 
             if (DateTime.Now - NormalTextTranslator._lastCacheCleanupTime > NormalTextTranslator.CACHE_CLEANUP_INTERVAL)
@@ -395,9 +399,9 @@ namespace GameTranslator.Patches.Translatons
             try
             {
                 this._translations.TryGetValue(text, out text2);
-                if (text2 != null)
+                if (text2 == null && _regexResultCache.TryGetValue(text, out text2))
                 {
-                    this._translationLastAccess[text] = DateTime.Now;
+                    _regexResultLastAccess[text] = DateTime.Now;
                 }
                 if (text2 == null)
                 {
@@ -481,17 +485,15 @@ namespace GameTranslator.Patches.Translatons
                             {
                                 if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedHit))
                                 {
-                                    scopedHit.Translations[text] = text3;
-                                    scopedHit.ReverseTranslations[text3] = text;
-                                    scopedHit.LastAccess[text] = DateTime.Now;
-                                    EvictTranslationCache(scopedHit.Translations, scopedHit.ReverseTranslations, scopedHit.LastAccess);
+                                    scopedHit.RegexResultCache[text] = text3;
+                                    scopedHit.RegexResultLastAccess[text] = DateTime.Now;
+                                    EvictTranslationCache(scopedHit.RegexResultCache, scopedHit.RegexResultLastAccess);
                                 }
                                 else
                                 {
-                                    this._translations[text] = text3;
-                                    this._reverseTranslations[text3] = text;
-                                    this._translationLastAccess[text] = DateTime.Now;
-                                    EvictTranslationCache(this._translations, this._reverseTranslations, this._translationLastAccess);
+                                    this._regexResultCache[text] = text3;
+                                    this._regexResultLastAccess[text] = DateTime.Now;
+                                    EvictTranslationCache(this._regexResultCache, this._regexResultLastAccess);
                                 }
                             }
                         }
@@ -522,14 +524,25 @@ namespace GameTranslator.Patches.Translatons
 
         public string TryGetCachedTranslation(string text, int scope = -1)
         {
-            if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped) && scoped.Translations.TryGetValue(text, out var scopedResult))
+            if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped))
             {
-                scoped.LastAccess[text] = DateTime.Now;
-                return scopedResult;
+                if (scoped.Translations.TryGetValue(text, out var scopedResult))
+                {
+                    return scopedResult;
+                }
+                if (scoped.RegexResultCache.TryGetValue(text, out scopedResult))
+                {
+                    scoped.RegexResultLastAccess[text] = DateTime.Now;
+                    return scopedResult;
+                }
             }
             if (_translations.TryGetValue(text, out var result))
             {
-                _translationLastAccess[text] = DateTime.Now;
+                return result;
+            }
+            if (_regexResultCache.TryGetValue(text, out result))
+            {
+                _regexResultLastAccess[text] = DateTime.Now;
             }
             return result;
         }
@@ -620,7 +633,9 @@ namespace GameTranslator.Patches.Translatons
 
         private ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
 
-        private ConcurrentDictionary<string, DateTime> _translationLastAccess = new ConcurrentDictionary<string, DateTime>();
+        private ConcurrentDictionary<string, string> _regexResultCache = new ConcurrentDictionary<string, string>();
+
+        private ConcurrentDictionary<string, DateTime> _regexResultLastAccess = new ConcurrentDictionary<string, DateTime>();
 
         private ConcurrentDictionary<int, ScopedTranslationData> _scopedTranslations = new ConcurrentDictionary<int, ScopedTranslationData>();
 
@@ -633,7 +648,8 @@ namespace GameTranslator.Patches.Translatons
             internal List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
             internal HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
             internal ConcurrentDictionary<string, byte> FailedRegexLookups { get; set; } = new ConcurrentDictionary<string, byte>();
-            internal ConcurrentDictionary<string, DateTime> LastAccess { get; set; } = new ConcurrentDictionary<string, DateTime>();
+            internal ConcurrentDictionary<string, string> RegexResultCache { get; set; } = new ConcurrentDictionary<string, string>();
+            internal ConcurrentDictionary<string, DateTime> RegexResultLastAccess { get; set; } = new ConcurrentDictionary<string, DateTime>();
         }
 
         internal ScopedTranslationData GetOrCreateScopedData(int scope)
