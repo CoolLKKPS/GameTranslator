@@ -157,9 +157,9 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             bool shouldSync = text.Length <= TranslatePlugin.syncTranslationThreshold.Value || !TranslatePlugin.enableAsyncDuringTyping.Value;
             string translated = null;
             if (shouldSync)
-                translated = TextTranslate.Instance.TranslateImmediate(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, true);
+                translated = TextTranslate.Instance.TranslateImmediate(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, false);      // ignoreComponentState = false, for now
             if (string.IsNullOrEmpty(translated) && TranslatePlugin.enableAsyncDuringTyping.Value)
-                translated = TextTranslate.Instance.TranslateOrQueue(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, true);
+                translated = TextTranslate.Instance.TranslateOrQueue(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, false);        // ignoreComponentState = false, for now
             if (!string.IsNullOrEmpty(translated) && !translated.Equals(text))
             {
                 TextTranslate.Instance.SetTranslatedText(ui, translated, text, info);
