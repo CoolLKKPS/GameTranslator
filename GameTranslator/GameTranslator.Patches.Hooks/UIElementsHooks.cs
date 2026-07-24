@@ -9,7 +9,7 @@ namespace GameTranslator.Patches.Hooks
     {
         [HarmonyPrefix]
         [HarmonyPatch("text", MethodType.Setter)]
-        public static void Change(ref TextElement __instance, ref string value)
+        public static void Change(TextElement __instance, ref string value)
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref value);
         }

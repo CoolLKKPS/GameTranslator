@@ -9,14 +9,14 @@ namespace GameTranslator.Patches.Hooks
     {
         [HarmonyPrefix]
         [HarmonyPatch("OnEnable")]
-        public static void Change(ref Text __instance)
+        public static void Change(Text __instance)
         {
             TextTranslate.Instance.OnComponentTextChanged(__instance);
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("text", MethodType.Setter)]
-        public static void Change(ref Text __instance, ref string value)
+        public static void Change(Text __instance, ref string value)
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref value);
         }

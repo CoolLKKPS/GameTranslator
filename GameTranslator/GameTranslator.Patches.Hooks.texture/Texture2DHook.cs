@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using XUnity.Common.Logging;
 
-namespace GameTranslator.Patches.Hooks
+namespace GameTranslator.Patches.Hooks.texture
 {
     [HarmonyPatch(typeof(Texture2D))]
     internal class Texture2DHook

@@ -9,7 +9,7 @@ namespace GameTranslator.Patches.Hooks
     {
         [HarmonyPrefix]
         [HarmonyPatch("OnEnable")]
-        public static void Change(ref TextMeshPro __instance)
+        public static void Change(TextMeshPro __instance)
         {
             TextTranslate.Instance.OnComponentTextChanged(__instance);
         }

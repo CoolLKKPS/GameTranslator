@@ -11,7 +11,7 @@ namespace GameTranslator.Patches.Hooks
     {
         [HarmonyPrefix]
         [HarmonyPatch("SetTextInternal")]
-        public static void SetTextInternal(ref TMP_Text __instance, ref string sourceText)
+        public static void SetTextInternal(TMP_Text __instance, ref string sourceText)
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
@@ -23,7 +23,7 @@ namespace GameTranslator.Patches.Hooks
             typeof(string),
             typeof(bool)
         })]
-        public static void SetText(ref TMP_Text __instance, ref string sourceText, bool syncTextInputBox)
+        public static void SetText(TMP_Text __instance, ref string sourceText, bool syncTextInputBox)
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
@@ -42,7 +42,7 @@ namespace GameTranslator.Patches.Hooks
             typeof(float),
             typeof(float)
         })]
-        public static void SetText(ref TMP_Text __instance, ref string sourceText, float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7)
+        public static void SetText(TMP_Text __instance, ref string sourceText, float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7)
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
@@ -55,7 +55,7 @@ namespace GameTranslator.Patches.Hooks
             typeof(int),
             typeof(int)
         })]
-        public static void SetText(ref TMP_Text __instance, ref StringBuilder sourceText, int start, int length)
+        public static void SetText(TMP_Text __instance, ref StringBuilder sourceText, int start, int length)
         {
             string text = sourceText.ToString();
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref text);
@@ -65,7 +65,7 @@ namespace GameTranslator.Patches.Hooks
 
         [HarmonyPrefix]
         [HarmonyPatch("text", MethodType.Setter)]
-        public static void Change(ref TMP_Text __instance, ref string value)
+        public static void Change(TMP_Text __instance, ref string value)
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref value);
             ReplaceUnsupportedCharacters(ref value, __instance);

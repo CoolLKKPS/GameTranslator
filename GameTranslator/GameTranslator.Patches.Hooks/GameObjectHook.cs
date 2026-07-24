@@ -12,7 +12,7 @@ namespace GameTranslator.Patches.Hooks
     {
         [HarmonyPostfix]
         [HarmonyPatch("active", MethodType.Setter)]
-        public static void Active(ref GameObject __instance, bool value)
+        public static void Active(GameObject __instance, bool value)
         {
             if (value)
             {
@@ -28,7 +28,7 @@ namespace GameTranslator.Patches.Hooks
 
         [HarmonyPostfix]
         [HarmonyPatch("SetActive", new Type[] { typeof(bool) })]
-        public static void SetActive(ref GameObject __instance, bool value)
+        public static void SetActive(GameObject __instance, bool value)
         {
             if (value)
             {

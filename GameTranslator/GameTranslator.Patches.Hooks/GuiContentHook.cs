@@ -17,14 +17,14 @@ namespace GameTranslator.Patches.Hooks
             typeof(Texture),
             typeof(string)
         })]
-        public static void Init(ref GUIContent __instance, ref string text, Texture image, string tooltip)
+        public static void Init(GUIContent __instance, ref string text, Texture image, string tooltip)
         {
             GuiContentHook.Hook_TextChanged(TextTranslate.Instance, __instance, ref text, TranslateConfig.guiText, TranslateConfig.gui);
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("text", MethodType.Setter)]
-        public static void Change(ref GUIContent __instance, ref string value)
+        public static void Change(GUIContent __instance, ref string value)
         {
             GuiContentHook.Hook_TextChanged(TextTranslate.Instance, __instance, ref value, TranslateConfig.guiText, TranslateConfig.gui);
         }
