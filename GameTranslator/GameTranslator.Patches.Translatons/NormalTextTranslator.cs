@@ -267,15 +267,21 @@ namespace GameTranslator.Patches.Translatons
         private static void EvictTranslationCache(ConcurrentDictionary<string, string> translations, ConcurrentDictionary<string, DateTime> lastAccess)
         {
             bool isMemoryPressure = GC.GetTotalMemory(false) > MEMORY_PRESSURE_THRESHOLD;
+            string reason = null;
             int num = 0;
             if (isMemoryPressure)
             {
-                num = (int)(translations.Count * TRANSLATION_CACHE_EVICT_RATIO);
-                num = Math.Max(1, Math.Min(num, translations.Count));
+                if (translations.Count >= TRANSLATION_CACHE_EVICT_MIN)
+                {
+                    num = (int)(translations.Count * TRANSLATION_CACHE_EVICT_RATIO);
+                    num = Math.Max(1, Math.Min(num, translations.Count));
+                }
+                reason = "memory pressure";
             }
             else if (translations.Count > TRANSLATION_CACHE_MAX)
             {
                 num = translations.Count - TRANSLATION_CACHE_MAX;
+                reason = "over limit";
             }
             if (num <= 0) return;
             var keysToRemove = lastAccess.OrderBy(kv => kv.Value).Take(num).Select(kv => kv.Key).ToList();
@@ -284,7 +290,7 @@ namespace GameTranslator.Patches.Translatons
                 translations.TryRemove(key, out _);
                 lastAccess.TryRemove(key, out _);
             }
-            TranslatePlugin.logger.LogInfo(string.Format("Translation cache evicted {0} entries, {1} remaining", keysToRemove.Count, translations.Count));
+            TranslatePlugin.logger.LogInfo(string.Format("Translation cache evicted {0} entries, {1} remaining (reason: {2})", keysToRemove.Count, translations.Count, reason));
         }
 
         private void PeriodicCacheCleanup()
@@ -677,11 +683,13 @@ namespace GameTranslator.Patches.Translatons
 
         private static readonly TimeSpan CACHE_CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
 
-        private const long MEMORY_PRESSURE_THRESHOLD = 104857600L;
+        private const long MEMORY_PRESSURE_THRESHOLD = 536870912L;
 
         private const float TRANSLATION_CACHE_EVICT_RATIO = 0.2f;
 
         private const int TRANSLATION_CACHE_MAX = 8000;
+
+        private const int TRANSLATION_CACHE_EVICT_MIN = 100;
 
         private const int FAILED_LOOKUP_CACHE_MAX = 10000;
 

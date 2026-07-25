@@ -65,7 +65,7 @@ namespace GameTranslator.Patches.Utils
                 _debugOutputCache.Remove(key);
             }
 
-            if (TranslatePlugin.showOtherDebug.Value && keysToRemove.Count > 0)
+            if (keysToRemove.Count > 0)
             {
                 TranslatePlugin.logger.LogInfo($"[Debug] Cleaned up {keysToRemove.Count} old debug cache entries");
             }

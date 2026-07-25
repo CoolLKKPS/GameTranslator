@@ -287,14 +287,20 @@ namespace GameTranslator
             foreach (TranslateConfig.TranslateConfigFile translateConfigFile in TranslateConfig.TranslateConfigFile.configs)
             {
                 int num = 0;
+                string reason = null;
                 if (flag)
                 {
-                    num = (int)((float)translateConfigFile.translatePairs.Count * TRANSLATE_PAIR_EVICT_RATIO);
-                    num = Math.Max(1, Math.Min(num, translateConfigFile.translatePairs.Count));
+                    if (translateConfigFile.translatePairs.Count >= TRANSLATE_PAIR_EVICT_MIN)
+                    {
+                        num = (int)((float)translateConfigFile.translatePairs.Count * TRANSLATE_PAIR_EVICT_RATIO);
+                        num = Math.Max(1, Math.Min(num, translateConfigFile.translatePairs.Count));
+                    }
+                    reason = "memory pressure";
                 }
                 else if (translateConfigFile.translatePairs.Count > TRANSLATE_PAIR_MAX)
                 {
                     num = translateConfigFile.translatePairs.Count - TRANSLATE_PAIR_MAX;
+                    reason = "over limit";
                 }
                 if (num > 0)
                 {
@@ -310,7 +316,7 @@ namespace GameTranslator
                         DateTime dateTime;
                         translateConfigFile._translatePairLastAccess.TryRemove(text, out dateTime);
                     }
-                    TranslatePlugin.logger.LogInfo(string.Format("Cleaned {0} translate pairs from {1}. Remaining: {2}", list.Count, translateConfigFile.ConfigFileName, translateConfigFile.translatePairs.Count));
+                    TranslatePlugin.logger.LogInfo(string.Format("Cleaned {0} translate pairs from {1}. Remaining: {2} (reason: {3})", list.Count, translateConfigFile.ConfigFileName, translateConfigFile.translatePairs.Count, reason));
                 }
             }
         }
@@ -345,11 +351,13 @@ namespace GameTranslator
 
         private static readonly TimeSpan CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
 
-        private const long TRANSLATE_PAIR_MEMORY_PRESSURE = 104857600L;
+        private const long TRANSLATE_PAIR_MEMORY_PRESSURE = 536870912L;
 
         private const float TRANSLATE_PAIR_EVICT_RATIO = 0.2f;
 
         private const int TRANSLATE_PAIR_MAX = 6000;
+
+        private const int TRANSLATE_PAIR_EVICT_MIN = 100;
 
         internal class TranslateConfigFile
         {
