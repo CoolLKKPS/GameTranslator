@@ -308,8 +308,20 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
+        private bool HasTranslationKey(string key, int scope)
+        {
+            if (_translations.ContainsKey(key))
+                return true;
+            if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
+                && scoped.Translations.ContainsKey(key))
+                return true;
+            return false;
+        }
+
         private bool IsTranslation(string translation, int scope = -1)
         {
+            if (HasTranslationKey(translation, scope))
+                return false;
             if (this._reverseTranslations.ContainsKey(translation))
                 return true;
             if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scoped)
