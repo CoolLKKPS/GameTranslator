@@ -86,6 +86,7 @@ namespace GameTranslator
             TranslatePlugin.enableTypingTranslation = base.Config.Bind<bool>("Debug", "Enable TextWindow Typing Translation", false, "Define whether to display translated text letter-by-letter during the textwindow typing animation instead of waiting for the animation to complete");
             TranslatePlugin.enableAsyncDuringTyping = base.Config.Bind<bool>("Debug", "Enable Async During Typing Translation", false, "Define whether to allow async translation during typing animation which terminating the animation when async translation completes");
             TranslatePlugin.cacheUnmodifiedTextures = base.Config.Bind<bool>("Debug", "Cache Unmodified Textures", false, "Define whether to cache textures that have not been modified");
+            TranslatePlugin.enableTextureDumping = base.Config.Bind<bool>("Debug", "Enable Texture Dumping", false, "Define whether to dump original textures to disk for debug purposes");
             TranslatePlugin.stabilizationMinTextLength = base.Config.Bind<int>("Debug", "Stabilization Min Text Length", 100, "Define minimum text length to trigger stabilization. Set to 0 to disable stabilization");
             TranslatePlugin.stabilizationDelay = base.Config.Bind<float>("Debug", "Stabilization Delay", 0.9f, "Define delay in seconds between stabilization checks. Must be greater than 0");
             TranslatePlugin.stabilizationMaxRetries = base.Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
@@ -125,6 +126,11 @@ namespace GameTranslator
             if (!Directory.Exists(TranslatePlugin.TexturesPath))
             {
                 Directory.CreateDirectory(TranslatePlugin.TexturesPath);
+            }
+            TranslatePlugin.DumpPath = TranslatePlugin.DefaultPath + "Dump\\";
+            if (TranslatePlugin.enableTextureDumping.Value && !Directory.Exists(TranslatePlugin.DumpPath))
+            {
+                Directory.CreateDirectory(TranslatePlugin.DumpPath);
             }
             TranslateConfig.Load();
             TranslateExtensions.Load();
@@ -302,6 +308,8 @@ namespace GameTranslator
 
         public static ConfigEntry<bool> cacheUnmodifiedTextures;
 
+        public static ConfigEntry<bool> enableTextureDumping;
+
         public static ConfigEntry<int> stabilizationMinTextLength;
 
         public static ConfigEntry<float> stabilizationDelay;
@@ -343,5 +351,7 @@ namespace GameTranslator
         internal static string DefaultPath;
 
         internal static string TexturesPath;
+
+        internal static string DumpPath;
     }
 }

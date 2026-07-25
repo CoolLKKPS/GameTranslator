@@ -17,9 +17,18 @@ namespace GameTranslator.Patches.Translatons
 
         public bool IsTranslated { get; set; }
 
+        public bool IsDumped { get; set; }
+
         public bool UsingReplacedTexture { get; set; }
 
         public long ChangeTime { get; set; }
+
+        public byte[] GetOrCreateOriginalData()
+        {
+            SetupHashAndData(Original.Target);
+            if (_originalData != null) return _originalData;
+            return Original.Target.GetTextureData().Data;
+        }
 
         public void Reset()
         {
@@ -129,6 +138,17 @@ namespace GameTranslator.Patches.Translatons
                 if (textureName != null)
                 {
                     TextureDataResult textureDataResult = this.SetupKeyForNameWithFallback(textureName, texture);
+                    if (TranslatePlugin.enableTextureDumping.Value && _originalData == null)
+                    {
+                        if (textureDataResult != null)
+                        {
+                            _originalData = textureDataResult.Data;
+                        }
+                        else
+                        {
+                            _originalData = texture.GetTextureData().Data;
+                        }
+                    }
                 }
             }
         }
@@ -159,6 +179,8 @@ namespace GameTranslator.Patches.Translatons
         private static readonly Encoding UTF8 = new UTF8Encoding(false);
 
         private string _key;
+
+        private byte[] _originalData;
 
         private bool _initialized;
 

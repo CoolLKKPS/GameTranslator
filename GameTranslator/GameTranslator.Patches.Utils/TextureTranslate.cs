@@ -2,6 +2,7 @@ using GameTranslator.Patches.Translatons;
 using System;
 using System.IO;
 using UnityEngine;
+using XUnity.Common.Extensions;
 using XUnity.Common.Logging;
 
 namespace GameTranslator.Patches.Utils
@@ -10,7 +11,7 @@ namespace GameTranslator.Patches.Utils
     {
         internal void Hook_ImageChangedOnComponent(object source, ref Texture2D texture, bool isPrefixHooked, bool onEnable = false)
         {
-            if (TextureTranslate.ImageHooksEnabled && TranslatePlugin.changeTexture.Value && source.IsKnownImageType())
+            if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && source.IsKnownImageType())
             {
                 Sprite sprite = null;
                 this.HandleImage(source, ref sprite, ref texture, isPrefixHooked);
@@ -19,7 +20,7 @@ namespace GameTranslator.Patches.Utils
 
         internal void Hook_ImageChangedOnComponent(object source, ref Sprite sprite, ref Texture2D texture, bool isPrefixHooked, bool onEnable)
         {
-            if (TextureTranslate.ImageHooksEnabled && TranslatePlugin.changeTexture.Value && source.IsKnownImageType())
+            if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && source.IsKnownImageType())
             {
                 this.HandleImage(source, ref sprite, ref texture, isPrefixHooked);
             }
@@ -27,7 +28,7 @@ namespace GameTranslator.Patches.Utils
 
         internal void Hook_ImageChanged(ref Texture2D texture, bool isPrefixHooked)
         {
-            if (TextureTranslate.ImageHooksEnabled && TranslatePlugin.changeTexture.Value && !(texture == null))
+            if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && !(texture == null))
             {
                 Sprite sprite = null;
                 this.HandleImage(null, ref sprite, ref texture, isPrefixHooked);
@@ -38,7 +39,11 @@ namespace GameTranslator.Patches.Utils
         {
             try
             {
-                if (this.ShouldProcessTexture(source, texture))
+                if (TranslatePlugin.enableTextureDumping.Value)
+                {
+                    this.DumpTexture(source, texture);
+                }
+                if (TranslatePlugin.changeTexture.Value && this.ShouldProcessTexture(source, texture))
                 {
                     this.TranslateTexture(source, ref sprite, ref texture, isPrefixHooked);
                 }
@@ -47,6 +52,58 @@ namespace GameTranslator.Patches.Utils
             {
                 XuaLogger.AutoTranslator.Error(ex, "An error occurred while translating texture.");
             }
+        }
+
+        private void DumpTexture(object source, Texture2D texture)
+        {
+            try
+            {
+                TextureTranslate.ImageHooksEnabled = false;
+
+                texture = texture ?? source.GetTexture();
+                if (texture == null) return;
+
+                var format = (int)texture.format;
+                if (format == 1 || format == 9 || format == 63) return;
+
+                var tti = texture.GetOrCreateTextureTranslationInfo();
+                if (tti.IsDumped) return;
+
+                var key = tti.GetKey();
+                if (string.IsNullOrEmpty(key)) return;
+
+                var name = texture.GetTextureName("Unnamed");
+                var originalData = tti.GetOrCreateOriginalData();
+                DumpImageToDisk(name, key, originalData);
+                tti.IsDumped = true;
+            }
+            catch (Exception ex)
+            {
+                XuaLogger.AutoTranslator.Error(ex, "An error occurred while dumping texture.");
+            }
+            finally
+            {
+                TextureTranslate.ImageHooksEnabled = true;
+            }
+        }
+
+        private static void DumpImageToDisk(string textureName, string key, byte[] data)
+        {
+            Directory.CreateDirectory(TranslatePlugin.DumpPath);
+            string sanitizedName = textureName.SanitizeForFileSystem();
+            string dataHash = TextureTranslationCache.HashHelper.Compute(data);
+            string fileName;
+            if (key == dataHash)
+            {
+                fileName = sanitizedName + " [" + key + "].png";
+            }
+            else
+            {
+                fileName = sanitizedName + " [" + key + "-" + dataHash + "].png";
+            }
+            string fullPath = Path.Combine(TranslatePlugin.DumpPath, fileName);
+            File.WriteAllBytes(fullPath, data);
+            XuaLogger.AutoTranslator.Info("Dumped texture file: " + fileName);
         }
 
         private void TranslateTexture(object source, ref Sprite sprite, ref Texture2D texture, bool isPrefixHooked)
