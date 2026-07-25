@@ -314,6 +314,7 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
+        // Redundant safeguard
         private bool HasTranslationKey(string key, int scope)
         {
             if (_translations.ContainsKey(key))
