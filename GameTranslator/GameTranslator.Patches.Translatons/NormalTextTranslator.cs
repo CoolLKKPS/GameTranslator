@@ -71,10 +71,6 @@ namespace GameTranslator.Patches.Translatons
                 foreach (string text in streamReader.ReadToEnd().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     string trimmed = text.TrimStart();
-                    if (trimmed.StartsWith("//"))
-                    {
-                        continue;
-                    }
                     if (trimmed.StartsWith("#set level "))
                     {
                         string levelsStr = trimmed.Substring(11).Trim();
@@ -113,10 +109,6 @@ namespace GameTranslator.Patches.Translatons
                                 }
                             }
                         }
-                        continue;
-                    }
-                    if (trimmed.StartsWith("#"))
-                    {
                         continue;
                     }
                     try
@@ -361,8 +353,7 @@ namespace GameTranslator.Patches.Translatons
                                 translationFunc = delegate (string groupValue)
                                 {
                                     string text2;
-                                    if (capturedScope >= 0 && _scopedTranslations.TryGetValue(capturedScope, out var s)
-                                        && s.Translations.TryGetValue(groupValue, out text2))
+                                    if (capturedScope >= 0 && _scopedTranslations.TryGetValue(capturedScope, out var s) && s.Translations.TryGetValue(groupValue, out text2))
                                     {
                                         return text2;
                                     }

@@ -89,7 +89,7 @@ namespace GameTranslator.Patches.Utils
                     }
                     else if (c == '%')
                     {
-                        if (i + 2 < length && i + 1 < length && i + 2 < length && str[i + 1] == '3' && str[i + 2] == 'D')
+                        if (i + 2 < length && str[i + 1] == '3' && str[i + 2] == 'D')
                         {
                             stringBuilder.Append('=');
                             i += 2;
@@ -102,7 +102,7 @@ namespace GameTranslator.Patches.Utils
                     else if (c == '/')
                     {
                         int num3 = i + 1;
-                        if (num3 < length && num3 < length && str[num3] == '/')
+                        if (num3 < length && str[num3] == '/')
                         {
                             array2[num++] = stringBuilder.ToString();
                             if (num == 2)

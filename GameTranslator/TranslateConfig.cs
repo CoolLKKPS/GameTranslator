@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace GameTranslator
@@ -184,7 +183,7 @@ namespace GameTranslator
         public static string replaceByMap(string text, TranslateConfig.TranslateConfigFile file)
         {
             if (file == null) return text;
-            if (file.normal.Count == 0 && file.regexTranslations.Count == 0 && file.splitterRegexTranslations.Count == 0)
+            if (file.normal.Count == 0 && file.regexTranslations.Count == 0)
             {
                 return text;
             }
@@ -207,20 +206,12 @@ namespace GameTranslator
                     return file.translatePairs[text];
                 }
                 StringBuffer stringBuffer = new StringBuffer(text);
-                NormalTextTranslator moduleTranslator = TranslateConfig.GetModuleTranslator(file);
-                if (moduleTranslator != null)
+                if (file.regexTranslations.Count > 0)
                 {
-                    RegexTranslationSplitter[] splitterSnapshot;
                     RegexTranslation[] regexSnapshot;
-                    lock (moduleTranslator._regexLock)
+                    lock (file._fileLock)
                     {
-                        splitterSnapshot = moduleTranslator._splitterRegexes.ToArray();
-                        regexSnapshot = moduleTranslator._defaultRegexes.ToArray();
-                    }
-                    foreach (RegexTranslationSplitter regexTranslationSplitter in splitterSnapshot)
-                    {
-                        string text2 = moduleTranslator.SplitterTranslate(stringBuffer.ToString(), regexTranslationSplitter);
-                        stringBuffer.Clear().Append(text2);
+                        regexSnapshot = file.regexTranslations.ToArray();
                     }
                     foreach (RegexTranslation regexTranslation in regexSnapshot)
                     {
@@ -379,12 +370,15 @@ namespace GameTranslator
 
             public void Reload()
             {
-                this.translatePairs.Clear();
-                this._translatePairLastAccess.Clear();
-                this.normal.Clear();
-                this.regexTranslations.Clear();
-                this.splitterRegexTranslations.Clear();
-                List<string> errors = ParseTranslationFile(this.ConfigFilePath);
+                List<string> errors;
+                lock (this._fileLock)
+                {
+                    this.translatePairs.Clear();
+                    this._translatePairLastAccess.Clear();
+                    this.normal.Clear();
+                    this.regexTranslations.Clear();
+                    errors = ParseTranslationFile(this.ConfigFilePath);
+                }
                 if (errors.Count > 0)
                 {
                     File.AppendAllLines(Path.Combine(Path.GetDirectoryName(this.ConfigFilePath), this.ConfigFileName + "_errors.log"), errors);
@@ -399,62 +393,43 @@ namespace GameTranslator
                 for (int i = 0; i < lines.Length; i++)
                 {
                     string text = lines[i];
-                    if (!text.StartsWith("#") && text.Contains("="))
+                    string[] array2 = TextHelper.ReadTranslationLineAndDecode(text);
+                    if (array2 != null)
                     {
-                        string[] array2 = TranslateConfig.TranslateConfigFile.regex.Split(text);
-                        if (array2.Length == 2)
+                        string text2 = array2[0];
+                        string text3 = array2[1];
+                        if (text2.StartsWith("r:"))
                         {
-                            string text2 = array2[0].Replace("\\=", "=");
-                            string text3 = array2[1].Replace("\\=", "=");
-                            if (text2.StartsWith("r:"))
+                            try
                             {
-                                try
-                                {
-                                    RegexTranslation regexTranslation = new RegexTranslation(text2, text3);
-                                    this.regexTranslations.Add(regexTranslation);
-                                    continue;
-                                }
-                                catch (Exception ex)
-                                {
-                                    string text4 = text2 + "=" + text3;
-                                    errors.Add("Invalid regex: " + text4 + " - " + ex.Message);
-                                    TranslatePlugin.logger.LogWarning("Failed to parse regex: " + text4 + ". Error: " + ex.Message);
-                                    continue;
-                                }
+                                RegexTranslation regexTranslation = new RegexTranslation(text2, text3);
+                                this.regexTranslations.Add(regexTranslation);
+                                continue;
                             }
-                            if (text2.StartsWith("sr:"))
+                            catch (Exception ex)
                             {
-                                try
-                                {
-                                    RegexTranslationSplitter regexTranslationSplitter = new RegexTranslationSplitter(text2, text3);
-                                    this.splitterRegexTranslations.Add(regexTranslationSplitter);
-                                    continue;
-                                }
-                                catch (Exception ex2)
-                                {
-                                    string text5 = text2 + "=" + text3;
-                                    errors.Add("Invalid splitter regex: " + text5 + " - " + ex2.Message);
-                                    TranslatePlugin.logger.LogWarning("Failed to parse splitter regex: " + text5 + ". Error: " + ex2.Message);
-                                    continue;
-                                }
+                                string text4 = text2 + "=" + text3;
+                                errors.Add("Invalid regex: " + text4 + " - " + ex.Message);
+                                TranslatePlugin.logger.LogWarning("Failed to parse regex: " + text4 + ". Error: " + ex.Message);
+                                continue;
                             }
-                            if (this.normal.ContainsKey(text2))
-                            {
-                                this.normal[text2] = text3;
-                            }
-                            else
-                            {
-                                this.normal.Add(text2, text3);
-                                normalKeyLineOrder[text2] = i;
-                            }
-                            if (text2.Length < this.shouldTranslateMinLength)
-                            {
-                                this.shouldTranslateMinLength = text2.Length;
-                            }
-                            if (text2.Length > this.shouldTranslateMaxLength)
-                            {
-                                this.shouldTranslateMaxLength = text2.Length;
-                            }
+                        }
+                        if (this.normal.ContainsKey(text2))
+                        {
+                            this.normal[text2] = text3;
+                        }
+                        else
+                        {
+                            this.normal.Add(text2, text3);
+                            normalKeyLineOrder[text2] = i;
+                        }
+                        if (text2.Length < this.shouldTranslateMinLength)
+                        {
+                            this.shouldTranslateMinLength = text2.Length;
+                        }
+                        if (text2.Length > this.shouldTranslateMaxLength)
+                        {
+                            this.shouldTranslateMaxLength = text2.Length;
                         }
                     }
                 }
@@ -475,25 +450,6 @@ namespace GameTranslator
                 }
             }
 
-            public static Regex regex
-            {
-                get
-                {
-                    if (TranslateConfig.TranslateConfigFile._regex == null)
-                    {
-                        Type typeFromHandle = typeof(TranslateConfig.TranslateConfigFile);
-                        lock (typeFromHandle)
-                        {
-                            if (TranslateConfig.TranslateConfigFile._regex == null)
-                            {
-                                TranslateConfig.TranslateConfigFile._regex = new Regex("(?<!\\\\)=", NormalTextTranslator.RegexCompiledSupportedFlag);
-                            }
-                        }
-                    }
-                    return TranslateConfig.TranslateConfigFile._regex;
-                }
-            }
-
             public string ConfigFilePath;
 
             public string ConfigFileName;
@@ -508,11 +464,9 @@ namespace GameTranslator
 
             public ConcurrentDictionary<string, string> translatePairs = new ConcurrentDictionary<string, string>();
 
-            private static Regex _regex;
+            internal readonly object _fileLock = new object();
 
             internal List<RegexTranslation> regexTranslations = new List<RegexTranslation>();
-
-            internal List<RegexTranslationSplitter> splitterRegexTranslations = new List<RegexTranslationSplitter>();
 
             internal readonly ConcurrentDictionary<string, DateTime> _translatePairLastAccess = new ConcurrentDictionary<string, DateTime>();
 
