@@ -23,12 +23,12 @@ namespace GameTranslator.Patches.Translatons
         public ConcurrentDictionary<object, byte> AssociatedUIs { get; set; }
         public object TranslationInfo { get; set; }
         public NormalTextTranslator NormalText { get; set; }
-        public TranslateConfig.ModuleConfig Config { get; set; }
+        public TranslateConfig.TranslateConfigFile Config { get; set; }
         public int RetryCount { get; set; }
         public long StartVersion { get; set; }
         public int Scope { get; set; } = -1;
 
-        public void Associate(object ui, object info, NormalTextTranslator normalText, TranslateConfig.ModuleConfig config)
+        public void Associate(object ui, object info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
         {
             AssociatedUIs.TryAdd(ui, 0);
             TranslationInfo = info;

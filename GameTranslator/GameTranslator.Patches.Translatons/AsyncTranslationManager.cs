@@ -44,7 +44,7 @@ namespace GameTranslator.Patches.Translatons
             _stabilizationContexts.Clear();
         }
 
-        public void QueueTranslation(object ui, string originalText, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.ModuleConfig config, bool ignoreComponentState)
+        public void QueueTranslation(object ui, string originalText, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
             if (string.IsNullOrWhiteSpace(originalText)) return;
             int scope = TranslationScopeHelper.GetScope(ui);
@@ -137,7 +137,7 @@ namespace GameTranslator.Patches.Translatons
             return text.Length > threshold;
         }
 
-        private void StartTextStabilization(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.ModuleConfig config, string immKey, int scope)
+        private void StartTextStabilization(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, string immKey, int scope)
         {
             var context = new TextStabilizationContext
             {
@@ -397,7 +397,7 @@ namespace GameTranslator.Patches.Translatons
         public string OriginalText { get; set; }
         public TextTranslationInfo Info { get; set; }
         public NormalTextTranslator NormalText { get; set; }
-        public TranslateConfig.ModuleConfig Config { get; set; }
+        public TranslateConfig.TranslateConfigFile Config { get; set; }
         public int MaxTries { get; set; }
         public float StartTime { get; set; }        // Still using for other purposes
         public int CurrentTries { get; set; }       // Still using for other purposes

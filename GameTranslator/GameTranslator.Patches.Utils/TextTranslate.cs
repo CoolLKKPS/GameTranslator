@@ -140,7 +140,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        public string TranslateOrQueue(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.ModuleConfig config, bool ignoreComponentState)
+        public string TranslateOrQueue(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
             string immediate = GuardAndPrepareText(ui, ref text, info, out bool shouldContinue, ignoreComponentState);
             if (!shouldContinue)
@@ -199,7 +199,7 @@ namespace GameTranslator.Patches.Utils
             return null;
         }
 
-        public string TranslateImmediate(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.ModuleConfig config, bool ignoreComponentState)
+        public string TranslateImmediate(object ui, string text, TextTranslationInfo info, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, bool ignoreComponentState)
         {
             string immediate = GuardAndPrepareText(ui, ref text, info, out bool shouldContinue, ignoreComponentState);
             if (!shouldContinue)

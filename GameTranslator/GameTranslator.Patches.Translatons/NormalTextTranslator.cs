@@ -62,11 +62,11 @@ namespace GameTranslator.Patches.Translatons
         {
             if (isLoad)
             {
-                TranslatePlugin.logger.LogInfo("Loading text file: " + Path.GetFileNameWithoutExtension(this.FileName) + ".");
+                TranslatePlugin.logger.LogInfo("Loading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
             }
             else
             {
-                TranslatePlugin.logger.LogInfo("Reloading text file: " + Path.GetFileNameWithoutExtension(this.FileName) + ".");
+                TranslatePlugin.logger.LogInfo("Reloading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
             }
             using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
             {

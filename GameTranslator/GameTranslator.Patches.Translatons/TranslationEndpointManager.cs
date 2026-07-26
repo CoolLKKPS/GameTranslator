@@ -39,7 +39,7 @@ namespace GameTranslator.Patches.Translatons
             string key,
             object translationInfo,
             NormalTextTranslator normalText,
-            TranslateConfig.ModuleConfig config,
+            TranslateConfig.TranslateConfigFile config,
             bool isTranslatable,
             bool allowFallback = true)
         {
@@ -172,7 +172,7 @@ namespace GameTranslator.Patches.Translatons
             TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{untranslatedText}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})");
         }
 
-        internal static string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.ModuleConfig config, int scope = -1)
+        internal static string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
             if (string.IsNullOrEmpty(text)) return text;
 
@@ -197,7 +197,7 @@ namespace GameTranslator.Patches.Translatons
             return translatedText;
         }
 
-        internal static string BuildKey(string text, TranslateConfig.ModuleConfig config, int scope = -1)
+        internal static string BuildKey(string text, TranslateConfig.TranslateConfigFile config, int scope = -1)
         {
             return $"{config?.ConfigFileName ?? "global"}:{scope}:{text}";
         }
