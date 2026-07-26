@@ -31,21 +31,21 @@ namespace GameTranslator
             }
             if (TranslatePlugin.shouldTranslateTerimal.Value)
             {
-                TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true);
+                TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true, true);
                 TranslateConfig.terminal.shouldTranslate = true;
             }
             if (TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
             {
-                TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate", true);
+                TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate", true, true);
                 TranslateConfig.interactiveTerminalAPI.shouldTranslate = true;
             }
             if (TranslatePlugin.TerimalCanUseShortCutOne.Value)
             {
-                TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true);
+                TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true, true);
             }
             if (TranslatePlugin.TerimalCanUseShortCutTwo.Value)
             {
-                TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true);
+                TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true, true);
             }
             if (TranslatePlugin.shouldTranslateGui.Value)
             {
@@ -157,7 +157,7 @@ namespace GameTranslator
             }
         }
 
-        private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should, bool needsParseFile = true)
+        private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should, bool needsParseFile = false)
         {
             TranslatePlugin.logger.LogInfo(">>> Loading " + fileName + " file");
             return new TranslateConfig.TranslateConfigFile(fileName, should, needsParseFile);
@@ -321,7 +321,7 @@ namespace GameTranslator
 
         internal class TranslateConfigFile
         {
-            public TranslateConfigFile(string configName, bool shouldLoad, bool needsParseFile = true)
+            public TranslateConfigFile(string configName, bool shouldLoad, bool needsParseFile = false)
             {
                 this.ConfigFileName = configName;
                 this.ConfigFilePath = Path.GetFullPath(TranslatePlugin.DefaultPath + configName + ".cfg");
@@ -439,7 +439,7 @@ namespace GameTranslator
 
             public bool shouldLoad = true;
 
-            public bool needsParseFile = true;
+            public bool needsParseFile = false;
 
             public IDictionary<string, string> normal = new ConcurrentDictionary<string, string>();
 
