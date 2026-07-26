@@ -284,7 +284,7 @@ namespace GameTranslator
 
         internal const string PLUGIN_NAME = "GameTranslator";
 
-        internal const string PLUGIN_VERSION = "2.2.2";
+        internal const string PLUGIN_VERSION = "2.2.3";
 
         internal const string PLUGIN_VERSION_FULL = PLUGIN_VERSION + ".0";
 

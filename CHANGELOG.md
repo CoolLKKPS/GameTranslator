@@ -1,3 +1,9 @@
+## v2.2.3
+
+- Terminal no longer can use sr, but i think that just fine
+- `#` no longer be a comment marker, if old comment with this marker doesn't have equal marker won't affect
+- I suggest use `//` instead of `/*` `*/` or any other marker that looks like comment marker
+
 ## v2.2.2
 
 Breaking change:
