@@ -27,9 +27,8 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        public void Load()
+        public void Load(bool isLoad = false)
         {
-            TranslatePlugin.logger.LogInfo("--- Loading " + this.FileName + " file ---");
             if (!File.Exists(this.FilePath))
             {
                 TranslatePlugin.logger.LogWarning("Translation file not found: " + this.FilePath);
@@ -49,7 +48,7 @@ namespace GameTranslator.Patches.Translatons
                     this._failedRegexLookups.Clear();
                     this._regexResultCache.Clear();
                     this._regexResultLastAccess.Clear();
-                    this.LoadTranslationsInStream(this.FilePath, true);
+                    this.LoadTranslationsInStream(this.FilePath, isLoad);
                 }
             }
             catch (Exception ex)
@@ -63,7 +62,11 @@ namespace GameTranslator.Patches.Translatons
         {
             if (isLoad)
             {
-                TranslatePlugin.logger.LogInfo("Loading text file: " + stream + ".");
+                TranslatePlugin.logger.LogInfo("Loading text file: " + Path.GetFileNameWithoutExtension(this.FileName) + ".");
+            }
+            else
+            {
+                TranslatePlugin.logger.LogInfo("Reloading text file: " + Path.GetFileNameWithoutExtension(this.FileName) + ".");
             }
             using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
             {

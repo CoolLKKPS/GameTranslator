@@ -68,7 +68,7 @@ namespace GameTranslator.Patches.Hooks
             }
         }
 
-        internal static void Hook_TextChanged(TextTranslate textTranslate, object ui, ref string value, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config)
+        internal static void Hook_TextChanged(TextTranslate textTranslate, object ui, ref string value, NormalTextTranslator normalText, TranslateConfig.ModuleConfig config)
         {
             if (TranslatePlugin.shouldTranslateGui.Value)
             {

@@ -22,45 +22,37 @@ namespace GameTranslator
 
         public static void Load()
         {
+            if (TranslatePlugin.shouldTranslateNormalText.Value)
+            {
+                TranslateConfig.normal = TranslateConfig.CreateNewModuleConfig("Normal-Translate", true);
+                TranslateConfig.normal.shouldTranslate = true;
+                TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
+                TranslateConfig.normalText.Load(true);
+            }
             if (TranslatePlugin.shouldTranslateTerimal.Value)
             {
-                TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true);
+                TranslateConfig.terminal = TranslateConfig.CreateNewReplaceByMapConfig("Terminal-Translate", true);
                 TranslateConfig.terminal.shouldTranslate = true;
-                TranslateConfig.terminalText = new NormalTextTranslator(TranslateConfig.terminal.ConfigFileName + ".cfg");
-                TranslateConfig.terminalText.Load();
-            }
-            if (TranslatePlugin.TerimalCanUseShortCutTwo.Value)
-            {
-                TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true);
-                TranslateConfig.cmdPyText = new NormalTextTranslator(TranslateConfig.cmd_py.ConfigFileName + ".cfg");
-                TranslateConfig.cmdPyText.Load();
-            }
-            if (TranslatePlugin.TerimalCanUseShortCutOne.Value)
-            {
-                TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true);
-                TranslateConfig.cmdZhText = new NormalTextTranslator(TranslateConfig.cmd_zh.ConfigFileName + ".cfg");
-                TranslateConfig.cmdZhText.Load();
-            }
-            if (TranslatePlugin.shouldTranslateGui.Value)
-            {
-                TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate", true);
-                TranslateConfig.gui.shouldTranslate = true;
-                TranslateConfig.guiText = new NormalTextTranslator(TranslateConfig.gui.ConfigFileName + ".cfg");
-                TranslateConfig.guiText.Load();
             }
             if (TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
             {
-                TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate", true);
+                TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewReplaceByMapConfig("InteractiveTerminalAPI-Translate", true);
                 TranslateConfig.interactiveTerminalAPI.shouldTranslate = true;
-                TranslateConfig.interactiveTerminalAPIText = new NormalTextTranslator(TranslateConfig.interactiveTerminalAPI.ConfigFileName + ".cfg");
-                TranslateConfig.interactiveTerminalAPIText.Load();
             }
-            if (TranslatePlugin.shouldTranslateNormalText.Value)
+            if (TranslatePlugin.TerimalCanUseShortCutOne.Value)
             {
-                TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate", true);
-                TranslateConfig.normal.shouldTranslate = true;
-                TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
-                TranslateConfig.normalText.Load();
+                TranslateConfig.cmd_zh = TranslateConfig.CreateNewReplaceByMapConfig("CMD-ZH-Translate", true);
+            }
+            if (TranslatePlugin.TerimalCanUseShortCutTwo.Value)
+            {
+                TranslateConfig.cmd_py = TranslateConfig.CreateNewReplaceByMapConfig("CMD-PY-Translate", true);
+            }
+            if (TranslatePlugin.shouldTranslateGui.Value)
+            {
+                TranslateConfig.gui = TranslateConfig.CreateNewModuleConfig("GuiText-Translate", true);
+                TranslateConfig.gui.shouldTranslate = true;
+                TranslateConfig.guiText = new NormalTextTranslator(TranslateConfig.gui.ConfigFileName + ".cfg");
+                TranslateConfig.guiText.Load(true);
             }
             if (TranslatePlugin.changeTexture.Value)
             {
@@ -74,7 +66,7 @@ namespace GameTranslator
                 _fileWatcher.DirectoryUpdated += OnDirectoryUpdated;
                 TranslatePlugin.logger.LogInfo("Tracking path " + fullPath);
             }
-            foreach (TranslateConfig.TranslateConfigFile config in TranslateConfig.TranslateConfigFile.configs)
+            foreach (TranslateConfig.ModuleConfig config in TranslateConfig.ModuleConfig.configs)
             {
                 if (File.Exists(config.ConfigFilePath))
                 {
@@ -109,7 +101,7 @@ namespace GameTranslator
                 try
                 {
                     bool hasChanges = false;
-                    foreach (TranslateConfig.TranslateConfigFile config in TranslateConfig.TranslateConfigFile.configs)
+                    foreach (TranslateConfig.ModuleConfig config in TranslateConfig.ModuleConfig.configs)
                     {
                         if (!config.shouldLoad || !File.Exists(config.ConfigFilePath))
                             continue;
@@ -124,11 +116,14 @@ namespace GameTranslator
                                 {
                                     try
                                     {
-                                        config.Reload();
+                                        if (config is TranslateConfig.TranslateConfigFile tf)
+                                        {
+                                            tf.Reload();
+                                        }
                                         NormalTextTranslator moduleTranslator = TranslateConfig.GetModuleTranslator(config);
                                         if (moduleTranslator != null)
                                         {
-                                            moduleTranslator.Load();
+                                            moduleTranslator.Load(false);
                                         }
                                         TextTranslate.ChangeTime += 1L;
                                         hasChanges = true;
@@ -165,10 +160,16 @@ namespace GameTranslator
             }
         }
 
-        private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should)
+        private static TranslateConfig.TranslateConfigFile CreateNewReplaceByMapConfig(string fileName, bool should)
         {
-            TranslatePlugin.logger.LogInfo("GameTranslator is loading config file call " + fileName);
+            TranslatePlugin.logger.LogInfo(">>> Loading " + fileName + " file");
             return new TranslateConfig.TranslateConfigFile(fileName, should);
+        }
+
+        private static TranslateConfig.ModuleConfig CreateNewModuleConfig(string fileName, bool should)
+        {
+            TranslatePlugin.logger.LogInfo(">>> Loading " + fileName + " file");
+            return new TranslateConfig.ModuleConfig(fileName, should);
         }
 
         // Still using for other purposes
@@ -243,31 +244,15 @@ namespace GameTranslator
             return text5;
         }
 
-        internal static NormalTextTranslator GetModuleTranslator(TranslateConfig.TranslateConfigFile file)
+        internal static NormalTextTranslator GetModuleTranslator(TranslateConfig.ModuleConfig file)
         {
             if (file == TranslateConfig.normal)
             {
                 return TranslateConfig.normalText;
             }
-            if (file == TranslateConfig.terminal)
-            {
-                return TranslateConfig.terminalText;
-            }
-            if (file == TranslateConfig.cmd_py)
-            {
-                return TranslateConfig.cmdPyText;
-            }
-            if (file == TranslateConfig.cmd_zh)
-            {
-                return TranslateConfig.cmdZhText;
-            }
             if (file == TranslateConfig.gui)
             {
                 return TranslateConfig.guiText;
-            }
-            if (file == TranslateConfig.interactiveTerminalAPI)
-            {
-                return TranslateConfig.interactiveTerminalAPIText;
             }
             return null;
         }
@@ -275,8 +260,10 @@ namespace GameTranslator
         private static void CleanupTranslatePairs()
         {
             bool flag = GC.GetTotalMemory(false) > TRANSLATE_PAIR_MEMORY_PRESSURE;
-            foreach (TranslateConfig.TranslateConfigFile translateConfigFile in TranslateConfig.TranslateConfigFile.configs)
+            foreach (TranslateConfig.ModuleConfig config in TranslateConfig.ModuleConfig.configs)
             {
+                if (config is not TranslateConfig.TranslateConfigFile translateConfigFile)
+                    continue;
                 int num = 0;
                 string reason = null;
                 if (flag)
@@ -312,31 +299,23 @@ namespace GameTranslator
             }
         }
 
-        public static TranslateConfig.TranslateConfigFile normal;
+        public static TranslateConfig.ModuleConfig normal;
 
         public static TranslateConfig.TranslateConfigFile terminal;
 
-        public static TranslateConfig.TranslateConfigFile cmd_py;
+        public static TranslateConfig.TranslateConfigFile interactiveTerminalAPI;
 
         public static TranslateConfig.TranslateConfigFile cmd_zh;
 
-        public static TranslateConfig.TranslateConfigFile gui;
+        public static TranslateConfig.TranslateConfigFile cmd_py;
 
-        public static TranslateConfig.TranslateConfigFile interactiveTerminalAPI;
+        public static TranslateConfig.ModuleConfig gui;
+
+        public static TextureTranslationCache cache;
 
         public static NormalTextTranslator normalText;
 
         public static NormalTextTranslator guiText;
-
-        public static TextureTranslationCache cache;
-
-        public static NormalTextTranslator terminalText;
-
-        public static NormalTextTranslator cmdPyText;
-
-        public static NormalTextTranslator cmdZhText;
-
-        public static NormalTextTranslator interactiveTerminalAPIText;
 
         private static DateTime _lastCleanupTime = DateTime.Now;
 
@@ -350,43 +329,81 @@ namespace GameTranslator
 
         private const int TRANSLATE_PAIR_EVICT_MIN = 100;
 
-        internal class TranslateConfigFile
+        internal class ModuleConfig
         {
-            public TranslateConfigFile(string configName, bool shouldLoad)
+            public ModuleConfig(string configName, bool shouldLoad)
             {
                 this.ConfigFileName = configName;
                 this.ConfigFilePath = Path.GetFullPath(TranslatePlugin.DefaultPath + configName + ".cfg");
                 this.shouldLoad = shouldLoad;
-                if (this.shouldLoad && File.Exists(this.ConfigFilePath))
-                {
-                    this.Reload();
-                }
-                else if (!File.Exists(this.ConfigFilePath))
+                if (!File.Exists(this.ConfigFilePath))
                 {
                     this.Touch();
                 }
-                TranslateConfig.TranslateConfigFile.configs.Add(this);
+                ModuleConfig.configs.Add(this);
             }
 
-            public void Reload()
+            public void Touch()
             {
-                List<string> errors;
+                string directoryName = Path.GetDirectoryName(this.ConfigFilePath);
+                if (!Directory.Exists(directoryName))
+                {
+                    Directory.CreateDirectory(directoryName);
+                }
+                if (!File.Exists(this.ConfigFilePath))
+                {
+                    File.Create(this.ConfigFilePath).Close();
+                }
+            }
+
+            public string ConfigFilePath;
+
+            public string ConfigFileName;
+
+            public bool shouldTranslate;
+
+            public bool shouldLoad = true;
+
+            public static HashSet<ModuleConfig> configs = new HashSet<ModuleConfig>();
+        }
+
+        internal class TranslateConfigFile : ModuleConfig
+        {
+            public TranslateConfigFile(string configName, bool shouldLoad) : base(configName, shouldLoad)
+            {
+                if (this.shouldLoad && File.Exists(this.ConfigFilePath))
+                {
+                    this.Reload(true);
+                }
+            }
+
+            public void Reload(bool isLoad = false)
+            {
+                List<string> errors = null;
                 lock (this._fileLock)
                 {
                     this.translatePairs.Clear();
                     this._translatePairLastAccess.Clear();
                     this.normal.Clear();
                     this.regexTranslations.Clear();
-                    errors = ParseTranslationFile(this.ConfigFilePath);
+                    errors = ParseTranslationFile(this.ConfigFilePath, isLoad);
                 }
-                if (errors.Count > 0)
+                if (errors != null && errors.Count > 0)
                 {
                     File.AppendAllLines(Path.Combine(Path.GetDirectoryName(this.ConfigFilePath), this.ConfigFileName + "_errors.log"), errors);
                 }
             }
 
-            private List<string> ParseTranslationFile(string filePath)
+            private List<string> ParseTranslationFile(string filePath, bool isLoad = false)
             {
+                if (isLoad)
+                {
+                    TranslatePlugin.logger.LogInfo("Loading text file: " + this.ConfigFileName + ".");
+                }
+                else
+                {
+                    TranslatePlugin.logger.LogInfo("Reloading text file: " + this.ConfigFileName + ".");
+                }
                 Dictionary<string, int> normalKeyLineOrder = new Dictionary<string, int>();
                 List<string> errors = new List<string>();
                 string[] lines = File.ReadAllLines(filePath);
@@ -437,30 +454,7 @@ namespace GameTranslator
                 return errors;
             }
 
-            public void Touch()
-            {
-                string directoryName = Path.GetDirectoryName(this.ConfigFilePath);
-                if (!Directory.Exists(directoryName))
-                {
-                    Directory.CreateDirectory(directoryName);
-                }
-                if (!File.Exists(this.ConfigFilePath))
-                {
-                    File.Create(this.ConfigFilePath).Close();
-                }
-            }
-
-            public string ConfigFilePath;
-
-            public string ConfigFileName;
-
-            public bool shouldTranslate;
-
-            public bool shouldLoad = true;
-
             public IDictionary<string, string> normal = new ConcurrentDictionary<string, string>();
-
-            public static HashSet<TranslateConfig.TranslateConfigFile> configs = new HashSet<TranslateConfig.TranslateConfigFile>();
 
             public ConcurrentDictionary<string, string> translatePairs = new ConcurrentDictionary<string, string>();
 
