@@ -1,3 +1,7 @@
+## v2.2.4
+
+- Now i know, font system need to be improved
+
 ## v2.2.3
 
 - Terminal no longer can use sr, but i think that just fine

@@ -66,10 +66,10 @@ namespace GameTranslator.Patches.Utils
         {
             try
             {
-                var font = FontHelper.GetTextMeshProFont(fontPath);
-                if (font != null)
+                var fonts = FontHelper.GetTextMeshProFonts(fontPath);
+                if (fonts.Count > 0)
                 {
-                    FontCache.FallbackFontsTextMeshPro.Add(font);
+                    FontCache.FallbackFontsTextMeshPro.AddRange(fonts);
                 }
             }
             catch (Exception e) when (e.ToString().ToLowerInvariant().Contains("missing") || e.ToString().ToLowerInvariant().Contains("not found"))

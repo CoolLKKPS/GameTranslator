@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 using XUnity.Common.Constants;
 using XUnity.Common.Utilities;
@@ -10,78 +9,90 @@ namespace GameTranslator.Patches.Utils
 {
     internal static class FontHelper
     {
-        public static global::UnityEngine.Object GetTextMeshProFont(string assetBundle)
+        public static List<global::UnityEngine.Object> GetTextMeshProFonts(string assetBundle)
         {
+            var fonts = new List<global::UnityEngine.Object>();
+
             if (string.IsNullOrEmpty(assetBundle))
             {
-                return null;
+                return fonts;
             }
 
-            global::UnityEngine.Object font = null;
-            string overrideFontPath = Path.Combine(Paths.GameRoot, assetBundle);
-            if (File.Exists(overrideFontPath))
+            string fontBundlePath = Path.Combine(Paths.GameRoot, assetBundle);
+            if (File.Exists(fontBundlePath))
             {
-                TranslatePlugin.logger.LogInfo($"Attempting to load TextMesh Pro font from asset bundle: {overrideFontPath}");
+                TranslatePlugin.logger.LogInfo($"Attempting to load TextMesh Pro font from asset bundle: {fontBundlePath}");
 
                 AssetBundle bundle = null;
                 if (UnityTypes.AssetBundle_Methods.LoadFromFile != null)
                 {
-                    bundle = (AssetBundle)UnityTypes.AssetBundle_Methods.LoadFromFile.Invoke(null, new object[] { overrideFontPath });
+                    bundle = (AssetBundle)UnityTypes.AssetBundle_Methods.LoadFromFile.Invoke(null, new object[] { fontBundlePath });
                 }
                 else if (UnityTypes.AssetBundle_Methods.CreateFromFile != null)
                 {
-                    bundle = (AssetBundle)UnityTypes.AssetBundle_Methods.CreateFromFile.Invoke(null, new object[] { overrideFontPath });
+                    bundle = (AssetBundle)UnityTypes.AssetBundle_Methods.CreateFromFile.Invoke(null, new object[] { fontBundlePath });
                 }
                 else
                 {
-                    TranslatePlugin.logger.LogError("Could not find an appropriate asset bundle load method while loading font: " + overrideFontPath);
-                    return null;
+                    TranslatePlugin.logger.LogError("Could not find an appropriate asset bundle load method while loading font: " + fontBundlePath);
+                    return fonts;
                 }
 
                 if (bundle == null)
                 {
-                    TranslatePlugin.logger.LogWarning("Could not load asset bundle while loading font: " + overrideFontPath);
-                    return null;
+                    TranslatePlugin.logger.LogWarning("Could not load asset bundle while loading font: " + fontBundlePath);
+                    return fonts;
                 }
                 FontHelper._loadedBundles.Add(bundle);
 
                 if (UnityTypes.TMP_FontAsset != null)
                 {
+                    global::UnityEngine.Object[] assets = null;
                     if (UnityTypes.AssetBundle_Methods.LoadAllAssets != null)
                     {
-                        var assets = (global::UnityEngine.Object[])UnityTypes.AssetBundle_Methods.LoadAllAssets.Invoke(bundle, new object[] { UnityTypes.TMP_FontAsset.UnityType });
-                        font = assets?.FirstOrDefault();
+                        assets = (global::UnityEngine.Object[])UnityTypes.AssetBundle_Methods.LoadAllAssets.Invoke(bundle, new object[] { UnityTypes.TMP_FontAsset.UnityType });
                     }
                     else if (UnityTypes.AssetBundle_Methods.LoadAll != null)
                     {
-                        var assets = (global::UnityEngine.Object[])UnityTypes.AssetBundle_Methods.LoadAll.Invoke(bundle, new object[] { UnityTypes.TMP_FontAsset.UnityType });
-                        font = assets?.FirstOrDefault();
+                        assets = (global::UnityEngine.Object[])UnityTypes.AssetBundle_Methods.LoadAll.Invoke(bundle, new object[] { UnityTypes.TMP_FontAsset.UnityType });
+                    }
+
+                    if (assets != null)
+                    {
+                        foreach (var font in assets)
+                        {
+                            if (font != null)
+                            {
+                                var versionProperty = UnityTypes.TMP_FontAsset_Properties.Version;
+                                var version = (string)(versionProperty?.Get(font)) ?? "Unknown";
+                                TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font uses version: {version}");
+                                global::UnityEngine.Object.DontDestroyOnLoad(font);
+                                fonts.Add(font);
+                            }
+                        }
                     }
                 }
             }
             else
             {
-                TranslatePlugin.logger.LogInfo("Attempting to load TextMesh Pro font from internal Resources API: " + overrideFontPath);
-                font = Resources.Load(assetBundle);
+                TranslatePlugin.logger.LogInfo("Attempting to load TextMesh Pro font from internal Resources API: " + assetBundle);
+                var font = Resources.Load(assetBundle);
+                if (font != null)
+                {
+                    fonts.Add(font);
+                }
             }
 
-            if (font != null)
+            if (fonts.Count == 0)
             {
-                var versionProperty = UnityTypes.TMP_FontAsset_Properties.Version;
-                var version = (string)(versionProperty?.Get(font)) ?? "Unknown";
-                TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font uses version: {version}");
-                global::UnityEngine.Object.DontDestroyOnLoad(font);
-            }
-            else
-            {
-                TranslatePlugin.logger.LogError("Could not find the TextMeshPro font asset: " + assetBundle);
+                TranslatePlugin.logger.LogError("Could not find any TextMeshPro font assets: " + assetBundle);
             }
 
-            return font;
+            return fonts;
         }
 
         /*
-        // WIP
+        // I don't think i need it, just keep it maybe useful in the future
         public static string[] GetOSInstalledFontNames()
         {
             return Font.GetOSInstalledFontNames();

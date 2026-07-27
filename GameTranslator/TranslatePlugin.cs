@@ -92,7 +92,7 @@ namespace GameTranslator
             TranslatePlugin.stabilizationMaxRetries = base.Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
             TranslatePlugin.enableTerminalPatch = base.Config.Bind<bool>("Debug", "Enable Terminal Patch", true, "Define whether to patch Terminal");
             TranslatePlugin.changeFont = base.Config.Bind<bool>("Font", "Change Font", false, "Define whether to change the font");
-            TranslatePlugin.fallbackFontTextMeshPro = base.Config.Bind<string>("Font", "FallbackFontTextMeshPro", "", "Define the fallback font file used");
+            TranslatePlugin.fallbackFontTextMeshPro = base.Config.Bind<string>("Font", "FallbackFontTextMeshPro", "", "Define the fallback font asset bundle(s) used");
             TranslatePlugin.shouldRemoveChar = base.Config.Bind<string>("Font", "Custom Characters", "", "Define what vanilla characters will use custom ones");
             TranslatePlugin.language = base.Config.Bind<string>("General", "Language", "Default", "Define what language folder is used");
             TranslatePlugin.shouldTranslateNormalText = base.Config.Bind<bool>("General", "Translate Normal Text", true, "Define whether to use Normal Translate method");
@@ -284,7 +284,7 @@ namespace GameTranslator
 
         internal const string PLUGIN_NAME = "GameTranslator";
 
-        internal const string PLUGIN_VERSION = "2.2.3";
+        internal const string PLUGIN_VERSION = "2.2.4";
 
         internal const string PLUGIN_VERSION_FULL = PLUGIN_VERSION + ".0";
 
