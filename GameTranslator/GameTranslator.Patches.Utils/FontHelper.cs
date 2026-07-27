@@ -38,8 +38,7 @@ namespace GameTranslator.Patches.Utils
                     {
                         if (font != null)
                         {
-                            TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font uses version: {font.version}");
-                            UnityEngine.Object.DontDestroyOnLoad(font);
+                            TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font '{font.name}' uses version: {font.version}");
                             fonts.Add(font);
                         }
                     }
