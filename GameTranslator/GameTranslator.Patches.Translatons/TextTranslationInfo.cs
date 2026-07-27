@@ -89,11 +89,15 @@ namespace GameTranslator.Patches.Translatons
                                 }
                             }
 
-                            TMP_FontAsset fallbackFont = (TMP_FontAsset)FontCache.GetOrCreateFallbackFontTextMeshPro();
+                            var fallbackFonts = FontCache.GetOrCreateFallbackFontTextMeshPro();
 
-                            if (fallbackFont != null && !originalFont.fallbackFontAssetTable.Contains(fallbackFont))
+                            foreach (var fontObj in fallbackFonts)
                             {
-                                originalFont.fallbackFontAssetTable.Add(fallbackFont);
+                                TMP_FontAsset fallbackFont = fontObj as TMP_FontAsset;
+                                if (fallbackFont != null && !originalFont.fallbackFontAssetTable.Contains(fallbackFont))
+                                {
+                                    originalFont.fallbackFontAssetTable.Add(fallbackFont);
+                                }
                             }
                         }
                     }

@@ -26,10 +26,14 @@ namespace GameTranslator.Patches.Utils
                 _textCache.Clear();
                 if (TranslatePlugin.changeFont.Value)
                 {
-                    var mainFont = FontCache.GetOrCreateFallbackFontTextMeshPro() as TMP_FontAsset;
-                    if (mainFont != null)
+                    var fallbackFonts = FontCache.GetOrCreateFallbackFontTextMeshPro();
+                    foreach (var fontObj in fallbackFonts)
                     {
-                        AddFont(mainFont);
+                        var mainFont = fontObj as TMP_FontAsset;
+                        if (mainFont != null)
+                        {
+                            AddFont(mainFont);
+                        }
                     }
                 }
                 var allFonts = Resources.FindObjectsOfTypeAll<TMP_FontAsset>();
