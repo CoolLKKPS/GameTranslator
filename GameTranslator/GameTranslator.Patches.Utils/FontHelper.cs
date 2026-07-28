@@ -38,7 +38,10 @@ namespace GameTranslator.Patches.Utils
                     {
                         if (font != null)
                         {
-                            TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font '{font.name}' uses version: {font.version}");
+                            string shaderName = font.material != null && font.material.shader != null ? font.material.shader.name : "Unknown";
+                            int atlasW = font.atlasTexture != null ? font.atlasTexture.width : 0;
+                            int atlasH = font.atlasTexture != null ? font.atlasTexture.height : 0;
+                            TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font '{font.name}' version={font.version}, shader={shaderName}, atlas={atlasW}x{atlasH}, pointSize={font.faceInfo.pointSize}, padding={font.atlasPadding}");
                             fonts.Add(font);
                         }
                     }

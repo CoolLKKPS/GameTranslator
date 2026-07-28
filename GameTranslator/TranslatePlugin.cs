@@ -92,6 +92,8 @@ namespace GameTranslator
             TranslatePlugin.stabilizationMaxRetries = base.Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
             TranslatePlugin.enableTerminalPatch = base.Config.Bind<bool>("Debug", "Enable Terminal Patch", true, "Define whether to patch Terminal");
             TranslatePlugin.changeFont = base.Config.Bind<bool>("Font", "Change Font", false, "Define whether to change the font");
+            TranslatePlugin.scaleFallbackEffects = base.Config.Bind<bool>("Font", "Scale Fallback Effects", false, "Define whether to proportionally scale SDF effects on fallback fonts");
+            TranslatePlugin.fallbackEffectScale = base.Config.Bind<float>("Font", "Fallback Effect Scale", 1.0f, "Define the scale multiplier for fallback font SDF effects (lower = lighter effects)");
             TranslatePlugin.fallbackFontTextMeshPro = base.Config.Bind<string>("Font", "FallbackFontTextMeshPro", "", "Define the fallback font asset bundle(s) used");
             TranslatePlugin.shouldRemoveChar = base.Config.Bind<string>("Font", "Custom Characters", "", "Define what vanilla characters will use custom ones");
             TranslatePlugin.language = base.Config.Bind<string>("General", "Language", "Default", "Define what language folder is used");
@@ -150,6 +152,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextMeshHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_FontAssetHook),
+                typeof(GameTranslator.Patches.Hooks.TMP_FallbackMaterialHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_TextHook),
                 typeof(GameTranslator.Patches.Hooks.texture.CubismRenderer_MainTexture_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.CubismRenderer_TryInitialize_Hook),
@@ -317,6 +320,10 @@ namespace GameTranslator
         public static ConfigEntry<int> stabilizationMaxRetries;
 
         public static ConfigEntry<bool> enableTerminalPatch;
+
+        public static ConfigEntry<bool> scaleFallbackEffects;
+
+        public static ConfigEntry<float> fallbackEffectScale;
 
         public static ConfigEntry<bool> changeFont;
 
