@@ -68,7 +68,7 @@ namespace GameTranslator.Patches.Hooks
             if (srcGS > 0f && targetGS > 0f)
             {
                 float gsRatio = targetGS / srcGS;
-                float ratio = gsRatio * gsRatio * TranslatePlugin.fallbackEffectScale.Value;
+                float ratio = gsRatio * TranslatePlugin.fallbackEffectScale.Value;
                 __result.SetFloat("_OutlineWidth", srcOutline * ratio);
                 __result.SetFloat("_OutlineSoftness", srcOutlineSoftness * ratio);
                 __result.SetFloat("_UnderlayDilate", srcUnderlay * ratio);

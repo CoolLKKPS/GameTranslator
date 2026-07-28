@@ -163,11 +163,24 @@ namespace GameTranslator
             return new TranslateConfig.TranslateConfigFile(fileName, should, needsParseFile);
         }
 
-        public static void show(TranslateConfig.TranslateConfigFile file)
+        // Still using for other purposes
+        public static void show(TranslateConfigFile file)
         {
-            foreach (string text in file.normal.Keys)
+            if (file != null)
             {
-                TranslatePlugin.logger.LogInfo(text + "=" + file.normal[text]);
+                foreach (string text in file.normal.Keys)
+                {
+                    TranslatePlugin.logger.LogInfo(text + "=" + file.normal[text]);
+                }
+
+                NormalTextTranslator translator = GetModuleTranslator(file);
+                if (translator != null)
+                {
+                    foreach (var kv in translator._translations)
+                    {
+                        TranslatePlugin.logger.LogInfo(kv.Key + "=" + kv.Value);
+                    }
+                }
             }
         }
 

@@ -632,7 +632,7 @@ namespace GameTranslator.Patches.Translatons
 
         internal readonly object _regexLock = new object();
 
-        private ConcurrentDictionary<string, string> _translations = new ConcurrentDictionary<string, string>();
+        internal ConcurrentDictionary<string, string> _translations = new ConcurrentDictionary<string, string>();
 
         private ConcurrentDictionary<string, string> _reverseTranslations = new ConcurrentDictionary<string, string>();
 

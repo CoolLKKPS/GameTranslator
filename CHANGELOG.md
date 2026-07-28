@@ -1,6 +1,8 @@
 ## v2.2.4
 
 - Now i know, font system need to be improved
+- You now can load multi font asset bundles
+- SDF effect can now auto-scale in the config (check the new configs)
 
 ## v2.2.3
 
