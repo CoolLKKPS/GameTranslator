@@ -64,47 +64,41 @@ namespace GameTranslator.Patches.Hooks
             float srcFaceSoftness = sourceMaterial.HasProperty("_FaceSoftness") ? sourceMaterial.GetFloat("_FaceSoftness") : 0f;
             float srcGS = sourceMaterial.GetFloat("_GradientScale");
             float targetGS = targetMaterial.GetFloat("_GradientScale");
+            float scale = TranslatePlugin.fallbackEffectScale.Value;
+            __result.SetFloat("_OutlineWidth", srcOutline * scale);
+            __result.SetFloat("_OutlineSoftness", srcOutlineSoftness * scale);
+            __result.SetFloat("_UnderlayDilate", srcUnderlay * scale);
+            __result.SetFloat("_UnderlaySoftness", srcUnderlaySoftness * scale);
+            __result.SetFloat("_UnderlayOffsetX", srcUnderlayOffsetX * scale);
+            __result.SetFloat("_UnderlayOffsetY", srcUnderlayOffsetY * scale);
+            __result.SetFloat("_GlowInner", srcGlowInner * scale);
+            __result.SetFloat("_GlowOuter", srcGlowOuter * scale);
+            __result.SetFloat("_GlowOffset", srcGlowOffset * scale);
+            __result.SetFloat("_GlowPower", srcGlowPower * scale);
+            __result.SetFloat("_BevelWidth", srcBevel * scale);
+            __result.SetFloat("_FaceDilate", srcFaceDilate * scale);
+            if (srcFaceSoftness != 0f) __result.SetFloat("_FaceSoftness", srcFaceSoftness * scale);
 
-            if (srcGS > 0f && targetGS > 0f)
+            if (TranslatePlugin.showOtherDebug.Value)
             {
-                float gsRatio = targetGS / srcGS;
-                float ratio = gsRatio * TranslatePlugin.fallbackEffectScale.Value;
-                __result.SetFloat("_OutlineWidth", srcOutline * ratio);
-                __result.SetFloat("_OutlineSoftness", srcOutlineSoftness * ratio);
-                __result.SetFloat("_UnderlayDilate", srcUnderlay * ratio);
-                __result.SetFloat("_UnderlaySoftness", srcUnderlaySoftness * ratio);
-                __result.SetFloat("_UnderlayOffsetX", srcUnderlayOffsetX * ratio);
-                __result.SetFloat("_UnderlayOffsetY", srcUnderlayOffsetY * ratio);
-                __result.SetFloat("_GlowInner", srcGlowInner * ratio);
-                __result.SetFloat("_GlowOuter", srcGlowOuter * ratio);
-                __result.SetFloat("_GlowOffset", srcGlowOffset * ratio);
-                __result.SetFloat("_GlowPower", srcGlowPower * ratio);
-                __result.SetFloat("_BevelWidth", srcBevel * ratio);
-                __result.SetFloat("_FaceDilate", srcFaceDilate * ratio);
-                if (srcFaceSoftness != 0f) __result.SetFloat("_FaceSoftness", srcFaceSoftness * ratio);
-
-                if (TranslatePlugin.showOtherDebug.Value)
+                int key = sourceMaterial.GetInstanceID() ^ (targetMaterial.GetInstanceID() << 16);
+                var now = DateTime.Now;
+                CleanupLogCache();
+                if (!_lastLogTime.TryGetValue(key, out var last) || now - last >= _logCooldown)
                 {
-                    int key = sourceMaterial.GetInstanceID() ^ (targetMaterial.GetInstanceID() << 16);
-                    var now = DateTime.Now;
-                    CleanupLogCache();
-                    if (!_lastLogTime.TryGetValue(key, out var last) || now - last >= _logCooldown)
-                    {
-                        _lastLogTime[key] = now;
-                        TranslatePlugin.logger.LogInfo(
-                            $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetInstanceID()}, tgtMat={targetMaterial.name}#{targetMaterial.GetInstanceID()}, " +
-                            $"srcGS={srcGS}, targetGS={targetGS}, scale={TranslatePlugin.fallbackEffectScale.Value}, ratio={ratio:F4}");
-                        TranslatePlugin.logger.LogInfo(
-                            $"[FallbackScale] Outline: width={srcOutline}→{__result.GetFloat("_OutlineWidth"):F4}, color={sourceMaterial.GetColor("_OutlineColor")}, keyword={sourceMaterial.IsKeywordEnabled("OUTLINE_ON")}");
-                        TranslatePlugin.logger.LogInfo(
-                            $"[FallbackScale] Underlay: dilate={srcUnderlay}→{__result.GetFloat("_UnderlayDilate"):F4}, color={sourceMaterial.GetColor("_UnderlayColor")}, keyword={sourceMaterial.IsKeywordEnabled("UNDERLAY_ON")}");
-                        TranslatePlugin.logger.LogInfo(
-                            $"[FallbackScale] Glow: inner={srcGlowInner}→{__result.GetFloat("_GlowInner"):F4}, outer={srcGlowOuter}→{__result.GetFloat("_GlowOuter"):F4}, color={sourceMaterial.GetColor("_GlowColor")}, keyword={sourceMaterial.IsKeywordEnabled("GLOW_ON")}");
-                        TranslatePlugin.logger.LogInfo(
-                            $"[FallbackScale] Face: dilate={sourceMaterial.GetFloat("_FaceDilate")}, color={sourceMaterial.GetColor("_FaceColor")}");
-                        TranslatePlugin.logger.LogInfo(
-                            $"[FallbackScale] Bevel: width={srcBevel}→{__result.GetFloat("_BevelWidth"):F4}");
-                    }
+                    _lastLogTime[key] = now;
+                    TranslatePlugin.logger.LogInfo(
+                        $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetInstanceID()}, tgtMat={targetMaterial.name}#{targetMaterial.GetInstanceID()}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
+                    TranslatePlugin.logger.LogInfo(
+                        $"[FallbackScale] Outline: width={srcOutline}→{__result.GetFloat("_OutlineWidth"):F4}, color={sourceMaterial.GetColor("_OutlineColor")}, keyword={sourceMaterial.IsKeywordEnabled("OUTLINE_ON")}");
+                    TranslatePlugin.logger.LogInfo(
+                        $"[FallbackScale] Underlay: dilate={srcUnderlay}→{__result.GetFloat("_UnderlayDilate"):F4}, color={sourceMaterial.GetColor("_UnderlayColor")}, keyword={sourceMaterial.IsKeywordEnabled("UNDERLAY_ON")}");
+                    TranslatePlugin.logger.LogInfo(
+                        $"[FallbackScale] Glow: inner={srcGlowInner}→{__result.GetFloat("_GlowInner"):F4}, outer={srcGlowOuter}→{__result.GetFloat("_GlowOuter"):F4}, color={sourceMaterial.GetColor("_GlowColor")}, keyword={sourceMaterial.IsKeywordEnabled("GLOW_ON")}");
+                    TranslatePlugin.logger.LogInfo(
+                        $"[FallbackScale] Face: dilate={sourceMaterial.GetFloat("_FaceDilate")}, color={sourceMaterial.GetColor("_FaceColor")}");
+                    TranslatePlugin.logger.LogInfo(
+                        $"[FallbackScale] Bevel: width={srcBevel}→{__result.GetFloat("_BevelWidth"):F4}");
                 }
             }
         }

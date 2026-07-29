@@ -39,9 +39,26 @@ namespace GameTranslator.Patches.Utils
                         if (font != null)
                         {
                             string shaderName = font.material != null && font.material.shader != null ? font.material.shader.name : "Unknown";
-                            int atlasW = font.atlasTexture != null ? font.atlasTexture.width : 0;
-                            int atlasH = font.atlasTexture != null ? font.atlasTexture.height : 0;
-                            TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font '{font.name}' version={font.version}, shader={shaderName}, atlas={atlasW}x{atlasH}, pointSize={font.faceInfo.pointSize}, padding={font.atlasPadding}");
+                            int atlasCount = font.atlasTextures != null ? font.atlasTextures.Length : 0;
+                            string atlasInfo;
+                            if (atlasCount > 0)
+                            {
+                                var dims = new System.Text.StringBuilder();
+                                for (int i = 0; i < atlasCount; i++)
+                                {
+                                    if (font.atlasTextures[i] != null)
+                                        dims.Append(font.atlasTextures[i].width + "x" + font.atlasTextures[i].height);
+                                    else
+                                        dims.Append("null");
+                                    if (i < atlasCount - 1) dims.Append(", ");
+                                }
+                                atlasInfo = atlasCount + " atlas(es): " + dims;
+                            }
+                            else
+                            {
+                                atlasInfo = "0 atlas";
+                            }
+                            TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font '{font.name}' version={font.version}, shader={shaderName}, {atlasInfo}, pointSize={font.faceInfo.pointSize}, padding={font.atlasPadding}");
                             fonts.Add(font);
                         }
                     }
