@@ -56,22 +56,7 @@ namespace GameTranslator.Patches.Utils
                     try
                     {
                         bool added = font.TryAddCharacters(missingStr);
-                        if (!added)
-                        {
-                            try
-                            {
-                                var multiAtlasField = typeof(TMP_FontAsset).GetField("m_IsMultiAtlasTexturesEnabled",
-                                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                                if (multiAtlasField != null)
-                                {
-                                    multiAtlasField.SetValue(font, true);
-                                    added = font.TryAddCharacters(missingStr);
-                                }
-                            }
-                            catch { }
-                        }
-                        if (added)
-                            break;
+                        if (added) break;
                     }
                     catch (System.Exception ex)
                     {
