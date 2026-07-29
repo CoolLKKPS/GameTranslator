@@ -59,7 +59,11 @@ namespace GameTranslator.Patches.Hooks
             float srcGlowOuter = sourceMaterial.GetFloat("_GlowOuter");
             float srcGlowOffset = sourceMaterial.GetFloat("_GlowOffset");
             float srcGlowPower = sourceMaterial.GetFloat("_GlowPower");
-            float srcBevel = sourceMaterial.GetFloat("_BevelWidth");
+            float srcBevel = sourceMaterial.GetFloat("_Bevel");
+            float srcBevelWidth = sourceMaterial.GetFloat("_BevelWidth");
+            float srcBevelOffset = sourceMaterial.GetFloat("_BevelOffset");
+            float srcBevelClamp = sourceMaterial.GetFloat("_BevelClamp");
+            float srcBevelRoundness = sourceMaterial.GetFloat("_BevelRoundness");
             float srcFaceDilate = sourceMaterial.GetFloat("_FaceDilate");
             float srcFaceSoftness = sourceMaterial.HasProperty("_FaceSoftness") ? sourceMaterial.GetFloat("_FaceSoftness") : 0f;
             float srcGS = sourceMaterial.GetFloat("_GradientScale");
@@ -75,7 +79,11 @@ namespace GameTranslator.Patches.Hooks
             __result.SetFloat("_GlowOuter", srcGlowOuter * scale);
             __result.SetFloat("_GlowOffset", srcGlowOffset * scale);
             __result.SetFloat("_GlowPower", srcGlowPower * scale);
-            __result.SetFloat("_BevelWidth", srcBevel * scale);
+            __result.SetFloat("_Bevel", srcBevel * scale);
+            __result.SetFloat("_BevelWidth", srcBevelWidth * scale);
+            __result.SetFloat("_BevelOffset", srcBevelOffset * scale);
+            __result.SetFloat("_BevelClamp", srcBevelClamp * scale);
+            __result.SetFloat("_BevelRoundness", srcBevelRoundness * scale);
             __result.SetFloat("_FaceDilate", srcFaceDilate * scale);
             if (srcFaceSoftness != 0f) __result.SetFloat("_FaceSoftness", srcFaceSoftness * scale);
 
@@ -98,7 +106,7 @@ namespace GameTranslator.Patches.Hooks
                     TranslatePlugin.logger.LogInfo(
                         $"[FallbackScale] Face: dilate={sourceMaterial.GetFloat("_FaceDilate")}, color={sourceMaterial.GetColor("_FaceColor")}");
                     TranslatePlugin.logger.LogInfo(
-                        $"[FallbackScale] Bevel: width={srcBevel}→{__result.GetFloat("_BevelWidth"):F4}");
+                        $"[FallbackScale] Bevel: width={srcBevelWidth}→{__result.GetFloat("_BevelWidth"):F4}");
                 }
             }
         }
