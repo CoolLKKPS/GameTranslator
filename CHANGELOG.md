@@ -2,6 +2,7 @@
 
 - Now i know, font system need to be improved
 - You now can load multi font asset bundles
+- Dynamic Font Support
 - SDF effects for fallback font(s) can now scale in the config (check the new configs)
 
 ## v2.2.3

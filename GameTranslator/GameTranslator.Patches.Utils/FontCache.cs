@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TMPro;
 
 namespace GameTranslator.Patches.Utils
 {
@@ -70,6 +71,12 @@ namespace GameTranslator.Patches.Utils
                 if (fonts.Count > 0)
                 {
                     FontCache.FallbackFontsTextMeshPro.AddRange(fonts);
+                    foreach (var obj in fonts)
+                    {
+                        var tmpFont = obj as TMP_FontAsset;
+                        if (tmpFont != null)
+                            FontDynamicLoader.RegisterDynamicFont(tmpFont);
+                    }
                 }
             }
             catch (Exception e) when (e.ToString().ToLowerInvariant().Contains("missing") || e.ToString().ToLowerInvariant().Contains("not found"))

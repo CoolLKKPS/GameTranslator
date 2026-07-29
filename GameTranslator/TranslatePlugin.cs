@@ -92,6 +92,7 @@ namespace GameTranslator
             TranslatePlugin.stabilizationMaxRetries = base.Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
             TranslatePlugin.enableTerminalPatch = base.Config.Bind<bool>("Debug", "Enable Terminal Patch", true, "Define whether to patch Terminal");
             TranslatePlugin.changeFont = base.Config.Bind<bool>("Font", "Change Font", false, "Define whether to change the font");
+            TranslatePlugin.enableDynamicFont = base.Config.Bind<bool>("Font", "Enable Dynamic Font", false, "Define whether to dynamically add missing characters to fallback fonts at runtime");
             TranslatePlugin.scaleFallbackEffects = base.Config.Bind<bool>("Font", "Scale Fallback Effects", false, "Define whether to proportionally scale SDF effects on fallback fonts");
             TranslatePlugin.fallbackEffectScale = base.Config.Bind<float>("Font", "Fallback Effect Scale", 1.0f, "Define the scale multiplier for fallback font SDF effects (lower = lighter effects)");
             TranslatePlugin.fallbackFontTextMeshPro = base.Config.Bind<string>("Font", "FallbackFontTextMeshPro", "", "Define the fallback font asset bundle(s) used");
@@ -194,6 +195,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Translatons.Manipulator.TextArea2DComponentManipulator),
                 typeof(GameTranslator.Patches.Translatons.Manipulator.UguiNovelTextComponentManipulator),
                 typeof(GameTranslator.Patches.Utils.FontCache),
+                typeof(GameTranslator.Patches.Utils.FontDynamicLoader),
                 typeof(GameTranslator.Patches.Utils.FontHelper),
                 typeof(GameTranslator.Patches.Utils.FontSupportChecker),
                 typeof(GameTranslator.Patches.Utils.StringBuffer),
@@ -326,6 +328,8 @@ namespace GameTranslator
         public static ConfigEntry<float> fallbackEffectScale;
 
         public static ConfigEntry<bool> changeFont;
+
+        public static ConfigEntry<bool> enableDynamicFont;
 
         public static ConfigEntry<string> fallbackFontTextMeshPro;
 
