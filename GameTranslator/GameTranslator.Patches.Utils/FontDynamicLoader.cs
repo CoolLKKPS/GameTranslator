@@ -8,10 +8,14 @@ namespace GameTranslator.Patches.Utils
     {
         private static readonly HashSet<uint> _processedChars = new HashSet<uint>();
         private static readonly HashSet<TMP_FontAsset> _dynamicFonts = new HashSet<TMP_FontAsset>();
+        private static readonly HashSet<TMP_FontAsset> _allFonts = new HashSet<TMP_FontAsset>();
+        private static bool _warnedAtlasFull;
 
         internal static void RegisterDynamicFont(TMP_FontAsset font)
         {
-            if (font != null && font.atlasPopulationMode == AtlasPopulationMode.Dynamic)
+            if (font == null) return;
+            _allFonts.Add(font);
+            if (font.atlasPopulationMode == AtlasPopulationMode.Dynamic)
                 _dynamicFonts.Add(font);
         }
 
@@ -32,7 +36,7 @@ namespace GameTranslator.Patches.Utils
                     continue;
 
                 bool found = false;
-                foreach (var font in _dynamicFonts)
+                foreach (var font in _allFonts)
                 {
                     if (font.HasCharacter((int)cp))
                     {
@@ -51,16 +55,49 @@ namespace GameTranslator.Patches.Utils
             if (missing.Length > 0)
             {
                 string missingStr = missing.ToString();
-                foreach (var font in _dynamicFonts)
+                var canRasterize = new StringBuilder();
+                for (int i = 0; i < missingStr.Length; i++)
                 {
-                    try
+                    uint cp = (uint)char.ConvertToUtf32(missingStr, i);
+                    if (char.IsSurrogatePair(missingStr, i)) i++;
+
+                    bool supported = false;
+                    foreach (var font in _dynamicFonts)
                     {
-                        bool added = font.TryAddCharacters(missingStr);
-                        if (added) break;
+                        if (font.sourceFontFile != null && font.sourceFontFile.HasCharacter((int)cp))
+                        {
+                            supported = true;
+                            break;
+                        }
                     }
-                    catch (System.Exception ex)
+                    if (supported)
+                        canRasterize.Append(char.ConvertFromUtf32((int)cp));
+                }
+
+                if (canRasterize.Length > 0)
+                {
+                    string toAdd = canRasterize.ToString();
+                    bool added = false;
+                    foreach (var font in _dynamicFonts)
                     {
-                        TranslatePlugin.logger.LogWarning($"[DynamicFont] Failed: {ex.Message}");
+                        try
+                        {
+                            if (font.TryAddCharacters(toAdd))
+                            {
+                                added = true;
+                                break;
+                            }
+                        }
+                        catch (System.Exception ex)
+                        {
+                            TranslatePlugin.logger.LogWarning($"[DynamicFont] Failed: {ex.Message}");
+                        }
+                    }
+
+                    if (!added && !_warnedAtlasFull)
+                    {
+                        _warnedAtlasFull = true;
+                        TranslatePlugin.logger.LogWarning($"[DynamicFont] Cannot add chars, dynamic atlas is full. Consider enabling multi-atlas in Font Asset Creator or increasing atlas size.");
                     }
                 }
             }
