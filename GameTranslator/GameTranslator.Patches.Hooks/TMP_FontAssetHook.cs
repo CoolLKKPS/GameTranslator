@@ -8,9 +8,9 @@ namespace GameTranslator.Patches.Hooks
     internal class TMP_FontAssetHook
     {
         [HarmonyPostfix]
-        [HarmonyPatch("Awake")]
+        [HarmonyPatch("ReadFontAssetDefinition")]
         [HarmonyWrapSafe]
-        public static void TMP_FontAsset_Awake(TMP_FontAsset __instance)
+        public static void TMP_FontAsset_ReadFontAssetDefinition(TMP_FontAsset __instance)
         {
             FontSupportChecker.RegisterFont(__instance);
         }
