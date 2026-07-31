@@ -333,13 +333,13 @@ namespace GameTranslator
 
         public static ConfigEntry<bool> enableTerminalPatch;
 
-        public static ConfigEntry<bool> scaleFallbackEffects;
-
-        public static ConfigEntry<float> fallbackEffectScale;
-
         public static ConfigEntry<bool> changeFont;
 
         public static ConfigEntry<bool> enableDynamicFont;
+
+        public static ConfigEntry<bool> scaleFallbackEffects;
+
+        public static ConfigEntry<float> fallbackEffectScale;
 
         public static ConfigEntry<string> fallbackFontTextMeshPro;
 
