@@ -191,7 +191,11 @@ namespace GameTranslator
             {
                 return text;
             }
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = null;
+            if (TranslatePlugin.showOtherDebug.Value)
+            {
+                stopwatch = Stopwatch.StartNew();
+            }
             string text5;
             try
             {
@@ -237,11 +241,14 @@ namespace GameTranslator
             }
             finally
             {
-                stopwatch.Stop();
-                if (stopwatch.ElapsedMilliseconds > 500L)
+                if (stopwatch != null)
                 {
-                    string text11 = ((text.Length > 50) ? (text.Substring(0, 50) + "...") : text);
-                    TranslatePlugin.logger.LogWarning(string.Format("replaceByMap took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, text11));
+                    stopwatch.Stop();
+                    if (stopwatch.ElapsedMilliseconds > 500L)
+                    {
+                        string text11 = ((text.Length > 50) ? (text.Substring(0, 50) + "...") : text);
+                        TranslatePlugin.logger.LogWarning(string.Format("replaceByMap took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, text11));
+                    }
                 }
             }
             return text5;

@@ -104,7 +104,7 @@ namespace GameTranslator.Patches.Hooks
                 if (!_lastLogTime.TryGetValue(key, out var last) || now - last >= _logCooldown)
                 {
                     _lastLogTime[key] = now;
-                    string tgtDesc = targetMaterial != null ? $"{targetMaterial.name}#{targetMaterial.GetInstanceID()}" : "(atlasIndex)";
+                    string tgtDesc = targetMaterial != null ? $"{targetMaterial.name}#{targetMaterial.GetInstanceID()}" : null;
                     TranslatePlugin.logger.LogInfo(
                         $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetInstanceID()}, tgt={tgtDesc}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
                     TranslatePlugin.logger.LogInfo(
@@ -114,7 +114,7 @@ namespace GameTranslator.Patches.Hooks
                     TranslatePlugin.logger.LogInfo(
                         $"[FallbackScale] Glow: inner={srcGlowInner}→{result.GetFloat("_GlowInner"):F4}, outer={srcGlowOuter}→{result.GetFloat("_GlowOuter"):F4}, color={sourceMaterial.GetColor("_GlowColor")}, keyword={sourceMaterial.IsKeywordEnabled("GLOW_ON")}");
                     TranslatePlugin.logger.LogInfo(
-                        $"[FallbackScale] Face: dilate={sourceMaterial.GetFloat("_FaceDilate")}, color={sourceMaterial.GetColor("_FaceColor")}");
+                        $"[FallbackScale] Face: dilate={srcFaceDilate}, color={sourceMaterial.GetColor("_FaceColor")}");
                     TranslatePlugin.logger.LogInfo(
                         $"[FallbackScale] Bevel: width={srcBevelWidth}→{result.GetFloat("_BevelWidth"):F4}");
                 }

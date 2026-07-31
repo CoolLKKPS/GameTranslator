@@ -25,6 +25,31 @@ namespace GameTranslator
             this.gameObject.hideFlags = HideFlags.HideAndDontSave;
             DontDestroyOnLoad(this.gameObject);
             this.ConfigFile();
+            if (TranslatePlugin.showAvailableText.Value || TranslatePlugin.showOtherDebug.Value)
+            {
+                var bepinVersion = typeof(BepInEx.Logging.Logger).Assembly.GetName().Version;
+                if (bepinVersion <= BepInExPatchVersionCeiling)
+                {
+                    var remainingOriginals = BepInEx.Logging.Logger.Listeners.OfType<ConsoleLogListener>().Count();
+                    if (remainingOriginals == 0)
+                    {
+                        base.Logger.LogInfo("[Init] No ConsoleLogListener present — may already be handled by another mod");
+                    }
+                    else
+                    {
+                        foreach (var listener in BepInEx.Logging.Logger.Listeners.OfType<ConsoleLogListener>().ToArray())
+                        {
+                            BepInEx.Logging.Logger.Listeners.Remove(listener);
+                            BepInEx.Logging.Logger.Listeners.Add(new SafeConsoleLogListener(listener));
+                        }
+                        base.Logger.LogInfo($"[Init] Wrapped {remainingOriginals} ConsoleLogListener(s) (BepInEx {bepinVersion} <= {BepInExPatchVersionCeiling})");
+                    }
+                }
+                else
+                {
+                    base.Logger.LogInfo($"[Init] Skipped ConsoleLogListener wrap — BepInEx {bepinVersion} > {BepInExPatchVersionCeiling}");
+                }
+            }
             HookingHelper.PatchAll(ImageHooks.All, false);
             HookingHelper.PatchAll(ImageHooks.Sprite, false);
             HookingHelper.PatchAll(ImageHooks.SpriteRenderer, false);
@@ -72,6 +97,21 @@ namespace GameTranslator
                 {
                     TranslatePlugin.logger?.LogError("Error in TranslationUpdater Update: " + ex.Message);
                 }
+            }
+        }
+
+        private class SafeConsoleLogListener : ILogListener
+        {
+            private readonly ConsoleLogListener _inner;
+            public SafeConsoleLogListener(ConsoleLogListener inner) { _inner = inner; }
+            public void LogEvent(object sender, LogEventArgs eventArgs)
+            {
+                try { _inner.LogEvent(sender, eventArgs); }
+                catch (IndexOutOfRangeException) { }
+            }
+            public void Dispose()
+            {
+                _inner.Dispose();
             }
         }
 
@@ -299,9 +339,11 @@ namespace GameTranslator
 
         internal const string PLUGIN_NAME = "GameTranslator";
 
-        internal const string PLUGIN_VERSION = "2.2.4";
+        internal const string PLUGIN_VERSION = "2.2.5";
 
         internal const string PLUGIN_VERSION_FULL = PLUGIN_VERSION + ".0";
+
+        public static Version BepInExPatchVersionCeiling = new Version(5, 4, 99, 99);
 
         public static ManualLogSource logger;
 

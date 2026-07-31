@@ -169,7 +169,7 @@ namespace GameTranslator.Patches.Translatons
         {
             var failureKey = $"{scope}:{untranslatedText}";
             _failedTranslations.AddOrUpdate(failureKey, 1, (k, value) => (byte)(value + 1));
-            TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{untranslatedText}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})");
+            TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{NormalTextTranslator.GetTextSnippet(untranslatedText, 50)}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})");
         }
 
         internal static string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)

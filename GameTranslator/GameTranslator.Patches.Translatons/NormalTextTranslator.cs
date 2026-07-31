@@ -407,7 +407,11 @@ namespace GameTranslator.Patches.Translatons
                 NormalTextTranslator._lastCacheCleanupTime = DateTime.Now;
             }
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = null;
+            if (TranslatePlugin.showOtherDebug.Value)
+            {
+                stopwatch = Stopwatch.StartNew();
+            }
             string text2;
             try
             {
@@ -525,11 +529,14 @@ namespace GameTranslator.Patches.Translatons
             }
             finally
             {
-                stopwatch.Stop();
-                if (stopwatch.ElapsedMilliseconds > 500L)
+                if (stopwatch != null)
                 {
-                    string textSnippet2 = NormalTextTranslator.GetTextSnippet(text, 50);
-                    TranslatePlugin.logger.LogWarning(string.Format("TryTranslate took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, textSnippet2));
+                    stopwatch.Stop();
+                    if (stopwatch.ElapsedMilliseconds > 500L)
+                    {
+                        string textSnippet2 = NormalTextTranslator.GetTextSnippet(text, 50);
+                        TranslatePlugin.logger.LogWarning(string.Format("TryTranslate took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, textSnippet2));
+                    }
                 }
             }
             return text2;

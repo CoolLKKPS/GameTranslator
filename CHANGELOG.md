@@ -1,3 +1,9 @@
+## v2.2.5
+
+- Try fix the issue when BepInEx logger throw IndexOutOfRangeException (UnityInjector.ConsoleUtil.ConsoleEncoding.ReadByteBuffer)
+- The BepInEx logger patch only work when BepInEx version is lower than 5.4.99.99, and debug config option on
+- Improved debug log
+
 ## v2.2.4
 
 - Now i know, font system need to be improved
