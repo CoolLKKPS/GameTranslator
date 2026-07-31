@@ -76,14 +76,9 @@ namespace GameTranslator.Patches.Hooks
             float srcGlowInner = sourceMaterial.GetFloat("_GlowInner");
             float srcGlowOuter = sourceMaterial.GetFloat("_GlowOuter");
             float srcGlowOffset = sourceMaterial.GetFloat("_GlowOffset");
-            float srcGlowPower = sourceMaterial.GetFloat("_GlowPower");
-            float srcBevel = sourceMaterial.GetFloat("_Bevel");
             float srcBevelWidth = sourceMaterial.GetFloat("_BevelWidth");
             float srcBevelOffset = sourceMaterial.GetFloat("_BevelOffset");
-            float srcBevelClamp = sourceMaterial.GetFloat("_BevelClamp");
-            float srcBevelRoundness = sourceMaterial.GetFloat("_BevelRoundness");
             float srcFaceDilate = sourceMaterial.GetFloat("_FaceDilate");
-            float srcFaceSoftness = sourceMaterial.HasProperty("_FaceSoftness") ? sourceMaterial.GetFloat("_FaceSoftness") : 0f;
             float srcGS = sourceMaterial.GetFloat("_GradientScale");
             float targetGS = targetMaterial != null ? targetMaterial.GetFloat("_GradientScale") : 0f;
             float scale = TranslatePlugin.fallbackEffectScale.Value;
@@ -97,14 +92,9 @@ namespace GameTranslator.Patches.Hooks
             result.SetFloat("_GlowInner", srcGlowInner * scale);
             result.SetFloat("_GlowOuter", srcGlowOuter * scale);
             result.SetFloat("_GlowOffset", srcGlowOffset * scale);
-            result.SetFloat("_GlowPower", srcGlowPower * scale);
-            result.SetFloat("_Bevel", srcBevel * scale);
             result.SetFloat("_BevelWidth", srcBevelWidth * scale);
             result.SetFloat("_BevelOffset", srcBevelOffset * scale);
-            result.SetFloat("_BevelClamp", srcBevelClamp * scale);
-            result.SetFloat("_BevelRoundness", srcBevelRoundness * scale);
             result.SetFloat("_FaceDilate", srcFaceDilate * scale);
-            if (srcFaceSoftness != 0f) result.SetFloat("_FaceSoftness", srcFaceSoftness * scale);
 
             if (TranslatePlugin.showOtherDebug.Value)
             {
