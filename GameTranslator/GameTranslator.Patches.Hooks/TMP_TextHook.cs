@@ -15,7 +15,6 @@ namespace GameTranslator.Patches.Hooks
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
-            EnsureDynamicCharacters(sourceText);
         }
 
         [HarmonyPrefix]
@@ -28,7 +27,6 @@ namespace GameTranslator.Patches.Hooks
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
-            EnsureDynamicCharacters(sourceText);
         }
 
         [HarmonyPrefix]
@@ -48,7 +46,6 @@ namespace GameTranslator.Patches.Hooks
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref sourceText);
             ReplaceUnsupportedCharacters(ref sourceText, __instance);
-            EnsureDynamicCharacters(sourceText);
         }
 
         [HarmonyPrefix]
@@ -63,7 +60,6 @@ namespace GameTranslator.Patches.Hooks
             string text = sourceText.ToString();
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref text);
             ReplaceUnsupportedCharacters(ref text, __instance);
-            EnsureDynamicCharacters(text);
             sourceText = new StringBuilder(text);
         }
 
@@ -73,7 +69,6 @@ namespace GameTranslator.Patches.Hooks
         {
             TextTranslate.Instance.OnTranslateIncomingText(__instance, ref value);
             ReplaceUnsupportedCharacters(ref value, __instance);
-            EnsureDynamicCharacters(value);
         }
 
         private static void ReplaceUnsupportedCharacters(ref string text, TMP_Text textComponent)
@@ -86,12 +81,6 @@ namespace GameTranslator.Patches.Hooks
             {
                 text = replacedText;
             }
-        }
-
-        private static void EnsureDynamicCharacters(string text)
-        {
-            if (TranslatePlugin.changeFont.Value && TranslatePlugin.enableDynamicFont.Value && !string.IsNullOrEmpty(text))
-                FontDynamicLoader.EnsureCharactersAvailable(text);
         }
     }
 }
