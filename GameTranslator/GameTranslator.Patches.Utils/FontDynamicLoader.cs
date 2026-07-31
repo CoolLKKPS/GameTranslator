@@ -40,7 +40,7 @@ namespace GameTranslator.Patches.Utils
             if (!_warnedAtlasFull)
             {
                 _warnedAtlasFull = true;
-                TranslatePlugin.logger.LogWarning($"[DynamicFont] Cannot add chars, dynamic atlas is full. Consider enabling multi-atlas in Font Asset Creator or increasing atlas size.");
+                TranslatePlugin.logger.LogWarning($"[DynamicFont] Cannot add character. Atlas may be full or character unsupported.");
             }
         }
     }
