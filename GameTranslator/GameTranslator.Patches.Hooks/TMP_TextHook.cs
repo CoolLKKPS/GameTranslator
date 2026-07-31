@@ -90,7 +90,7 @@ namespace GameTranslator.Patches.Hooks
 
         private static void EnsureDynamicCharacters(string text)
         {
-            if (TranslatePlugin.enableDynamicFont.Value && !string.IsNullOrEmpty(text))
+            if (TranslatePlugin.changeFont.Value && TranslatePlugin.enableDynamicFont.Value && !string.IsNullOrEmpty(text))
                 FontDynamicLoader.EnsureCharactersAvailable(text);
         }
     }
