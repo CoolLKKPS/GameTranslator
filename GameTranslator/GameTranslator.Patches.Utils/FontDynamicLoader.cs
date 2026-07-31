@@ -7,11 +7,11 @@ namespace GameTranslator.Patches.Utils
     {
         private static readonly HashSet<uint> _processedChars = new HashSet<uint>();
         private static readonly HashSet<TMP_FontAsset> _dynamicFonts = new HashSet<TMP_FontAsset>();
-        private static bool _warnedAtlasFull;
+        private static bool _warned;
 
         internal static void RegisterDynamicFont(TMP_FontAsset font)
         {
-            if (font != null && font.atlasPopulationMode != AtlasPopulationMode.Static)
+            if (font != null && font.atlasPopulationMode != AtlasPopulationMode.Static && TranslatePlugin.changeFont.Value && TranslatePlugin.enableDynamicFont.Value)
                 _dynamicFonts.Add(font);
         }
 
@@ -37,9 +37,9 @@ namespace GameTranslator.Patches.Utils
                 }
             }
 
-            if (!_warnedAtlasFull)
+            if (!_warned)
             {
-                _warnedAtlasFull = true;
+                _warned = true;
                 TranslatePlugin.logger.LogWarning($"[DynamicFont] Cannot add character. Atlas may be full or character unsupported.");
             }
         }
