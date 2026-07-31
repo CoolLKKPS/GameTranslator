@@ -157,6 +157,8 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TMP_GetTextElementHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
+                typeof(GameTranslator.Patches.Hooks.texture.Texture2DHook),
+                /*
                 typeof(GameTranslator.Patches.Hooks.texture.CubismRenderer_MainTexture_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.CubismRenderer_TryInitialize_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.Cursor_SetCursor_Hook),
@@ -170,7 +172,6 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.texture.RawImage_texture_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.Sprite_texture_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.SpriteRenderer_sprite_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Texture2DHook),
                 typeof(GameTranslator.Patches.Hooks.texture.UI2DSprite_material_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.UI2DSprite_sprite2D_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.UIAtlas_spriteMaterial_Hook),
@@ -191,15 +192,21 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Translatons.TextureTranslationInfo),
                 typeof(GameTranslator.Patches.Translatons.TranslatedImage),
                 typeof(GameTranslator.Patches.Translatons.TranslateExtensions),
+                typeof(GameTranslator.Patches.Translatons.TranslationEndpointManager),
+                typeof(GameTranslator.Patches.Translatons.TranslationJob),
+                typeof(GameTranslator.Patches.Translatons.TranslationJobState),
+                typeof(GameTranslator.Patches.Translatons.TranslationManager),
                 typeof(GameTranslator.Patches.Translatons.Manipulator.DefaultTextComponentManipulator),
                 typeof(GameTranslator.Patches.Translatons.Manipulator.FairyGUITextComponentManipulator),
                 typeof(GameTranslator.Patches.Translatons.Manipulator.ITextComponentManipulator),
                 typeof(GameTranslator.Patches.Translatons.Manipulator.TextArea2DComponentManipulator),
                 typeof(GameTranslator.Patches.Translatons.Manipulator.UguiNovelTextComponentManipulator),
+                typeof(GameTranslator.Patches.Utils.ComponentExtensions),
                 typeof(GameTranslator.Patches.Utils.FontCache),
                 typeof(GameTranslator.Patches.Utils.FontDynamicLoader),
                 typeof(GameTranslator.Patches.Utils.FontHelper),
                 typeof(GameTranslator.Patches.Utils.FontSupportChecker),
+                typeof(GameTranslator.Patches.Utils.SafeFileWatcher),
                 typeof(GameTranslator.Patches.Utils.StringBuffer),
                 typeof(GameTranslator.Patches.Utils.TextHelper),
                 typeof(GameTranslator.Patches.Utils.TextTranslate),
@@ -209,6 +216,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Utils.Textures.LoadImageImageLoader),
                 typeof(GameTranslator.Patches.Utils.Textures.TextureLoader),
                 typeof(GameTranslator.Patches.Utils.Textures.TgaImageLoader),
+                */
                 };
                 var patchNames = patchTypes.Select(t => t.Name).ToList();
                 TranslatePlugin.logger.LogDebug($"Found {patchNames.Count} basic patch types: {string.Join(", ", patchNames)}");

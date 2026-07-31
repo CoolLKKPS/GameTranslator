@@ -59,7 +59,6 @@ namespace GameTranslator.Patches.Utils
                                 atlasInfo = "0 atlas";
                             }
                             TranslatePlugin.logger.LogInfo($"Loaded TextMesh Pro font '{font.name}' version={font.version}, shader={shaderName}, {atlasInfo}, pointSize={font.faceInfo.pointSize}, padding={font.atlasPadding}");
-                            FontDynamicLoader.RegisterDynamicFont(font);
                             fonts.Add(font);
                         }
                     }

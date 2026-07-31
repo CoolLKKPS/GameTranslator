@@ -43,6 +43,7 @@ namespace GameTranslator.Patches.Utils
                             }
                             return FontCache.FallbackFontsTextMeshPro;
                         }
+                        return FontCache.FallbackFontsTextMeshPro;
                     }
 
                     string[] fontPaths = configValue.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
