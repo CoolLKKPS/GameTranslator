@@ -17,7 +17,7 @@ namespace GameTranslator.Patches.Utils
 
         internal static void TryAddCharacterOnDemand(uint unicode)
         {
-            if (_dynamicFonts.Count == 0 || !TranslatePlugin.enableDynamicFont.Value)
+            if (_dynamicFonts.Count == 0 || !TranslatePlugin.changeFont.Value || !TranslatePlugin.enableDynamicFont.Value)
                 return;
 
             if (!_processedChars.Add(unicode))
