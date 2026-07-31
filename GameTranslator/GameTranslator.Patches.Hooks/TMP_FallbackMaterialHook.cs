@@ -46,9 +46,27 @@ namespace GameTranslator.Patches.Hooks
         [HarmonyWrapSafe]
         public static void Postfix(Material sourceMaterial, Material targetMaterial, ref Material __result)
         {
-            if (!TranslatePlugin.scaleFallbackEffects.Value || __result == null || sourceMaterial == null || targetMaterial == null)
+            ApplyScale(sourceMaterial, __result, targetMaterial);
+        }
+
+        internal static void ApplyScale(Material sourceMaterial, Material result, Material targetMaterial)
+        {
+            if (!TranslatePlugin.scaleFallbackEffects.Value || result == null || sourceMaterial == null || targetMaterial == null)
                 return;
 
+            ApplyCore(sourceMaterial, result, targetMaterial);
+        }
+
+        internal static void ApplyScaleWithoutTarget(Material sourceMaterial, Material result)
+        {
+            if (!TranslatePlugin.scaleFallbackEffects.Value || result == null || sourceMaterial == null)
+                return;
+
+            ApplyCore(sourceMaterial, result, null);
+        }
+
+        private static void ApplyCore(Material sourceMaterial, Material result, Material targetMaterial)
+        {
             float srcOutline = sourceMaterial.GetFloat("_OutlineWidth");
             float srcOutlineSoftness = sourceMaterial.GetFloat("_OutlineSoftness");
             float srcUnderlay = sourceMaterial.GetFloat("_UnderlayDilate");
@@ -67,48 +85,66 @@ namespace GameTranslator.Patches.Hooks
             float srcFaceDilate = sourceMaterial.GetFloat("_FaceDilate");
             float srcFaceSoftness = sourceMaterial.HasProperty("_FaceSoftness") ? sourceMaterial.GetFloat("_FaceSoftness") : 0f;
             float srcGS = sourceMaterial.GetFloat("_GradientScale");
-            float targetGS = targetMaterial.GetFloat("_GradientScale");
+            float targetGS = targetMaterial != null ? targetMaterial.GetFloat("_GradientScale") : 0f;
             float scale = TranslatePlugin.fallbackEffectScale.Value;
-            __result.SetFloat("_OutlineWidth", srcOutline * scale);
-            __result.SetFloat("_OutlineSoftness", srcOutlineSoftness * scale);
-            __result.SetFloat("_UnderlayDilate", srcUnderlay * scale);
-            __result.SetFloat("_UnderlaySoftness", srcUnderlaySoftness * scale);
-            __result.SetFloat("_UnderlayOffsetX", srcUnderlayOffsetX * scale);
-            __result.SetFloat("_UnderlayOffsetY", srcUnderlayOffsetY * scale);
-            __result.SetFloat("_GlowInner", srcGlowInner * scale);
-            __result.SetFloat("_GlowOuter", srcGlowOuter * scale);
-            __result.SetFloat("_GlowOffset", srcGlowOffset * scale);
-            __result.SetFloat("_GlowPower", srcGlowPower * scale);
-            __result.SetFloat("_Bevel", srcBevel * scale);
-            __result.SetFloat("_BevelWidth", srcBevelWidth * scale);
-            __result.SetFloat("_BevelOffset", srcBevelOffset * scale);
-            __result.SetFloat("_BevelClamp", srcBevelClamp * scale);
-            __result.SetFloat("_BevelRoundness", srcBevelRoundness * scale);
-            __result.SetFloat("_FaceDilate", srcFaceDilate * scale);
-            if (srcFaceSoftness != 0f) __result.SetFloat("_FaceSoftness", srcFaceSoftness * scale);
+
+            result.SetFloat("_OutlineWidth", srcOutline * scale);
+            result.SetFloat("_OutlineSoftness", srcOutlineSoftness * scale);
+            result.SetFloat("_UnderlayDilate", srcUnderlay * scale);
+            result.SetFloat("_UnderlaySoftness", srcUnderlaySoftness * scale);
+            result.SetFloat("_UnderlayOffsetX", srcUnderlayOffsetX * scale);
+            result.SetFloat("_UnderlayOffsetY", srcUnderlayOffsetY * scale);
+            result.SetFloat("_GlowInner", srcGlowInner * scale);
+            result.SetFloat("_GlowOuter", srcGlowOuter * scale);
+            result.SetFloat("_GlowOffset", srcGlowOffset * scale);
+            result.SetFloat("_GlowPower", srcGlowPower * scale);
+            result.SetFloat("_Bevel", srcBevel * scale);
+            result.SetFloat("_BevelWidth", srcBevelWidth * scale);
+            result.SetFloat("_BevelOffset", srcBevelOffset * scale);
+            result.SetFloat("_BevelClamp", srcBevelClamp * scale);
+            result.SetFloat("_BevelRoundness", srcBevelRoundness * scale);
+            result.SetFloat("_FaceDilate", srcFaceDilate * scale);
+            if (srcFaceSoftness != 0f) result.SetFloat("_FaceSoftness", srcFaceSoftness * scale);
 
             if (TranslatePlugin.showOtherDebug.Value)
             {
-                int key = sourceMaterial.GetInstanceID() ^ (targetMaterial.GetInstanceID() << 16);
+                int key = targetMaterial != null ? (sourceMaterial.GetInstanceID() ^ (targetMaterial.GetInstanceID() << 16)) : sourceMaterial.GetInstanceID();
                 var now = DateTime.Now;
                 CleanupLogCache();
                 if (!_lastLogTime.TryGetValue(key, out var last) || now - last >= _logCooldown)
                 {
                     _lastLogTime[key] = now;
+                    string tgtDesc = targetMaterial != null ? $"{targetMaterial.name}#{targetMaterial.GetInstanceID()}" : "(atlasIndex)";
                     TranslatePlugin.logger.LogInfo(
-                        $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetInstanceID()}, tgtMat={targetMaterial.name}#{targetMaterial.GetInstanceID()}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
+                        $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetInstanceID()}, tgt={tgtDesc}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
                     TranslatePlugin.logger.LogInfo(
-                        $"[FallbackScale] Outline: width={srcOutline}→{__result.GetFloat("_OutlineWidth"):F4}, color={sourceMaterial.GetColor("_OutlineColor")}, keyword={sourceMaterial.IsKeywordEnabled("OUTLINE_ON")}");
+                        $"[FallbackScale] Outline: width={srcOutline}→{result.GetFloat("_OutlineWidth"):F4}, color={sourceMaterial.GetColor("_OutlineColor")}, keyword={sourceMaterial.IsKeywordEnabled("OUTLINE_ON")}");
                     TranslatePlugin.logger.LogInfo(
-                        $"[FallbackScale] Underlay: dilate={srcUnderlay}→{__result.GetFloat("_UnderlayDilate"):F4}, color={sourceMaterial.GetColor("_UnderlayColor")}, keyword={sourceMaterial.IsKeywordEnabled("UNDERLAY_ON")}");
+                        $"[FallbackScale] Underlay: dilate={srcUnderlay}→{result.GetFloat("_UnderlayDilate"):F4}, color={sourceMaterial.GetColor("_UnderlayColor")}, keyword={sourceMaterial.IsKeywordEnabled("UNDERLAY_ON")}");
                     TranslatePlugin.logger.LogInfo(
-                        $"[FallbackScale] Glow: inner={srcGlowInner}→{__result.GetFloat("_GlowInner"):F4}, outer={srcGlowOuter}→{__result.GetFloat("_GlowOuter"):F4}, color={sourceMaterial.GetColor("_GlowColor")}, keyword={sourceMaterial.IsKeywordEnabled("GLOW_ON")}");
+                        $"[FallbackScale] Glow: inner={srcGlowInner}→{result.GetFloat("_GlowInner"):F4}, outer={srcGlowOuter}→{result.GetFloat("_GlowOuter"):F4}, color={sourceMaterial.GetColor("_GlowColor")}, keyword={sourceMaterial.IsKeywordEnabled("GLOW_ON")}");
                     TranslatePlugin.logger.LogInfo(
                         $"[FallbackScale] Face: dilate={sourceMaterial.GetFloat("_FaceDilate")}, color={sourceMaterial.GetColor("_FaceColor")}");
                     TranslatePlugin.logger.LogInfo(
-                        $"[FallbackScale] Bevel: width={srcBevelWidth}→{__result.GetFloat("_BevelWidth"):F4}");
+                        $"[FallbackScale] Bevel: width={srcBevelWidth}→{result.GetFloat("_BevelWidth"):F4}");
                 }
             }
+        }
+    }
+
+    [HarmonyPatch]
+    internal class TMP_FallbackMaterialHook_AtlasIndex
+    {
+        static MethodBase TargetMethod()
+        {
+            return AccessTools.Method(AccessTools.TypeByName("TMPro.TMP_MaterialManager"), "GetFallbackMaterial", new[] { AccessTools.TypeByName("TMPro.TMP_FontAsset"), typeof(Material), typeof(int) });
+        }
+
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
+        public static void Postfix(Material sourceMaterial, ref Material __result)
+        {
+            TMP_FallbackMaterialHook.ApplyScaleWithoutTarget(sourceMaterial, __result);
         }
     }
 }
