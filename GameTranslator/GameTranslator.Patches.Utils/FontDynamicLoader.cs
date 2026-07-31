@@ -11,7 +11,7 @@ namespace GameTranslator.Patches.Utils
 
         internal static void RegisterDynamicFont(TMP_FontAsset font)
         {
-            if (font != null && font.atlasPopulationMode == AtlasPopulationMode.Dynamic)
+            if (font != null && font.atlasPopulationMode != AtlasPopulationMode.Static)
                 _dynamicFonts.Add(font);
         }
 
