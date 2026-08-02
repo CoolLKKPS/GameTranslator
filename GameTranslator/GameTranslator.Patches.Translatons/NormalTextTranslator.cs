@@ -535,7 +535,8 @@ namespace GameTranslator.Patches.Translatons
                     if (stopwatch.ElapsedMilliseconds > 500L)
                     {
                         string textSnippet2 = NormalTextTranslator.GetTextSnippet(text, 50);
-                        TranslatePlugin.logger.LogWarning(string.Format("TryTranslate took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, textSnippet2));
+                        try { TranslatePlugin.logger.LogWarning(string.Format("TryTranslate took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, textSnippet2)); }
+                        catch (IndexOutOfRangeException) { }
                     }
                 }
             }

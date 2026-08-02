@@ -151,11 +151,13 @@ namespace GameTranslator.Patches.Utils
             {
                 if (!TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached-result:{text}"))
                 {
-                    TranslatePlugin.logger.LogInfo($"[Debug] Cached translation found for: '{text}' -> '{cachedTranslation}'");
+                    try { TranslatePlugin.logger.LogInfo($"[Debug] Cached translation found for text: '{text}' -> '{cachedTranslation}'"); }
+                    catch (IndexOutOfRangeException) { }
                 }
                 else if (TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached:{text}"))
                 {
-                    TranslatePlugin.logger.LogInfo($"[Debug] Cached translation hit for: '{text}'");
+                    try { TranslatePlugin.logger.LogInfo($"[Debug] Cached translation hit for text: '{text}'"); }
+                    catch (IndexOutOfRangeException) { }
                 }
                 if (info != null)
                 {
@@ -185,7 +187,8 @@ namespace GameTranslator.Patches.Utils
                 {
                     if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"queued:{text}"))
                     {
-                        TranslatePlugin.logger.LogInfo($"[Debug] Queued available text: '{text}'");
+                        try { TranslatePlugin.logger.LogInfo($"[Debug] Queued available text: '{text}'"); }
+                        catch (IndexOutOfRangeException) { }
                     }
                     GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.QueueTranslation(ui, text, info, normalText, config, ignoreComponentState);
 
@@ -213,7 +216,8 @@ namespace GameTranslator.Patches.Utils
                 {
                     if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"available:{text}"))
                     {
-                        TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'");
+                        try { TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'"); }
+                        catch (IndexOutOfRangeException) { }
                     }
                     result = normalText.TryTranslate(text, scope);
                 }

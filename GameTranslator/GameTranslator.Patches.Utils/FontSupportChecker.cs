@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -138,7 +139,8 @@ namespace GameTranslator.Patches.Utils
             string result = stringBuilder.ToString();
             if (hasReplacement && TranslatePlugin.showOtherDebug.Value)
             {
-                TranslatePlugin.logger.LogInfo($"[FontSupport] Replaced unsupported characters in text: '{text}' -> '{result}'");
+                try { TranslatePlugin.logger.LogInfo($"[FontSupport] Replaced unsupported characters for text: '{text}' -> '{result}'"); }
+                catch (IndexOutOfRangeException) { }
             }
             _textCache.Add(text, result);
             return result;

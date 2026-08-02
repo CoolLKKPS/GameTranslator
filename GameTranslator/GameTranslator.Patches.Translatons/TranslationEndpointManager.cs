@@ -169,7 +169,8 @@ namespace GameTranslator.Patches.Translatons
         {
             var failureKey = $"{scope}:{untranslatedText}";
             _failedTranslations.AddOrUpdate(failureKey, 1, (k, value) => (byte)(value + 1));
-            TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{NormalTextTranslator.GetTextSnippet(untranslatedText, 50)}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})");
+            try { TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{NormalTextTranslator.GetTextSnippet(untranslatedText, 50)}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})"); }
+            catch (IndexOutOfRangeException) { }
         }
 
         internal static string TranslateText(string text, NormalTextTranslator normalText, TranslateConfig.TranslateConfigFile config, int scope = -1)
@@ -190,7 +191,8 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Translation error for text '{NormalTextTranslator.GetTextSnippet(text, 50)}': {ex.Message}");
+                try { TranslatePlugin.logger.LogError($"Translation error for text '{NormalTextTranslator.GetTextSnippet(text, 50)}': {ex.Message}"); }
+                catch (IndexOutOfRangeException) { }
                 return text;
             }
 

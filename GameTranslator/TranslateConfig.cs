@@ -247,7 +247,8 @@ namespace GameTranslator
                     if (stopwatch.ElapsedMilliseconds > 500L)
                     {
                         string text11 = ((text.Length > 50) ? (text.Substring(0, 50) + "...") : text);
-                        TranslatePlugin.logger.LogWarning(string.Format("replaceByMap took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, text11));
+                        try { TranslatePlugin.logger.LogWarning(string.Format("replaceByMap took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, text11)); }
+                        catch (IndexOutOfRangeException) { }
                     }
                 }
             }

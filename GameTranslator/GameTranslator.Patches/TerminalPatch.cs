@@ -286,7 +286,8 @@ namespace GameTranslator.Patches
                         if (TranslatePlugin.showAvailableText.Value && !string.IsNullOrEmpty(__instance.currentText) &&
                             GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"terminal:{__instance.currentText}"))
                         {
-                            TranslatePlugin.logger.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'");
+                            try { TranslatePlugin.logger.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'"); }
+                            catch (IndexOutOfRangeException) { }
                         }
 
                         string originalText = __instance.currentText;

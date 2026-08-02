@@ -356,7 +356,8 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (System.Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Failed to safely update UI for text '{originalText}': {ex.Message}");
+                try { TranslatePlugin.logger.LogError($"Failed to safely update UI for text '{originalText}': {ex.Message}"); }
+                catch (IndexOutOfRangeException) { }
                 TranslatePlugin.logger.LogError(ex);
             }
         }
