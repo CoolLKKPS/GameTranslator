@@ -13,6 +13,7 @@ namespace GameTranslator.Patches.Hooks
         public static void TMP_FontAsset_ReadFontAssetDefinition(TMP_FontAsset __instance)
         {
             FontSupportChecker.RegisterFont(__instance);
+            TMP_FallbackMaterialHook.RegisterFontMaterial(__instance);
         }
     }
 }

@@ -1,3 +1,7 @@
+## v2.2.8
+
+- Fixed the issue where fallbackEffectScale could scale multiple times in certain cases
+
 ## v2.2.7
 
 - Added a guard for TMP_FallbackMaterialHook

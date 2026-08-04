@@ -2,6 +2,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
 
 namespace GameTranslator.Patches.Hooks
@@ -16,6 +17,8 @@ namespace GameTranslator.Patches.Hooks
         private static DateTime _lastCleanup = DateTime.Now;
 
         private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(5);
+
+        private static readonly HashSet<int> _fontAssetMaterialIds = new HashSet<int>();
 
         private static void CleanupLogCache()
         {
@@ -37,6 +40,19 @@ namespace GameTranslator.Patches.Hooks
                 _lastLogTime.Remove(key);
         }
 
+        internal static void RegisterFontMaterial(TMP_FontAsset font)
+        {
+            if (font == null || font.material == null) return;
+            _fontAssetMaterialIds.Add(font.material.GetInstanceID());
+        }
+
+        internal static void RegisterAtlasMaterialIfSourceIsFontAsset(Material sourceMaterial, Material result)
+        {
+            if (sourceMaterial == null || result == null) return;
+            if (_fontAssetMaterialIds.Contains(sourceMaterial.GetInstanceID()))
+                _fontAssetMaterialIds.Add(result.GetInstanceID());
+        }
+
         static MethodBase TargetMethod()
         {
             return AccessTools.Method(AccessTools.TypeByName("TMPro.TMP_MaterialManager"), "GetFallbackMaterial", new[] { typeof(Material), typeof(Material) });
@@ -54,15 +70,10 @@ namespace GameTranslator.Patches.Hooks
             if (!TranslatePlugin.scaleFallbackEffects.Value || result == null || sourceMaterial == null || targetMaterial == null)
                 return;
 
-            ApplyCore(sourceMaterial, result, targetMaterial);
-        }
-
-        internal static void ApplyScaleWithoutTarget(Material sourceMaterial, Material result)
-        {
-            if (!TranslatePlugin.scaleFallbackEffects.Value || result == null || sourceMaterial == null)
+            if (!_fontAssetMaterialIds.Contains(sourceMaterial.GetInstanceID()))
                 return;
 
-            ApplyCore(sourceMaterial, result, null);
+            ApplyCore(sourceMaterial, result, targetMaterial);
         }
 
         private static float Clamp(float value, float min, float max)
@@ -85,7 +96,7 @@ namespace GameTranslator.Patches.Hooks
             float srcBevelOffset = sourceMaterial.GetFloat("_BevelOffset");
             float srcFaceDilate = sourceMaterial.GetFloat("_FaceDilate");
             float srcGS = sourceMaterial.GetFloat("_GradientScale");
-            float targetGS = targetMaterial != null ? targetMaterial.GetFloat("_GradientScale") : 0f;
+            float targetGS = targetMaterial.GetFloat("_GradientScale");
             float scale = Clamp(TranslatePlugin.fallbackEffectScale.Value, -1f, 1f);
 
             result.SetFloat("_OutlineWidth", Mathf.Max(0f, srcOutline * scale));
@@ -103,13 +114,13 @@ namespace GameTranslator.Patches.Hooks
 
             if (TranslatePlugin.showOtherDebug.Value)
             {
-                int key = targetMaterial != null ? (sourceMaterial.GetInstanceID() ^ (targetMaterial.GetInstanceID() << 16)) : sourceMaterial.GetInstanceID();
+                int key = sourceMaterial.GetInstanceID() ^ (targetMaterial.GetInstanceID() << 16);
                 var now = DateTime.Now;
                 CleanupLogCache();
                 if (!_lastLogTime.TryGetValue(key, out var last) || now - last >= _logCooldown)
                 {
                     _lastLogTime[key] = now;
-                    string tgtDesc = targetMaterial != null ? $"{targetMaterial.name}#{targetMaterial.GetInstanceID()}" : null;
+                    string tgtDesc = $"{targetMaterial.name}#{targetMaterial.GetInstanceID()}";
                     TranslatePlugin.logger.LogInfo(
                         $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetInstanceID()}, tgt={tgtDesc}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
                     TranslatePlugin.logger.LogInfo(
@@ -128,7 +139,7 @@ namespace GameTranslator.Patches.Hooks
     }
 
     [HarmonyPatch]
-    internal class TMP_FallbackMaterialHook_AtlasIndex
+    internal class TMP_FallbackMaterialHook_AtlasIndexRegister
     {
         static MethodBase TargetMethod()
         {
@@ -139,7 +150,7 @@ namespace GameTranslator.Patches.Hooks
         [HarmonyWrapSafe]
         public static void Postfix(Material sourceMaterial, ref Material __result)
         {
-            TMP_FallbackMaterialHook.ApplyScaleWithoutTarget(sourceMaterial, __result);
+            TMP_FallbackMaterialHook.RegisterAtlasMaterialIfSourceIsFontAsset(sourceMaterial, __result);
         }
     }
 }

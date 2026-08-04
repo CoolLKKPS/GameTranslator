@@ -152,7 +152,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextMeshHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_FallbackMaterialHook),
-                typeof(GameTranslator.Patches.Hooks.TMP_FallbackMaterialHook_AtlasIndex),
+                typeof(GameTranslator.Patches.Hooks.TMP_FallbackMaterialHook_AtlasIndexRegister),
                 typeof(GameTranslator.Patches.Hooks.TMP_FontAssetHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_GetTextElementHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_TextHook),
@@ -299,7 +299,7 @@ namespace GameTranslator
 
         internal const string PLUGIN_NAME = "GameTranslator";
 
-        internal const string PLUGIN_VERSION = "2.2.7";
+        internal const string PLUGIN_VERSION = "2.2.8";
 
         internal const string PLUGIN_VERSION_FULL = PLUGIN_VERSION + ".0";
 
