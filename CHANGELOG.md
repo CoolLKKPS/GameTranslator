@@ -1,3 +1,7 @@
+## v2.2.7
+
+- Added a guard for TMP_FallbackMaterialHook
+
 ## v2.2.6
 
 - v2.2.5 console logger patch (IndexOutOfRangeException) now only work for the certain logs, no longer require BepInEx version check and debug on
