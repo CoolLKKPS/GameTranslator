@@ -65,6 +65,11 @@ namespace GameTranslator.Patches.Hooks
             ApplyCore(sourceMaterial, result, null);
         }
 
+        private static float Clamp(float value, float min, float max)
+        {
+            return Mathf.Clamp(value, min, max);
+        }
+
         private static void ApplyCore(Material sourceMaterial, Material result, Material targetMaterial)
         {
             float srcOutline = sourceMaterial.GetFloat("_OutlineWidth");
@@ -81,19 +86,19 @@ namespace GameTranslator.Patches.Hooks
             float srcFaceDilate = sourceMaterial.GetFloat("_FaceDilate");
             float srcGS = sourceMaterial.GetFloat("_GradientScale");
             float targetGS = targetMaterial != null ? targetMaterial.GetFloat("_GradientScale") : 0f;
-            float scale = TranslatePlugin.fallbackEffectScale.Value;
+            float scale = Clamp(TranslatePlugin.fallbackEffectScale.Value, -1f, 1f);
 
-            result.SetFloat("_OutlineWidth", srcOutline * scale);
-            result.SetFloat("_OutlineSoftness", srcOutlineSoftness * scale);
+            result.SetFloat("_OutlineWidth", Mathf.Max(0f, srcOutline * scale));
+            result.SetFloat("_OutlineSoftness", Mathf.Max(0f, srcOutlineSoftness * scale));
             result.SetFloat("_UnderlayDilate", srcUnderlay * scale);
-            result.SetFloat("_UnderlaySoftness", srcUnderlaySoftness * scale);
+            result.SetFloat("_UnderlaySoftness", Mathf.Max(0f, srcUnderlaySoftness * scale));
             result.SetFloat("_UnderlayOffsetX", srcUnderlayOffsetX * scale);
             result.SetFloat("_UnderlayOffsetY", srcUnderlayOffsetY * scale);
-            result.SetFloat("_GlowInner", srcGlowInner * scale);
-            result.SetFloat("_GlowOuter", srcGlowOuter * scale);
+            result.SetFloat("_GlowInner", Mathf.Max(0f, srcGlowInner * scale));
+            result.SetFloat("_GlowOuter", Mathf.Max(0f, srcGlowOuter * scale));
             result.SetFloat("_GlowOffset", srcGlowOffset * scale);
-            result.SetFloat("_BevelWidth", srcBevelWidth * scale);
-            result.SetFloat("_BevelOffset", srcBevelOffset * scale);
+            result.SetFloat("_BevelWidth", Clamp(srcBevelWidth * scale, -0.5f, 0.5f));
+            result.SetFloat("_BevelOffset", Clamp(srcBevelOffset * scale, -0.5f, 0.5f));
             result.SetFloat("_FaceDilate", srcFaceDilate * scale);
 
             if (TranslatePlugin.showOtherDebug.Value)
