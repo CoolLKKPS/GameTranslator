@@ -1,3 +1,4 @@
+using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -42,8 +43,10 @@ namespace GameTranslator.Patches.Hooks
 
         internal static void RegisterFontMaterial(TMP_FontAsset font)
         {
-            if (font == null || font.material == null) return;
-            _fontAssetMaterialIds.Add(font.material.GetInstanceID());
+            if (font == null) return;
+            var mat = FontHelper.GetFontMaterial(font);
+            if (mat == null) return;
+            _fontAssetMaterialIds.Add(mat.GetInstanceID());
         }
 
         internal static void RegisterAtlasMaterialIfSourceIsFontAsset(Material sourceMaterial, Material result)

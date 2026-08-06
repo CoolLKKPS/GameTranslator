@@ -28,7 +28,8 @@ namespace GameTranslator.Patches.Utils
 
                     if (!configValue.Contains(","))
                     {
-                        string fmtPath = Path.Combine(TranslatePlugin.DefaultPath, configValue.Trim());
+                        string trimmed = configValue.Trim();
+                        string fmtPath = Path.Combine(TranslatePlugin.DefaultPath, trimmed);
                         if (File.Exists(fmtPath))
                         {
                             LoadFontFile(fmtPath);
@@ -43,6 +44,10 @@ namespace GameTranslator.Patches.Utils
                             }
                             return FontCache.FallbackFontsTextMeshPro;
                         }
+                        if (IsSystemFontName(trimmed))
+                        {
+                            LoadFontFile(trimmed);
+                        }
                         return FontCache.FallbackFontsTextMeshPro;
                     }
 
@@ -53,7 +58,24 @@ namespace GameTranslator.Patches.Utils
                         if (string.IsNullOrEmpty(trimmed)) continue;
 
                         string fontPath = Path.Combine(TranslatePlugin.DefaultPath, trimmed);
-                        LoadFontFile(fontPath);
+                        if (File.Exists(fontPath))
+                        {
+                            LoadFontFile(fontPath);
+                            continue;
+                        }
+                        if (Directory.Exists(fontPath))
+                        {
+                            TranslatePlugin.logger.LogInfo("Loading fallback fonts from directory: " + fontPath);
+                            foreach (string filePath in Directory.GetFiles(fontPath, "*").OrderBy(f => f))
+                            {
+                                LoadFontFile(filePath);
+                            }
+                            continue;
+                        }
+                        if (IsSystemFontName(trimmed))
+                        {
+                            LoadFontFile(trimmed);
+                        }
                     }
                 }
                 catch (Exception e)
@@ -93,5 +115,10 @@ namespace GameTranslator.Patches.Utils
         private static bool _hasReadFallbackFontTextMeshPro = false;
 
         private static List<global::UnityEngine.Object> FallbackFontsTextMeshPro;
+
+        private static bool IsSystemFontName(string name)
+        {
+            return !string.IsNullOrEmpty(name) && !name.Contains("\\") && !name.Contains("/");
+        }
     }
 }
