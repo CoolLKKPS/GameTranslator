@@ -1,3 +1,7 @@
+## v2.2.9
+
+- Future support
+
 ## v2.2.8
 
 - Fixed the issue where fallbackEffectScale could scale multiple times in certain cases
