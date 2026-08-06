@@ -78,7 +78,7 @@ namespace GameTranslator.Patches.Utils
                 _isInitialized = true;
                 _characterSupportCache.Clear();
                 _textCache.Clear();
-                TranslatePlugin.logger.LogDebug($"Registered new font: {font.name}");
+                TranslatePlugin.logger.LogDebug(string.IsNullOrEmpty(font.name) ? "Registered new font (unnamed)" : $"Registered new font: {font.name}");
             }
         }
 

@@ -40,7 +40,8 @@ namespace GameTranslator.Patches.Utils
                         if (font != null)
                         {
                             var mat = FontHelper.GetFontMaterial(font);
-                            string shaderName = mat != null && mat.shader != null ? mat.shader.name : "Unknown";
+                            string shaderName = mat != null && mat.shader != null ? mat.shader.name : "Unavailable";
+                            string renderMode = font.atlasRenderMode.ToString();
                             int atlasCount = font.atlasTextures != null ? font.atlasTextures.Length : 0;
                             string atlasInfo;
                             if (atlasCount > 0)
@@ -61,7 +62,9 @@ namespace GameTranslator.Patches.Utils
                                 atlasInfo = "0 atlas";
                             }
                             string pointSizeStr = FontHelper._getFaceInfoPointSize(font);
-                            TranslatePlugin.logger.LogDebug($"Loaded TextMesh Pro font '{font.name}' version={font.version}, shader={shaderName}, {atlasInfo}, pointSize={pointSizeStr}, padding={font.atlasPadding}");
+                            string versionStr = FontHelper._getVersion(font);
+                            int atlasPaddingVal = FontHelper._getAtlasPadding(font);
+                            TranslatePlugin.logger.LogDebug($"Loaded TextMesh Pro font '{font.name}' version={versionStr}, shader={shaderName}, render={renderMode}, {atlasInfo}, pointSize={pointSizeStr}, padding={atlasPaddingVal}");
                             fonts.Add(font);
                         }
                     }
@@ -130,7 +133,13 @@ namespace GameTranslator.Patches.Utils
                 if (FontHelper._createFontAssetFromStringMethod != null)
                 {
                     TranslatePlugin.logger.LogInfo($"System font '{fontName}' found. Creating TextMesh Pro font asset from it.");
-                    return (TMP_FontAsset)FontHelper._createFontAssetFromStringMethod.Invoke(null, new object[] { fontName, "", 90 });
+                    var font = (TMP_FontAsset)FontHelper._createFontAssetFromStringMethod.Invoke(null, new object[] { fontName, "", 90 });
+                    if (font != null)
+                    {
+                        font.name = fontName;
+                        TranslatePlugin.logger.LogDebug($"System font asset created: {font.name}");
+                    }
+                    return font;
                 }
 
                 TranslatePlugin.logger.LogWarning("System font loading not supported on this TextMeshPro version.");
@@ -167,9 +176,13 @@ namespace GameTranslator.Patches.Utils
 
         private static readonly MethodInfo _createFontAssetFromStringMethod = typeof(TMP_FontAsset).GetMethod("CreateFontAsset", new[] { typeof(string), typeof(string), typeof(int) });
 
-        private static readonly Func<TMP_Asset, Material> _getFontMaterial = ResolvePropertyOrField<TMP_Asset, Material>("material");
+        private static readonly Func<TMP_Asset, Material> _getFontMaterial = ResolvePropertyOrField<TMP_Asset, Material>("material") ?? (_ => default);
 
         private static readonly Func<TMP_FontAsset, string> _getFaceInfoPointSize = InitFaceInfoPointSizeAccessor();
+
+        private static readonly Func<TMP_FontAsset, string> _getVersion = ResolvePropertyOrField<TMP_FontAsset, string>("version") ?? (_ => "?");
+
+        private static readonly Func<TMP_FontAsset, int> _getAtlasPadding = ResolvePropertyOrField<TMP_FontAsset, int>("atlasPadding") ?? (_ => default);
 
         internal static Material GetFontMaterial(TMP_FontAsset font)
         {
@@ -188,7 +201,7 @@ namespace GameTranslator.Patches.Utils
             if (field != null && typeof(V).IsAssignableFrom(field.FieldType))
                 return obj => (V)field.GetValue(obj);
 
-            return _ => default;
+            return null;
         }
 
         private static Func<TMP_FontAsset, string> InitFaceInfoPointSizeAccessor()
