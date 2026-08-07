@@ -1,4 +1,5 @@
 using GameTranslator.Patches.Translatons.Manipulator;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -369,15 +370,15 @@ namespace GameTranslator.Patches.Translatons
 
         private static readonly string CapitalMainTexturePropertyName = "MainTexture";
 
-        public static FieldInfo s_MissingCharacterList = typeof(TMP_FontAsset).GetField("s_MissingCharacterList", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        public static FieldInfo s_MissingCharacterList = AccessTools.Field(typeof(TMP_FontAsset), "s_MissingCharacterList");
 
-        public static FieldInfo m_MissingUnicodesFromFontFile = typeof(TMP_FontAsset).GetField("m_MissingUnicodesFromFontFile", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        public static FieldInfo m_MissingUnicodesFromFontFile = AccessTools.Field(typeof(TMP_FontAsset), "m_MissingUnicodesFromFontFile");
 
-        public static FieldInfo m_CharacterLookupDictionary = typeof(TMP_FontAsset).GetField("m_CharacterLookupDictionary", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        public static FieldInfo m_CharacterLookupDictionary = AccessTools.Field(typeof(TMP_FontAsset), "m_CharacterLookupDictionary");
 
-        public static FieldInfo m_CharacterTable = typeof(TMP_FontAsset).GetField("m_CharacterTable", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        public static FieldInfo m_CharacterTable = AccessTools.Field(typeof(TMP_FontAsset), "m_CharacterTable");
 
-        public static FieldInfo m_CharactersToAddLookup = typeof(TMP_FontAsset).GetField("m_CharactersToAddLookup", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        public static FieldInfo m_CharactersToAddLookup = AccessTools.Field(typeof(TMP_FontAsset), "m_CharactersToAddLookup");
 
         public enum ImageFormat
         {

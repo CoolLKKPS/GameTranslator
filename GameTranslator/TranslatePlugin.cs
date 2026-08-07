@@ -152,6 +152,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextMeshHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_FallbackMaterialHook),
+                typeof(GameTranslator.Patches.Hooks.TMP_FontAsset_FontFeaturesHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_FallbackMaterialHook_AtlasIndexRegister),
                 typeof(GameTranslator.Patches.Hooks.TMP_FontAssetHook),
                 typeof(GameTranslator.Patches.Hooks.TMP_GetTextElementHook),

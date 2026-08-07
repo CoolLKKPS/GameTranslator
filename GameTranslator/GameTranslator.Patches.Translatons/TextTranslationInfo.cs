@@ -94,9 +94,13 @@ namespace GameTranslator.Patches.Translatons
                             foreach (var fontObj in fallbackFonts)
                             {
                                 TMP_FontAsset fallbackFont = fontObj as TMP_FontAsset;
-                                if (fallbackFont != null && !originalFont.fallbackFontAssetTable.Contains(fallbackFont))
+                                if (fallbackFont != null && FontHelper.GetFontMaterial(fallbackFont) != null && !originalFont.fallbackFontAssetTable.Contains(fallbackFont))
                                 {
                                     originalFont.fallbackFontAssetTable.Add(fallbackFont);
+                                }
+                                else if (fallbackFont != null && FontHelper.GetFontMaterial(fallbackFont) == null)
+                                {
+                                    TranslatePlugin.logger.LogError($"Font '{fallbackFont.name}' has no material. Please regenerate it in the Font Asset Creator.");
                                 }
                             }
                         }

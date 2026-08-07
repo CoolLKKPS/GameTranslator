@@ -95,8 +95,8 @@ namespace GameTranslator.Patches.Hooks
             }
         }
 
-        public static FieldInfo s_Text = typeof(GUIContent).GetField("s_Text", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        public static FieldInfo s_Text = AccessTools.Field(typeof(GUIContent), "s_Text");
 
-        public static FieldInfo s_TextImage = typeof(GUIContent).GetField("s_TextImage", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        public static FieldInfo s_TextImage = AccessTools.Field(typeof(GUIContent), "s_TextImage");
     }
 }
