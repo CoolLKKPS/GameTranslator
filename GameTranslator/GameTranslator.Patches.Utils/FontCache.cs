@@ -26,7 +26,7 @@ namespace GameTranslator.Patches.Utils
 
                     string configValue = TranslatePlugin.fallbackFontTextMeshPro.Value;
 
-                    if (!configValue.Contains(","))
+                    if (!configValue.Contains(','))
                     {
                         string trimmed = configValue.Trim();
                         string fmtPath = Path.Combine(TranslatePlugin.DefaultPath, trimmed);
@@ -118,7 +118,7 @@ namespace GameTranslator.Patches.Utils
 
         private static bool IsSystemFontName(string name)
         {
-            return !string.IsNullOrEmpty(name) && !name.Contains("\\") && !name.Contains("/");
+            return !string.IsNullOrEmpty(name) && !name.Contains('\\') && !name.Contains('/');
         }
     }
 }

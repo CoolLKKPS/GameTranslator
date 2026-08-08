@@ -356,30 +356,21 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        private void Dispose(bool disposing)
+        public void Dispose()
         {
             if (!this._disposed)
             {
-                if (disposing)
+                foreach (var zip in _openZipArchives.Values)
                 {
-                    foreach (var zip in _openZipArchives.Values)
-                    {
-                        try { zip.Dispose(); } catch { }
-                    }
-                    _openZipArchives.Clear();
-                    _textureFileWatcher?.Dispose();
-                    _textureFileWatcher = null;
-                    _texturePollingTimer?.Dispose();
-                    _texturePollingTimer = null;
+                    try { zip.Dispose(); } catch { }
                 }
+                _openZipArchives.Clear();
+                _textureFileWatcher?.Dispose();
+                _textureFileWatcher = null;
+                _texturePollingTimer?.Dispose();
+                _texturePollingTimer = null;
                 this._disposed = true;
             }
-        }
-
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void CleanupInvalidEntries()
@@ -542,7 +533,7 @@ namespace GameTranslator.Patches.Translatons
                 return new string(array);
             }
 
-            private static readonly SHA1Managed SHA1 = new SHA1Managed();
+            private static readonly SHA1 SHA1 = SHA1.Create();
 
             private static readonly uint[] Lookup32 = TextureTranslationCache.HashHelper.CreateLookup32();
         }

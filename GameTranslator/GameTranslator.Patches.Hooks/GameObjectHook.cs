@@ -16,7 +16,7 @@ namespace GameTranslator.Patches.Hooks
         {
             if (value)
             {
-                foreach (Component component in __instance.GetComponentsInChildren(UnityTypes.TextMesh.UnityType))
+                foreach (Component component in __instance.GetComponentsInChildren(UnityTypes.TextMesh.ClrType))
                 {
                     if (component.IsComponentActive())
                     {
@@ -32,7 +32,7 @@ namespace GameTranslator.Patches.Hooks
         {
             if (value)
             {
-                foreach (Component component in __instance.GetComponentsInChildren(UnityTypes.TextMesh.UnityType))
+                foreach (Component component in __instance.GetComponentsInChildren(UnityTypes.TextMesh.ClrType))
                 {
                     if (component.IsComponentActive())
                     {

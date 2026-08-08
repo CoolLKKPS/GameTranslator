@@ -66,7 +66,7 @@ namespace GameTranslator.Patches.Translatons
         {
             if (ui != null)
             {
-                Type unityType = ui.GetUnityType();
+                var unityType = ui.GetUnityType();
                 if (UnityTypes.Text != null && UnityTypes.Text.IsAssignableFrom(unityType))
                 {
                     return;
@@ -75,7 +75,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     try
                     {
-                        CachedProperty cachedProperty = unityType.CachedProperty("font");
+                        CachedProperty cachedProperty = ui.GetType().CachedProperty("font");
                         TMP_FontAsset originalFont = (TMP_FontAsset)cachedProperty.Get(ui);
 
                         if (originalFont != null && !TranslatePlugin.fallbackFontTextMeshPro.Value.IsNullOrWhiteSpace())

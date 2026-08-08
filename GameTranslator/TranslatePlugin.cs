@@ -11,19 +11,62 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using XUnity.Common.Utilities;
+#if IL2CPP
+using BepInEx.Unity.IL2CPP;
+using Il2CppInterop.Runtime.Injection;
+#endif
 
 namespace GameTranslator
 {
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
+#if MANAGED
     public class TranslatePlugin : BaseUnityPlugin
+#else
+    public class TranslatePlugin : BasePlugin
+#endif
     {
+#if MANAGED
         private void Awake()
+#else
+        public override void Load()
+#endif
         {
-            TranslatePlugin.logger = base.Logger;
+#if IL2CPP
+            try
+            {
+                var interopManagerType = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(a => { try { return a.GetTypes(); } catch { return Array.Empty<Type>(); } })
+                    .FirstOrDefault(t => t.FullName == "BepInEx.Unity.IL2CPP.Il2CppInteropManager");
+                if (interopManagerType != null)
+                {
+                    var pathProp = interopManagerType.GetProperty("IL2CPPInteropAssemblyPath", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    if (pathProp != null)
+                    {
+                        var path = (string)pathProp.GetValue(null);
+                        XUnity.Common.Constants.Il2CppProxyAssemblies.Location = path;
+                    }
+                }
+            }
+            catch { }
+#endif
+
+            TranslatePlugin.logger = BepInEx.Logging.Logger.CreateLogSource(TranslatePlugin.PLUGIN_NAME);
             TranslatePlugin.Instance = this;
+
+#if MANAGED
             this.gameObject.AddComponent<TranslationUpdater>();
             this.gameObject.hideFlags = HideFlags.HideAndDontSave;
             DontDestroyOnLoad(this.gameObject);
+#else
+            ClassInjector.RegisterTypeInIl2Cpp<TranslationUpdater>();
+            var updaterObj = new GameObject("GameTranslator_Updater")
+            {
+                hideFlags = HideFlags.HideAndDontSave
+            };
+            UnityEngine.Object.DontDestroyOnLoad(updaterObj);
+            updaterObj.AddComponent<TranslationUpdater>();
+#endif
+
             this.ConfigFile();
             HookingHelper.PatchAll(ImageHooks.All, false);
             HookingHelper.PatchAll(ImageHooks.Sprite, false);
@@ -36,6 +79,8 @@ namespace GameTranslator
                 GameTranslator.Patches.Utils.FontSupportChecker.InitializeFonts();
             }
             AsyncTranslationManager.Instance.Start();
+
+#if MANAGED
             SceneManager.activeSceneChanged += (Scene from, Scene to) =>
             {
                 if (TranslatePlugin.showAvailableText.Value)
@@ -43,10 +88,16 @@ namespace GameTranslator
                     TranslatePlugin.logger.LogInfo($"[Scope] Active scene changed: '{to.name}' (buildIndex={to.buildIndex})");
                 }
             };
-            base.Logger.LogInfo("GameTranslator is loaded");
+#endif
+
+            TranslatePlugin.logger.LogInfo("GameTranslator is loaded");
         }
 
+#if MANAGED
         private void OnDestroy()
+#else
+        public override bool Unload()
+#endif
         {
             try
             {
@@ -57,7 +108,10 @@ namespace GameTranslator
                 TranslatePlugin.logger?.LogError("Error in OnDestroy: " + ex.Message);
             }
             TranslateConfig.Unload();
-            base.Logger.LogInfo("GameTranslator destroyed");
+            TranslatePlugin.logger?.LogInfo("GameTranslator destroyed");
+#if IL2CPP
+            return true;
+#endif
         }
 
         private class TranslationUpdater : MonoBehaviour
@@ -67,48 +121,68 @@ namespace GameTranslator
                 try
                 {
                     AsyncTranslationManager.Instance.ProcessMainThreadActions();
+#if IL2CPP
+                    PollSceneChange();
+#endif
                 }
                 catch (Exception ex)
                 {
                     TranslatePlugin.logger?.LogError("Error in TranslationUpdater Update: " + ex.Message);
                 }
             }
+
+#if IL2CPP
+            private int _lastSceneBuildIndex = -1;
+
+            private void PollSceneChange()
+            {
+                var scene = SceneManager.GetActiveScene();
+                if (scene.buildIndex != _lastSceneBuildIndex)
+                {
+                    _lastSceneBuildIndex = scene.buildIndex;
+                    if (TranslatePlugin.showAvailableText.Value)
+                    {
+                        TranslatePlugin.logger.LogInfo($"[Scope] Active scene changed: '{scene.name}' (buildIndex={scene.buildIndex})");
+                    }
+                }
+            }
+#endif
         }
 
         private void ConfigFile()
         {
-            TranslatePlugin.syncTranslationThreshold = base.Config.Bind<int>("ASync", "Sync Translation Threshold", 300, "Define the character threshold to not use async translation");
-            TranslatePlugin.showAvailableText = base.Config.Bind<bool>("Debug", "Show Available Text", false, "Define whether to show available text");
-            TranslatePlugin.showOtherDebug = base.Config.Bind<bool>("Debug", "Show Other Debug", false, "Define whether to show other debug");
-            TranslatePlugin.enableFileWatcher = base.Config.Bind<bool>("Debug", "Enable File Watcher", false, "If true, enable file system watcher for file updates");
-            TranslatePlugin.enablePollingCheck = base.Config.Bind<bool>("Debug", "Enable Polling Check", false, "If true, enable the 10-seconds polling fallback for file updates");
-            TranslatePlugin.replaceUnsupportedCharacters = base.Config.Bind<bool>("Debug", "Replace Unsupported Characters", false, "Define whether to replace unsupported characters with Unicode character u25A1");
-            TranslatePlugin.enableTypingTranslation = base.Config.Bind<bool>("Debug", "Enable TextWindow Typing Translation", false, "Define whether to display translated text letter-by-letter during the textwindow typing animation instead of waiting for the animation to complete");
-            TranslatePlugin.enableAsyncDuringTyping = base.Config.Bind<bool>("Debug", "Enable Async During Typing Translation", false, "Define whether to allow async translation during typing animation which terminating the animation when async translation completes");
-            TranslatePlugin.cacheUnmodifiedTextures = base.Config.Bind<bool>("Debug", "Cache Unmodified Textures", false, "Define whether to cache textures that have not been modified");
-            TranslatePlugin.enableTextureDumping = base.Config.Bind<bool>("Debug", "Enable Texture Dumping", false, "Define whether to dump original textures to disk for debug purposes");
-            TranslatePlugin.stabilizationMinTextLength = base.Config.Bind<int>("Debug", "Stabilization Min Text Length", 100, "Define minimum text length to trigger stabilization. Set to 0 to disable stabilization");
-            TranslatePlugin.stabilizationDelay = base.Config.Bind<float>("Debug", "Stabilization Delay", 0.9f, "Define delay in seconds between stabilization checks. Must be greater than 0");
-            TranslatePlugin.stabilizationMaxRetries = base.Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
-            TranslatePlugin.enableTerminalPatch = base.Config.Bind<bool>("Debug", "Enable Terminal Patch", true, "Define whether to patch Terminal");
-            TranslatePlugin.changeFont = base.Config.Bind<bool>("Font", "Change Font", false, "Define whether to change the font");
-            TranslatePlugin.enableDynamicFont = base.Config.Bind<bool>("Font", "Enable Dynamic Font", false, "Define whether to dynamically add missing characters to fallback fonts at runtime");
-            TranslatePlugin.scaleFallbackEffects = base.Config.Bind<bool>("Font", "Scale Fallback Effects", false, "Define whether to proportionally scale SDF effects on fallback fonts");
-            TranslatePlugin.fallbackEffectScale = base.Config.Bind<float>("Font", "Fallback Effect Scale", 1.0f, "Define the scale multiplier for fallback font SDF effects (lower = lighter effects)");
-            TranslatePlugin.fallbackFontTextMeshPro = base.Config.Bind<string>("Font", "FallbackFontTextMeshPro", "", "Define the fallback font asset bundle(s) used");
-            TranslatePlugin.shouldRemoveChar = base.Config.Bind<string>("Font", "Custom Characters", "", "Define what vanilla characters will use custom ones");
-            TranslatePlugin.language = base.Config.Bind<string>("General", "Language", "Default", "Define what language folder is used");
-            TranslatePlugin.shouldTranslateNormalText = base.Config.Bind<bool>("General", "Translate Normal Text", true, "Define whether to use Normal Translate method");
-            TranslatePlugin.shouldTranslateTerimal = base.Config.Bind<bool>("General", "Translate Terminal", false, "Define whether translate Terminal");
-            TranslatePlugin.shouldTranslateInteractiveTerminalAPI = base.Config.Bind<bool>("General", "Translate InteractiveTerminalAPI", false, "Define whether translate InteractiveTerminalAPI");
-            TranslatePlugin.TerimalCanUseShortCutOne = base.Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category ZH", false, "Define whether the terminal can use category ZH shortcut commands");
-            TranslatePlugin.TerimalCanUseShortCutTwo = base.Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category PY", false, "Define whether the terminal can use category PY shortcut commands");
-            TranslatePlugin.shouldTranslateGui = base.Config.Bind<bool>("General", "Translate Gui", false, "Define whether translate Gui");
-            TranslatePlugin.changeTexture = base.Config.Bind<bool>("Texture", "Change Texture", false, "Define whether to change the texture");
-            TranslatePlugin.cacheTexturesInMemory = base.Config.Bind<bool>("Texture", "Cache Textures In Memory", true, "Define whether to cache texture data in memory for faster loading");
-            TranslatePlugin.disableDuplicateTextureCheck = base.Config.Bind<bool>("Texture", "Disable Duplicate Texture Check", true, "Define whether to disable duplicate texture name check");
-            TranslatePlugin.ignoredTextureNames = base.Config.Bind<string>("Texture", "Ignored Texture Names", "", "Define what texture names to skip duplicate check");
-            TranslatePlugin.DefaultPath = base.Config.ConfigFilePath.Replace("GameTranslator.cfg", "translations\\" + TranslatePlugin.language.Value + "\\");
+            TranslatePlugin.syncTranslationThreshold = Config.Bind<int>("ASync", "Sync Translation Threshold", 300, "Define the character threshold to not use async translation");
+            TranslatePlugin.showAvailableText = Config.Bind<bool>("Debug", "Show Available Text", false, "Define whether to show available text");
+            TranslatePlugin.showOtherDebug = Config.Bind<bool>("Debug", "Show Other Debug", false, "Define whether to show other debug");
+            TranslatePlugin.enableFileWatcher = Config.Bind<bool>("Debug", "Enable File Watcher", false, "If true, enable file system watcher for file updates");
+            TranslatePlugin.enablePollingCheck = Config.Bind<bool>("Debug", "Enable Polling Check", false, "If true, enable the 10-seconds polling fallback for file updates");
+            TranslatePlugin.replaceUnsupportedCharacters = Config.Bind<bool>("Debug", "Replace Unsupported Characters", false, "Define whether to replace unsupported characters with Unicode character u25A1");
+            TranslatePlugin.enableTypingTranslation = Config.Bind<bool>("Debug", "Enable TextWindow Typing Translation", false, "Define whether to display translated text letter-by-letter during the textwindow typing animation instead of waiting for the animation to complete");
+            TranslatePlugin.enableAsyncDuringTyping = Config.Bind<bool>("Debug", "Enable Async During Typing Translation", false, "Define whether to allow async translation during typing animation which terminating the animation when async translation completes");
+            TranslatePlugin.cacheUnmodifiedTextures = Config.Bind<bool>("Debug", "Cache Unmodified Textures", false, "Define whether to cache textures that have not been modified");
+            TranslatePlugin.enableTextureDumping = Config.Bind<bool>("Debug", "Enable Texture Dumping", false, "Define whether to dump original textures to disk for debug purposes");
+            TranslatePlugin.stabilizationMinTextLength = Config.Bind<int>("Debug", "Stabilization Min Text Length", 100, "Define minimum text length to trigger stabilization. Set to 0 to disable stabilization");
+            TranslatePlugin.stabilizationDelay = Config.Bind<float>("Debug", "Stabilization Delay", 0.9f, "Define delay in seconds between stabilization checks. Must be greater than 0");
+            TranslatePlugin.stabilizationMaxRetries = Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
+            TranslatePlugin.enableTerminalPatch = Config.Bind<bool>("Debug", "Enable Terminal Patch", true, "Define whether to patch Terminal");
+            TranslatePlugin.changeFont = Config.Bind<bool>("Font", "Change Font", false, "Define whether to change the font");
+            TranslatePlugin.enableDynamicFont = Config.Bind<bool>("Font", "Enable Dynamic Font", false, "Define whether to dynamically add missing characters to fallback fonts at runtime");
+            TranslatePlugin.scaleFallbackEffects = Config.Bind<bool>("Font", "Scale Fallback Effects", false, "Define whether to proportionally scale SDF effects on fallback fonts");
+            TranslatePlugin.fallbackEffectScale = Config.Bind<float>("Font", "Fallback Effect Scale", 1.0f, "Define the scale multiplier for fallback font SDF effects (lower = lighter effects)");
+            TranslatePlugin.fallbackFontTextMeshPro = Config.Bind<string>("Font", "FallbackFontTextMeshPro", "", "Define the fallback font asset bundle(s) used");
+            TranslatePlugin.shouldRemoveChar = Config.Bind<string>("Font", "Custom Characters", "", "Define what vanilla characters will use custom ones");
+            TranslatePlugin.language = Config.Bind<string>("General", "Language", "Default", "Define what language folder is used");
+            TranslatePlugin.shouldTranslateNormalText = Config.Bind<bool>("General", "Translate Normal Text", true, "Define whether to use Normal Translate method");
+            TranslatePlugin.shouldTranslateTerimal = Config.Bind<bool>("General", "Translate Terminal", false, "Define whether translate Terminal");
+            TranslatePlugin.shouldTranslateInteractiveTerminalAPI = Config.Bind<bool>("General", "Translate InteractiveTerminalAPI", false, "Define whether translate InteractiveTerminalAPI");
+            TranslatePlugin.TerimalCanUseShortCutOne = Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category ZH", false, "Define whether the terminal can use category ZH shortcut commands");
+            TranslatePlugin.TerimalCanUseShortCutTwo = Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category PY", false, "Define whether the terminal can use category PY shortcut commands");
+            TranslatePlugin.shouldTranslateGui = Config.Bind<bool>("General", "Translate Gui", false, "Define whether translate Gui");
+            TranslatePlugin.changeTexture = Config.Bind<bool>("Texture", "Change Texture", false, "Define whether to change the texture");
+            TranslatePlugin.cacheTexturesInMemory = Config.Bind<bool>("Texture", "Cache Textures In Memory", true, "Define whether to cache texture data in memory for faster loading");
+            TranslatePlugin.disableDuplicateTextureCheck = Config.Bind<bool>("Texture", "Disable Duplicate Texture Check", true, "Define whether to disable duplicate texture name check");
+            TranslatePlugin.ignoredTextureNames = Config.Bind<string>("Texture", "Ignored Texture Names", "", "Define what texture names to skip duplicate check");
+            TranslatePlugin.DefaultPath = Config.ConfigFilePath.Replace("GameTranslator.cfg", "translations\\" + TranslatePlugin.language.Value + "\\");
             if (!Directory.Exists(TranslatePlugin.DefaultPath))
             {
                 TranslatePlugin.logger.LogWarning("Translation path does not exist: " + TranslatePlugin.DefaultPath);
@@ -120,7 +194,7 @@ namespace GameTranslator
                 catch (Exception ex)
                 {
                     TranslatePlugin.logger.LogError("Failed to create translation directory: " + ex.Message);
-                    TranslatePlugin.DefaultPath = Path.Combine(Path.GetDirectoryName(base.Config.ConfigFilePath), "translations", "default");
+                    TranslatePlugin.DefaultPath = Path.Combine(Path.GetDirectoryName(Config.ConfigFilePath), "translations", "default");
                     Directory.CreateDirectory(TranslatePlugin.DefaultPath);
                     TranslatePlugin.logger.LogInfo("Using fallback translation directory: " + TranslatePlugin.DefaultPath);
                 }
@@ -159,65 +233,6 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TMP_TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.Texture2DHook),
-                /*
-                typeof(GameTranslator.Patches.Hooks.texture.CubismRenderer_MainTexture_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.CubismRenderer_TryInitialize_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Cursor_SetCursor_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.DicingTextures_GetTexture_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Image_material_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Image_overrideSprite_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Image_sprite_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.ImageHooks),
-                typeof(GameTranslator.Patches.Hooks.texture.MaskableGraphic_OnEnable_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Material_mainTexture_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.RawImage_texture_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Sprite_texture_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.SpriteRenderer_sprite_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UI2DSprite_material_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UI2DSprite_sprite2D_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UIAtlas_spriteMaterial_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UIPanel_clipTexture_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UIRect_OnInit_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UISprite_atlas_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UISprite_material_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UISprite_OnInit_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UITexture_mainTexture_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.UITexture_material_Hook),
-                typeof(GameTranslator.Patches.Translatons.AsyncTranslationManager),
-                typeof(GameTranslator.Patches.Translatons.NormalTextTranslator),
-                typeof(GameTranslator.Patches.Translatons.RegexTranslation),
-                typeof(GameTranslator.Patches.Translatons.RegexTranslationSplitter),
-                typeof(GameTranslator.Patches.Translatons.TextTranslationInfo),
-                typeof(GameTranslator.Patches.Translatons.TextureDataResult),
-                typeof(GameTranslator.Patches.Translatons.TextureTranslationCache),
-                typeof(GameTranslator.Patches.Translatons.TextureTranslationInfo),
-                typeof(GameTranslator.Patches.Translatons.TranslatedImage),
-                typeof(GameTranslator.Patches.Translatons.TranslateExtensions),
-                typeof(GameTranslator.Patches.Translatons.TranslationEndpointManager),
-                typeof(GameTranslator.Patches.Translatons.TranslationJob),
-                typeof(GameTranslator.Patches.Translatons.TranslationJobState),
-                typeof(GameTranslator.Patches.Translatons.TranslationManager),
-                typeof(GameTranslator.Patches.Translatons.Manipulator.DefaultTextComponentManipulator),
-                typeof(GameTranslator.Patches.Translatons.Manipulator.FairyGUITextComponentManipulator),
-                typeof(GameTranslator.Patches.Translatons.Manipulator.ITextComponentManipulator),
-                typeof(GameTranslator.Patches.Translatons.Manipulator.TextArea2DComponentManipulator),
-                typeof(GameTranslator.Patches.Translatons.Manipulator.UguiNovelTextComponentManipulator),
-                typeof(GameTranslator.Patches.Utils.ComponentExtensions),
-                typeof(GameTranslator.Patches.Utils.FontCache),
-                typeof(GameTranslator.Patches.Utils.FontDynamicLoader),
-                typeof(GameTranslator.Patches.Utils.FontHelper),
-                typeof(GameTranslator.Patches.Utils.FontSupportChecker),
-                typeof(GameTranslator.Patches.Utils.SafeFileWatcher),
-                typeof(GameTranslator.Patches.Utils.StringBuffer),
-                typeof(GameTranslator.Patches.Utils.TextHelper),
-                typeof(GameTranslator.Patches.Utils.TextTranslate),
-                typeof(GameTranslator.Patches.Utils.TextureTranslate),
-                typeof(GameTranslator.Patches.Utils.TranslationScopeHelper),
-                typeof(GameTranslator.Patches.Utils.Textures.ITextureLoader),
-                typeof(GameTranslator.Patches.Utils.Textures.LoadImageImageLoader),
-                typeof(GameTranslator.Patches.Utils.Textures.TextureLoader),
-                typeof(GameTranslator.Patches.Utils.Textures.TgaImageLoader),
-                */
                 };
                 var patchNames = patchTypes.Select(t => t.Name).ToList();
                 TranslatePlugin.logger.LogDebug($"Found {patchNames.Count} basic patch types: {string.Join(", ", patchNames)}");
@@ -260,8 +275,12 @@ namespace GameTranslator
             {
                 if (TranslatePlugin.enableTerminalPatch != null && TranslatePlugin.enableTerminalPatch.Value)
                 {
+#if MANAGED
                     this.harmony.PatchAll(typeof(GameTranslator.Patches.TerminalPatch));
                     TranslatePlugin.logger?.LogInfo("Terminal patch applied successfully");
+#else
+                    TranslatePlugin.logger?.LogInfo("Terminal patch not available on IL2CPP");
+#endif
                 }
                 else
                 {
@@ -280,8 +299,12 @@ namespace GameTranslator
             {
                 if (TranslatePlugin.shouldTranslateInteractiveTerminalAPI != null && TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
                 {
+#if MANAGED
                     GameTranslator.Patches.InteractiveTerminalAPI.InteractiveTerminalAPIPatch.Initialize(this.harmony);
                     TranslatePlugin.logger?.LogInfo("InteractiveTerminalAPI patch applied successfully");
+#else
+                    TranslatePlugin.logger?.LogInfo("InteractiveTerminalAPI patch not available on IL2CPP");
+#endif
                 }
                 else
                 {

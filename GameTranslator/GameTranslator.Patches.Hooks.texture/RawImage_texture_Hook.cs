@@ -5,7 +5,9 @@ using UnityEngine;
 using XUnity.Common.Constants;
 using XUnity.Common.Extensions;
 using XUnity.Common.Harmony;
+#if MANAGED
 using XUnity.Common.MonoMod;
+#endif
 
 namespace GameTranslator.Patches.Hooks.texture
 {
@@ -34,6 +36,7 @@ namespace GameTranslator.Patches.Hooks.texture
             }
         }
 
+#if MANAGED
         private static void MM_Init(object detour)
         {
             RawImage_texture_Hook._original = detour.GenerateTrampolineEx<Action<Component, Texture>>();
@@ -46,5 +49,6 @@ namespace GameTranslator.Patches.Hooks.texture
         }
 
         private static Action<Component, Texture> _original;
+#endif
     }
 }

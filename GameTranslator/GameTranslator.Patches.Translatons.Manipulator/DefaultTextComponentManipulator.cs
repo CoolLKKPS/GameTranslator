@@ -117,7 +117,11 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
             if (!_textWindowTextMeshCached)
             {
+#if MANAGED
                 var textWindow = UnityEngine.Object.FindObjectOfType(UnityTypes.TextWindow.ClrType);
+#else
+                var textWindow = UnityEngine.Object.FindAnyObjectByType(UnityTypes.TextWindow.ClrType);
+#endif
                 if (textWindow == null)
                     return false;
                 var flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;

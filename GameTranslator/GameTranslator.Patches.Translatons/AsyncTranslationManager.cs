@@ -155,6 +155,7 @@ namespace GameTranslator.Patches.Translatons
             _stabilizationContexts[key] = context;
             if (ui is MonoBehaviour behaviour)
             {
+#if MANAGED
                 TranslatePlugin.Instance.StartCoroutine(WaitForTextStablization(ui, info, context.Delay, context.MaxTries, 0,
                     stabilizedText =>
                     {
@@ -182,6 +183,7 @@ namespace GameTranslator.Patches.Translatons
                             TranslatePlugin.logger.LogError($"Error cleaning up stabilization context: {ex.Message}");
                         }
                     }));
+#endif
             }
             else
             {

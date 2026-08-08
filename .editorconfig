@@ -45,12 +45,31 @@ dotnet_diagnostic.IDE0051.severity = none
 dotnet_diagnostic.IDE0060.severity = none
 dotnet_diagnostic.IDE0018.severity = none
 dotnet_diagnostic.IDE0290.severity = none
+dotnet_diagnostic.IDE0330.severity = none
 
 dotnet_diagnostic.IDE0001.severity = none
 dotnet_diagnostic.IDE0002.severity = none
 dotnet_diagnostic.IDE0003.severity = none
 
 dotnet_diagnostic.IDE0004.severity = none
+dotnet_diagnostic.IDE0005.severity = none
 dotnet_diagnostic.IDE0040.severity = none
 dotnet_diagnostic.IDE0052.severity = none
+dotnet_diagnostic.IDE0057.severity = none
 dotnet_diagnostic.IDE0058.severity = none
+
+dotnet_diagnostic.CA1507.severity = none
+dotnet_diagnostic.CA1510.severity = none
+dotnet_diagnostic.CA1512.severity = none
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.CA1845.severity = none
+dotnet_diagnostic.CA1846.severity = none
+dotnet_diagnostic.CA1854.severity = none
+dotnet_diagnostic.CA1859.severity = none
+dotnet_diagnostic.CA1860.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1862.severity = none
+dotnet_diagnostic.CA1866.severity = none
+dotnet_diagnostic.CA1868.severity = none
+dotnet_diagnostic.CA2211.severity = none
+dotnet_diagnostic.CA2249.severity = none

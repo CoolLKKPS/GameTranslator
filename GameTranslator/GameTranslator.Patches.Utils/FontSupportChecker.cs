@@ -45,7 +45,7 @@ namespace GameTranslator.Patches.Utils
                         AddFont(font);
                     }
                 }
-                if (_availableFonts.Count > 0)
+                if (_availableFonts.Any())
                 {
                     _isInitialized = true;
                 }

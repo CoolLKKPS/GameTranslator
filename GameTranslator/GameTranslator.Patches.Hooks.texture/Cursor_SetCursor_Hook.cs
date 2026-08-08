@@ -3,7 +3,9 @@ using System;
 using System.Reflection;
 using UnityEngine;
 using XUnity.Common.Harmony;
+#if MANAGED
 using XUnity.Common.MonoMod;
+#endif
 
 namespace GameTranslator.Patches.Hooks.texture
 {
@@ -29,6 +31,7 @@ namespace GameTranslator.Patches.Hooks.texture
             TextureTranslate.Instance.Hook_ImageChanged(ref texture, true);
         }
 
+#if MANAGED
         private static void MM_Init(object detour)
         {
             Cursor_SetCursor_Hook._original = detour.GenerateTrampolineEx<Action<Texture2D, Vector2, CursorMode>>();
@@ -41,5 +44,6 @@ namespace GameTranslator.Patches.Hooks.texture
         }
 
         private static Action<Texture2D, Vector2, CursorMode> _original;
+#endif
     }
 }

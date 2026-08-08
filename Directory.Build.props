@@ -2,13 +2,21 @@
 
   <!-- Primary configuration for the project. -->
   <PropertyGroup>
-    <TargetFrameworks>net481</TargetFrameworks>
+    <TargetFrameworks>net481;net10.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <!-- See: https://learn.microsoft.com/en-us/dotnet/csharp/nullable-references -->
     <Nullable>disable</Nullable>
     <!-- Allows references to non-public members at runtime, for use with BepInEx.AssemblyPublicizer. -->
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net481'">
+    <DefineConstants>MANAGED</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <DefineConstants>IL2CPP</DefineConstants>
   </PropertyGroup>
 
   <!-- Enable debug symbols. This will show source code line numbers in stack traces. -->

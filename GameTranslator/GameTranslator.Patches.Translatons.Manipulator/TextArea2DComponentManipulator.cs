@@ -40,12 +40,20 @@ namespace GameTranslator.Patches.Translatons.Manipulator
         {
             if (UnityTypes.AdvUiMessageWindow != null && UnityTypes.AdvPage != null)
             {
-                global::UnityEngine.Object @object = global::UnityEngine.Object.FindObjectOfType(UnityTypes.AdvUiMessageWindow.UnityType);
+#if MANAGED
+                global::UnityEngine.Object @object = global::UnityEngine.Object.FindObjectOfType(UnityTypes.AdvUiMessageWindow.ClrType);
+#else
+                global::UnityEngine.Object @object = global::UnityEngine.Object.FindAnyObjectByType(UnityTypes.AdvUiMessageWindow.ClrType);
+#endif
                 object obj = UnityTypes.AdvUiMessageWindow_Fields.text.Get(@object);
                 object obj2 = UnityTypes.AdvUiMessageWindow_Fields.nameText.Get(@object);
                 if (object.Equals(obj, ui))
                 {
-                    global::UnityEngine.Object object2 = global::UnityEngine.Object.FindObjectOfType(UnityTypes.AdvPage.UnityType);
+#if MANAGED
+                    global::UnityEngine.Object object2 = global::UnityEngine.Object.FindObjectOfType(UnityTypes.AdvPage.ClrType);
+#else
+                    global::UnityEngine.Object object2 = global::UnityEngine.Object.FindAnyObjectByType(UnityTypes.AdvPage.ClrType);
+#endif
                     object obj3 = Activator.CreateInstance(UnityTypes.TextData.ClrType, new object[] { text });
                     this._TextData.Set(ui, obj3);
                     this.set_textData(object2, obj3);
@@ -55,7 +63,11 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                 }
                 if (object.Equals(obj2, ui))
                 {
-                    global::UnityEngine.Object object3 = global::UnityEngine.Object.FindObjectOfType(UnityTypes.AdvPage.UnityType);
+#if MANAGED
+                    global::UnityEngine.Object object3 = global::UnityEngine.Object.FindObjectOfType(UnityTypes.AdvPage.ClrType);
+#else
+                    global::UnityEngine.Object object3 = global::UnityEngine.Object.FindAnyObjectByType(UnityTypes.AdvPage.ClrType);
+#endif
                     object obj4 = Activator.CreateInstance(UnityTypes.TextData.ClrType, new object[] { text });
                     this._TextData.Set(ui, obj4);
                     this.set_nameText(object3, text);

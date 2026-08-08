@@ -13,11 +13,6 @@ namespace GameTranslator.Patches.Translatons
 {
     internal static class TranslateExtensions
     {
-        public static Type GetUnityType(this object obj)
-        {
-            return obj.GetType();
-        }
-
         public static bool EqualsIgnoreCase(this string value, string other)
         {
             return string.Equals(value, other, StringComparison.OrdinalIgnoreCase);
@@ -147,7 +142,7 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                Type unityType = ui.GetUnityType();
+                var unityType = ui.GetUnityType();
                 Material material;
                 SpriteRenderer spriteRenderer;
                 if (!ui.TryCastTo(out material) && !ui.TryCastTo(out spriteRenderer) && (UnityTypes.Image == null || !UnityTypes.Image.IsAssignableFrom(unityType)) && (UnityTypes.RawImage == null || !UnityTypes.RawImage.IsAssignableFrom(unityType)) && (UnityTypes.CubismRenderer == null || !UnityTypes.CubismRenderer.IsAssignableFrom(unityType)))
@@ -187,7 +182,7 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                Type unityType = ui.GetUnityType();
+                var unityType = ui.GetUnityType();
                 ITextComponentManipulator textComponentManipulator2;
                 if (!TranslateExtensions.Manipulators.TryGetValue(unityType, out textComponentManipulator2))
                 {
@@ -235,7 +230,7 @@ namespace GameTranslator.Patches.Translatons
             Component component2;
             if (UnityTypes.InputField != null)
             {
-                component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.InputField.UnityType);
+                component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.InputField.ClrType);
                 if (component2 != null && UnityTypes.InputField_Properties.Placeholder != null)
                 {
                     Component component3 = (Component)UnityTypes.InputField_Properties.Placeholder.Get(component2);
@@ -244,14 +239,14 @@ namespace GameTranslator.Patches.Translatons
             }
             if (UnityTypes.TMP_InputField != null)
             {
-                component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.TMP_InputField.UnityType);
+                component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.TMP_InputField.ClrType);
                 if (component2 != null && UnityTypes.TMP_InputField_Properties.Placeholder != null)
                 {
                     Component component4 = (Component)UnityTypes.TMP_InputField_Properties.Placeholder.Get(component2);
                     return !UnityObjectReferenceComparer.Default.Equals(component4, component);
                 }
             }
-            component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.UIInput?.UnityType);
+            component2 = gameObject.GetFirstComponentInSelfOrAncestor(UnityTypes.UIInput?.ClrType);
             return component2 != null;
         }
 
@@ -360,7 +355,7 @@ namespace GameTranslator.Patches.Translatons
             ((List<TMP_Character>)TranslateExtensions.m_CharacterTable.GetValue(fontAsset)).RemoveAll((TMP_Character character) => character.unicode == unicode);
         }
 
-        private static readonly Dictionary<Type, ITextComponentManipulator> Manipulators = new Dictionary<Type, ITextComponentManipulator>();
+        private static readonly Dictionary<object, ITextComponentManipulator> Manipulators = new Dictionary<object, ITextComponentManipulator>();
 
         private static List<TranslateExtensions.IPropertyMover> TexturePropertyMovers;
 
