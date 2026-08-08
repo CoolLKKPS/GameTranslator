@@ -98,7 +98,7 @@ namespace GameTranslator.Patches.Translatons
                                 {
                                     originalFont.fallbackFontAssetTable.Add(fallbackFont);
                                 }
-                                else if (fallbackFont != null && FontHelper.GetFontMaterial(fallbackFont) == null)
+                                else if (fallbackFont != null && FontHelper.GetFontMaterial(fallbackFont) == null && _loggedNullMaterialFonts.Add(fallbackFont.name))
                                 {
                                     TranslatePlugin.logger.LogError($"Font '{fallbackFont.name}' has no material. Please regenerate it in the Font Asset Creator.");
                                 }
@@ -118,5 +118,7 @@ namespace GameTranslator.Patches.Translatons
         public long changeTime;
 
         private static HashSet<TMP_FontAsset> _processedFonts = new HashSet<TMP_FontAsset>();
+
+        private static HashSet<string> _loggedNullMaterialFonts = new HashSet<string>();
     }
 }
