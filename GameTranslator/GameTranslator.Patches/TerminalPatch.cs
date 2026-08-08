@@ -1,3 +1,4 @@
+#if MANAGED
 using GameTranslator.Patches.Translatons;
 using HarmonyLib;
 using System;
@@ -352,3 +353,4 @@ namespace GameTranslator.Patches
         private static FieldInfo modifyingText = typeof(Terminal).GetField("modifyingText", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
     }
 }
+#endif

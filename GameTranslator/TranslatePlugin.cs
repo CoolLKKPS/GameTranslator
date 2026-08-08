@@ -207,6 +207,7 @@ namespace GameTranslator
 
         private void ApplyTerminalPatch()
         {
+#if MANAGED
             try
             {
                 if (TranslatePlugin.enableTerminalPatch != null && TranslatePlugin.enableTerminalPatch.Value)
@@ -223,10 +224,14 @@ namespace GameTranslator
             {
                 TranslatePlugin.logger?.LogWarning($"Error applying Terminal patch: {ex.Message}");
             }
+#else
+            TranslatePlugin.logger?.LogInfo("Terminal patch not available");
+#endif
         }
 
         private void ApplyInteractiveTerminalAPIPatch()
         {
+#if MANAGED
             try
             {
                 if (TranslatePlugin.shouldTranslateInteractiveTerminalAPI != null && TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
@@ -243,6 +248,9 @@ namespace GameTranslator
             {
                 TranslatePlugin.logger?.LogWarning($"Error applying InteractiveTerminalAPI patch: {ex.Message}");
             }
+#else
+            TranslatePlugin.logger?.LogInfo("InteractiveTerminalAPI patch not available");
+#endif
         }
 
         private readonly Harmony harmony = new Harmony("GameTranslator");
