@@ -32,19 +32,7 @@ namespace GameTranslator.Patches.Utils
                 }
                 FontHelper._loadedBundles.Add(bundle);
 
-#if MANAGED
                 TMP_FontAsset[] fontAssets = bundle.LoadAllAssets<TMP_FontAsset>();
-#else
-                var loadedAssets = bundle.LoadAllAssets();
-                TMP_FontAsset[] fontAssets = new TMP_FontAsset[loadedAssets == null ? 0 : loadedAssets.Length];
-                if (loadedAssets != null)
-                {
-                    for (int i = 0; i < loadedAssets.Length; i++)
-                    {
-                        fontAssets[i] = loadedAssets[i] as TMP_FontAsset;
-                    }
-                }
-#endif
                 if (fontAssets != null)
                 {
                     foreach (TMP_FontAsset font in fontAssets)

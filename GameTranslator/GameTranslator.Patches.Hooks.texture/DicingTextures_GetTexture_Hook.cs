@@ -4,9 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using XUnity.Common.Constants;
 using XUnity.Common.Harmony;
-#if MANAGED
 using XUnity.Common.MonoMod;
-#endif
 
 namespace GameTranslator.Patches.Hooks.texture
 {
@@ -28,7 +26,6 @@ namespace GameTranslator.Patches.Hooks.texture
             TextureTranslate.Instance.Hook_ImageChanged(ref __result, false);
         }
 
-#if MANAGED
         private static void MM_Init(object detour)
         {
             DicingTextures_GetTexture_Hook._original = detour.GenerateTrampolineEx<Func<object, string, Texture2D>>();
@@ -42,6 +39,5 @@ namespace GameTranslator.Patches.Hooks.texture
         }
 
         private static Func<object, string, Texture2D> _original;
-#endif
     }
 }

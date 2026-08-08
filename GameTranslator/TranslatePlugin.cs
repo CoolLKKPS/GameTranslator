@@ -11,62 +11,28 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using XUnity.Common.Utilities;
-#if IL2CPP
-using BepInEx.Unity.IL2CPP;
-using Il2CppInterop.Runtime.Injection;
-#endif
 
 namespace GameTranslator
 {
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
-#if MANAGED
-    public class TranslatePlugin : BaseUnityPlugin
+#if CORECLR
+    public class TranslatePlugin : MonoBehaviour
 #else
-    public class TranslatePlugin : BasePlugin
+    public class TranslatePlugin : BaseUnityPlugin
 #endif
     {
-#if MANAGED
         private void Awake()
-#else
-        public override void Load()
-#endif
         {
-#if IL2CPP
-            try
-            {
-                var interopManagerType = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(a => { try { return a.GetTypes(); } catch { return Array.Empty<Type>(); } })
-                    .FirstOrDefault(t => t.FullName == "BepInEx.Unity.IL2CPP.Il2CppInteropManager");
-                if (interopManagerType != null)
-                {
-                    var pathProp = interopManagerType.GetProperty("IL2CPPInteropAssemblyPath", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                    if (pathProp != null)
-                    {
-                        var path = (string)pathProp.GetValue(null);
-                        XUnity.Common.Constants.Il2CppProxyAssemblies.Location = path;
-                    }
-                }
-            }
-            catch { }
+#if CORECLR
+            var configPath = Path.Combine(Application.dataPath, "..", "BepInEx", "config", "GameTranslator.cfg");
+            var metadata = new BepInEx.BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION);
+            _config = new ConfigFile(configPath, false, metadata);
 #endif
-
             TranslatePlugin.logger = BepInEx.Logging.Logger.CreateLogSource(TranslatePlugin.PLUGIN_NAME);
             TranslatePlugin.Instance = this;
-
-#if MANAGED
             this.gameObject.AddComponent<TranslationUpdater>();
             this.gameObject.hideFlags = HideFlags.HideAndDontSave;
             DontDestroyOnLoad(this.gameObject);
-#else
-            ClassInjector.RegisterTypeInIl2Cpp<TranslationUpdater>();
-            var updaterObj = new GameObject("GameTranslator_Updater")
-            {
-                hideFlags = HideFlags.HideAndDontSave
-            };
-            UnityEngine.Object.DontDestroyOnLoad(updaterObj);
-            updaterObj.AddComponent<TranslationUpdater>();
-#endif
-
             this.ConfigFile();
             HookingHelper.PatchAll(ImageHooks.All, false);
             HookingHelper.PatchAll(ImageHooks.Sprite, false);
@@ -79,8 +45,6 @@ namespace GameTranslator
                 GameTranslator.Patches.Utils.FontSupportChecker.InitializeFonts();
             }
             AsyncTranslationManager.Instance.Start();
-
-#if MANAGED
             SceneManager.activeSceneChanged += (Scene from, Scene to) =>
             {
                 if (TranslatePlugin.showAvailableText.Value)
@@ -88,16 +52,11 @@ namespace GameTranslator
                     TranslatePlugin.logger.LogInfo($"[Scope] Active scene changed: '{to.name}' (buildIndex={to.buildIndex})");
                 }
             };
-#endif
 
             TranslatePlugin.logger.LogInfo("GameTranslator is loaded");
         }
 
-#if MANAGED
         private void OnDestroy()
-#else
-        public override bool Unload()
-#endif
         {
             try
             {
@@ -109,9 +68,6 @@ namespace GameTranslator
             }
             TranslateConfig.Unload();
             TranslatePlugin.logger?.LogInfo("GameTranslator destroyed");
-#if IL2CPP
-            return true;
-#endif
         }
 
         private class TranslationUpdater : MonoBehaviour
@@ -121,32 +77,12 @@ namespace GameTranslator
                 try
                 {
                     AsyncTranslationManager.Instance.ProcessMainThreadActions();
-#if IL2CPP
-                    PollSceneChange();
-#endif
                 }
                 catch (Exception ex)
                 {
                     TranslatePlugin.logger?.LogError("Error in TranslationUpdater Update: " + ex.Message);
                 }
             }
-
-#if IL2CPP
-            private int _lastSceneBuildIndex = -1;
-
-            private void PollSceneChange()
-            {
-                var scene = SceneManager.GetActiveScene();
-                if (scene.buildIndex != _lastSceneBuildIndex)
-                {
-                    _lastSceneBuildIndex = scene.buildIndex;
-                    if (TranslatePlugin.showAvailableText.Value)
-                    {
-                        TranslatePlugin.logger.LogInfo($"[Scope] Active scene changed: '{scene.name}' (buildIndex={scene.buildIndex})");
-                    }
-                }
-            }
-#endif
         }
 
         private void ConfigFile()
@@ -275,12 +211,8 @@ namespace GameTranslator
             {
                 if (TranslatePlugin.enableTerminalPatch != null && TranslatePlugin.enableTerminalPatch.Value)
                 {
-#if MANAGED
                     this.harmony.PatchAll(typeof(GameTranslator.Patches.TerminalPatch));
                     TranslatePlugin.logger?.LogInfo("Terminal patch applied successfully");
-#else
-                    TranslatePlugin.logger?.LogInfo("Terminal patch not available on IL2CPP");
-#endif
                 }
                 else
                 {
@@ -299,12 +231,8 @@ namespace GameTranslator
             {
                 if (TranslatePlugin.shouldTranslateInteractiveTerminalAPI != null && TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
                 {
-#if MANAGED
                     GameTranslator.Patches.InteractiveTerminalAPI.InteractiveTerminalAPIPatch.Initialize(this.harmony);
                     TranslatePlugin.logger?.LogInfo("InteractiveTerminalAPI patch applied successfully");
-#else
-                    TranslatePlugin.logger?.LogInfo("InteractiveTerminalAPI patch not available on IL2CPP");
-#endif
                 }
                 else
                 {
@@ -318,6 +246,12 @@ namespace GameTranslator
         }
 
         private readonly Harmony harmony = new Harmony("GameTranslator");
+
+#if CORECLR
+        private static ConfigFile _config;
+
+        private static ConfigFile Config => _config;
+#endif
 
         private const string PLUGIN_GUID = "GameTranslator";
 

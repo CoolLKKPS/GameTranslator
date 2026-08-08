@@ -46,14 +46,23 @@ namespace GameTranslator.Patches.Hooks
             if (font == null) return;
             var mat = FontHelper.GetFontMaterial(font);
             if (mat == null) return;
+#if MANAGED
             _fontAssetMaterialIds.Add(mat.GetInstanceID());
+#else
+            _fontAssetMaterialIds.Add(mat.GetEntityId().GetHashCode());
+#endif
         }
 
         internal static void RegisterAtlasMaterialIfSourceIsFontAsset(Material sourceMaterial, Material result)
         {
             if (sourceMaterial == null || result == null) return;
+#if MANAGED
             if (_fontAssetMaterialIds.Contains(sourceMaterial.GetInstanceID()))
                 _fontAssetMaterialIds.Add(result.GetInstanceID());
+#else
+            if (_fontAssetMaterialIds.Contains(sourceMaterial.GetEntityId().GetHashCode()))
+                _fontAssetMaterialIds.Add(result.GetEntityId().GetHashCode());
+#endif
         }
 
         static MethodBase TargetMethod()
@@ -73,7 +82,11 @@ namespace GameTranslator.Patches.Hooks
             if (!TranslatePlugin.scaleFallbackEffects.Value || result == null || sourceMaterial == null || targetMaterial == null)
                 return;
 
+#if MANAGED
             if (!_fontAssetMaterialIds.Contains(sourceMaterial.GetInstanceID()))
+#else
+            if (!_fontAssetMaterialIds.Contains(sourceMaterial.GetEntityId().GetHashCode()))
+#endif
                 return;
 
             ApplyCore(sourceMaterial, result, targetMaterial);
@@ -117,15 +130,25 @@ namespace GameTranslator.Patches.Hooks
 
             if (TranslatePlugin.showOtherDebug.Value)
             {
+#if MANAGED
                 int key = sourceMaterial.GetInstanceID() ^ (targetMaterial.GetInstanceID() << 16);
+#else
+                int key = sourceMaterial.GetEntityId().GetHashCode() ^ (targetMaterial.GetEntityId().GetHashCode() << 16);
+#endif
                 var now = DateTime.Now;
                 CleanupLogCache();
                 if (!_lastLogTime.TryGetValue(key, out var last) || now - last >= _logCooldown)
                 {
                     _lastLogTime[key] = now;
+#if MANAGED
                     string tgtDesc = $"{targetMaterial.name}#{targetMaterial.GetInstanceID()}";
                     TranslatePlugin.logger.LogInfo(
                         $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetInstanceID()}, tgt={tgtDesc}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
+#else
+                    string tgtDesc = $"{targetMaterial.name}#{targetMaterial.GetEntityId().GetHashCode()}";
+                    TranslatePlugin.logger.LogInfo(
+                        $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetEntityId().GetHashCode()}, tgt={tgtDesc}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
+#endif
                     TranslatePlugin.logger.LogInfo(
                         $"[FallbackScale] Outline: width={srcOutline}→{result.GetFloat("_OutlineWidth"):F4}, color={sourceMaterial.GetColor("_OutlineColor")}, keyword={sourceMaterial.IsKeywordEnabled("OUTLINE_ON")}");
                     TranslatePlugin.logger.LogInfo(

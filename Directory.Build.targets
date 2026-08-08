@@ -3,6 +3,7 @@
   <Import Project="$(SolutionRoot)Config.Build.user.props"
     Condition="Exists('$(SolutionRoot)Config.Build.user.props')" />
 
+  <!-- ===== MANAGED ===== -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net481'">
     <PackageReference
       Include="BepInEx.Analyzers"
@@ -14,7 +15,6 @@
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
-  <!-- ===== Mono ===== -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net481'">
     <PackageReference
       Include="BepInEx.Core"
@@ -59,19 +59,19 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageReference
-      Include="BepInEx.Unity.IL2CPP"
-      Version="6.0.0-be.785" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <PackageReference
       Include="UnityEngine.Modules"
-      Version="6000.0.81"
+      Version="6000.6.0-alpha.5"
       Private="False"
       PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Netcode.Runtime">
+      <HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/Unity.Netcode.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/Unity.TextMeshPro.dll</HintPath>
     </Reference>
@@ -79,10 +79,10 @@
       <HintPath>D:\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data/Managed/UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="XUnity.Common">
-      <HintPath>$(SolutionRoot)lib\net10.0\XUnity.Common.dll</HintPath>
+      <HintPath>$(SolutionRoot)lib\net481\XUnity.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Il2Cppmscorlib">
-      <HintPath>$(SolutionRoot)lib\net10.0\Il2Cppmscorlib.dll</HintPath>
+    <Reference Include="InteractiveTerminalAPI">
+      <HintPath>D:\Runtime dependencies (local)\BepInEx\plugins\WhiteSpike-Interactive_Terminal_API\InteractiveTerminalAPI\InteractiveTerminalAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
 

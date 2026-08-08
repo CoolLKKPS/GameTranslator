@@ -1,4 +1,3 @@
-#if MANAGED
 using HarmonyLib;
 using System;
 using System.Reflection;
@@ -134,4 +133,3 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
         }
     }
 }
-#endif

@@ -1,4 +1,3 @@
-#if MANAGED
 using GameTranslator.Patches.Translatons;
 using HarmonyLib;
 using System;
@@ -112,7 +111,11 @@ namespace GameTranslator.Patches
         [HarmonyPatch("CallFunctionInAccessibleTerminalObject")]
         private static void CallFunctionInAccessibleTerminalObject(Terminal __instance, string word)
         {
+#if MANAGED
             TerminalAccessibleObject[] array = global::UnityEngine.Object.FindObjectsOfType<TerminalAccessibleObject>();
+#else
+            TerminalAccessibleObject[] array = global::UnityEngine.Object.FindObjectsByType<TerminalAccessibleObject>();
+#endif
             for (int i = 0; i < array.Length; i++)
             {
                 if (TerminalPatch.GetCmd(array[i].objectCode, true).EqualsIgnoreCase(word) || TerminalPatch.GetCmd(array[i].objectCode, false).EqualsIgnoreCase(word))
@@ -180,7 +183,11 @@ namespace GameTranslator.Patches
                 try
                 {
                     string text = array[1];
+#if MANAGED
                     SignalTranslator signalTranslator = global::UnityEngine.Object.FindObjectOfType<SignalTranslator>();
+#else
+                    SignalTranslator signalTranslator = global::UnityEngine.Object.FindAnyObjectByType<SignalTranslator>();
+#endif
                     if (signalTranslator != null && Time.realtimeSinceStartup - signalTranslator.timeLastUsingSignalTranslator > 8f && text.Length > 1)
                     {
                         if (!__instance.IsServer)
@@ -345,4 +352,3 @@ namespace GameTranslator.Patches
         private static FieldInfo modifyingText = typeof(Terminal).GetField("modifyingText", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
     }
 }
-#endif
