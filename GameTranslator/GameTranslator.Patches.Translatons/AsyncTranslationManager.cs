@@ -16,6 +16,8 @@ namespace GameTranslator.Patches.Translatons
 
         public static AsyncTranslationManager Instance { get; } = new AsyncTranslationManager();
 
+        public static bool s_SupportsCoroutine = true;
+
         private AsyncTranslationManager()
         {
             _translationManager = new TranslationManager();
@@ -153,7 +155,7 @@ namespace GameTranslator.Patches.Translatons
             };
             string key = GetStabilizationKey(ui, text);
             _stabilizationContexts[key] = context;
-            if (ui is MonoBehaviour behaviour)
+            if (s_SupportsCoroutine)
             {
                 TranslatePlugin.Instance.StartCoroutine(WaitForTextStablization(ui, info, context.Delay, context.MaxTries, 0,
                     stabilizedText =>
@@ -185,7 +187,7 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                // GameObject is not a MonoBehaviour, clean up stabilization context
+                // Coroutine not supported, clean up stabilization context
                 _stabilizationContexts.TryRemove(key, out _);
                 _immediatelyTranslating.TryRemove(immKey, out _);
             }

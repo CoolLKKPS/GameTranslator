@@ -6,6 +6,6 @@
   </PropertyGroup>
 
   <Target Name="PackAfterBuild" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\pack.ps1&quot; -SkipBuild" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\pack.ps1&quot; -SkipBuild -TargetFramework &quot;$(TargetFramework)&quot;" />
   </Target>
 </Project>

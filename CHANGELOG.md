@@ -1,3 +1,7 @@
+## v2.3.0
+
+- Pre-support for future features, but still not available for now
+
 ## v2.2.9
 
 - Future support

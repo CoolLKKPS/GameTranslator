@@ -27,8 +27,10 @@ namespace GameTranslator
             var configPath = Path.Combine(Application.dataPath, "..", "BepInEx", "config", "GameTranslator.cfg");
             var metadata = new BepInEx.BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION);
             _config = new ConfigFile(configPath, false, metadata);
-#endif
             TranslatePlugin.logger = BepInEx.Logging.Logger.CreateLogSource(TranslatePlugin.PLUGIN_NAME);
+#else
+            TranslatePlugin.logger = base.Logger;
+#endif
             TranslatePlugin.Instance = this;
             this.gameObject.AddComponent<TranslationUpdater>();
             this.gameObject.hideFlags = HideFlags.HideAndDontSave;
@@ -265,7 +267,7 @@ namespace GameTranslator
 
         internal const string PLUGIN_NAME = "GameTranslator";
 
-        internal const string PLUGIN_VERSION = "2.2.9";
+        internal const string PLUGIN_VERSION = "2.3.0";
 
         internal const string PLUGIN_VERSION_FULL = PLUGIN_VERSION + ".0";
 

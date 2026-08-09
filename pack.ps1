@@ -7,6 +7,10 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+if ($TargetFramework -eq "net10.0") {
+    exit 0
+}
+
 $root = $PSScriptRoot
 $projectPath = Join-Path $root "GameTranslator\GameTranslator.csproj"
 $outputDir = Join-Path $root "artifacts\bin\GameTranslator\${Configuration}_$TargetFramework"
