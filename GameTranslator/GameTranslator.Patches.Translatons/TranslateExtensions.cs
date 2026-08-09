@@ -142,7 +142,7 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                var unityType = ui.GetUnityType();
+                Type unityType = ui.GetUnityType();
                 Material material;
                 SpriteRenderer spriteRenderer;
                 if (!ui.TryCastTo(out material) && !ui.TryCastTo(out spriteRenderer) && (UnityTypes.Image == null || !UnityTypes.Image.IsAssignableFrom(unityType)) && (UnityTypes.RawImage == null || !UnityTypes.RawImage.IsAssignableFrom(unityType)) && (UnityTypes.CubismRenderer == null || !UnityTypes.CubismRenderer.IsAssignableFrom(unityType)))
@@ -182,7 +182,7 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                var unityType = ui.GetUnityType();
+                Type unityType = ui.GetUnityType();
                 ITextComponentManipulator textComponentManipulator2;
                 if (!TranslateExtensions.Manipulators.TryGetValue(unityType, out textComponentManipulator2))
                 {
@@ -355,7 +355,7 @@ namespace GameTranslator.Patches.Translatons
             ((List<TMP_Character>)TranslateExtensions.m_CharacterTable.GetValue(fontAsset)).RemoveAll((TMP_Character character) => character.unicode == unicode);
         }
 
-        private static readonly Dictionary<object, ITextComponentManipulator> Manipulators = new Dictionary<object, ITextComponentManipulator>();
+        private static readonly Dictionary<Type, ITextComponentManipulator> Manipulators = new Dictionary<Type, ITextComponentManipulator>();
 
         private static List<TranslateExtensions.IPropertyMover> TexturePropertyMovers;
 

@@ -24,7 +24,7 @@ namespace GameTranslator.Patches.Hooks.texture
 
         public static void Postfix(Component __instance)
         {
-            var unityType = __instance.GetUnityType();
+            Type unityType = __instance.GetUnityType();
             bool flag = (UnityTypes.Image != null && UnityTypes.Image.IsAssignableFrom(unityType)) || (UnityTypes.RawImage != null && UnityTypes.RawImage.IsAssignableFrom(unityType));
             if (flag)
             {
