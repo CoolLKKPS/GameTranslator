@@ -1,3 +1,7 @@
+## v2.3.1
+
+- Fixed TMP_FallbackMaterialHook would try scale even font doesn't support
+
 ## v2.3.0
 
 - Pre-support for future features, but still not available for now

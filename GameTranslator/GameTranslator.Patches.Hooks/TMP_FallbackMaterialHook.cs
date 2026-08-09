@@ -99,6 +99,7 @@ namespace GameTranslator.Patches.Hooks
 
         private static void ApplyCore(Material sourceMaterial, Material result, Material targetMaterial)
         {
+            if (!sourceMaterial.HasProperty("_GradientScale") || !result.HasProperty("_GradientScale") || !targetMaterial.HasProperty("_GradientScale")) return;
             float srcOutline = sourceMaterial.GetFloat("_OutlineWidth");
             float srcOutlineSoftness = sourceMaterial.GetFloat("_OutlineSoftness");
             float srcUnderlay = sourceMaterial.GetFloat("_UnderlayDilate");
