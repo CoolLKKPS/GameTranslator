@@ -149,9 +149,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     if (UnityTypes.UIWidget != null)
                     {
-                        object obj = unityType;
-                        TypeContainer uilabel = UnityTypes.UILabel;
-                        if (!object.Equals(obj, (uilabel != null) ? uilabel.UnityType : null) && UnityTypes.UIWidget.IsAssignableFrom(unityType))
+                        if ((UnityTypes.UILabel == null || !UnityTypes.UILabel.IsAssignableFrom(unityType)) && UnityTypes.UIWidget.IsAssignableFrom(unityType))
                         {
                             return true;
                         }

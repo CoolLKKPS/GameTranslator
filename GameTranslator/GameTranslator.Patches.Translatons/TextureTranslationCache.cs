@@ -13,7 +13,7 @@ using XUnity.Common.Logging;
 
 namespace GameTranslator.Patches.Translatons
 {
-    internal class TextureTranslationCache
+    internal class TextureTranslationCache : IDisposable
     {
         private SafeFileWatcher _textureFileWatcher;
 
@@ -356,21 +356,35 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        public void Dispose()
+        ~TextureTranslationCache()
+        {
+            Dispose(false);
+        }
+
+        private void Dispose(bool disposing)
         {
             if (!this._disposed)
             {
-                foreach (var zip in _openZipArchives.Values)
+                if (disposing)
                 {
-                    try { zip.Dispose(); } catch { }
+                    foreach (var zip in _openZipArchives.Values)
+                    {
+                        try { zip.Dispose(); } catch { }
+                    }
+                    _openZipArchives.Clear();
+                    _textureFileWatcher?.Dispose();
+                    _textureFileWatcher = null;
+                    _texturePollingTimer?.Dispose();
+                    _texturePollingTimer = null;
                 }
-                _openZipArchives.Clear();
-                _textureFileWatcher?.Dispose();
-                _textureFileWatcher = null;
-                _texturePollingTimer?.Dispose();
-                _texturePollingTimer = null;
                 this._disposed = true;
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void CleanupInvalidEntries()
