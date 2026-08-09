@@ -1,6 +1,6 @@
 # GameTranslator
 
-A Lethal Company translator plugin.
+A Lethal Company translate plugin.
 
 ## What does this mod do?
 
