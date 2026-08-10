@@ -85,7 +85,7 @@ namespace GameTranslator.Patches.Translatons
 
         private XUnity.Common.Utilities.WeakReference<byte[]> _weakData;
 
-        private byte[] _data { get; set; }
+        private byte[] _data;
 
         public interface ITranslatedImageSource
         {
