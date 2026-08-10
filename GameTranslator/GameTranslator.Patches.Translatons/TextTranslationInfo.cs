@@ -110,8 +110,8 @@ namespace GameTranslator.Patches.Translatons
 
         public long changeTime;
 
-        private static readonly HashSet<TMP_FontAsset> _processedFonts = new HashSet<TMP_FontAsset>();
+        private static readonly HashSet<TMP_FontAsset> _processedFonts = [];
 
-        private static readonly HashSet<string> _loggedNullMaterialFonts = new HashSet<string>();
+        private static readonly HashSet<string> _loggedNullMaterialFonts = [];
     }
 }

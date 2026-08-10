@@ -15,8 +15,8 @@ namespace GameTranslator.Patches.Translatons
 
         public TranslationManager()
         {
-            _endpointsWithUnstartedJobs = new List<TranslationEndpointManager>();
-            Endpoints = new List<TranslationEndpointManager>();
+            _endpointsWithUnstartedJobs = [];
+            Endpoints = [];
             _processingTimer = new Timer(ProcessPendingJobs, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
         }
 

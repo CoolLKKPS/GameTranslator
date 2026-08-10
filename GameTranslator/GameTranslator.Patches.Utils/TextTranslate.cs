@@ -10,7 +10,7 @@ namespace GameTranslator.Patches.Utils
 {
     internal class TextTranslate
     {
-        private static readonly Dictionary<string, DateTime> _debugOutputCache = new Dictionary<string, DateTime>();
+        private static readonly Dictionary<string, DateTime> _debugOutputCache = [];
         private static readonly TimeSpan _debugOutputInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan _cacheCleanupInterval = TimeSpan.FromMinutes(5);
         private static DateTime _lastCleanupTime = DateTime.Now;

@@ -172,7 +172,7 @@ namespace GameTranslator.Patches.Utils
             FontHelper._loadedBundles.Clear();
         }
 
-        private static readonly List<AssetBundle> _loadedBundles = new List<AssetBundle>();
+        private static readonly List<AssetBundle> _loadedBundles = [];
 
         private static readonly MethodInfo _createFontAssetFromStringMethod = typeof(TMP_FontAsset).GetMethod("CreateFontAsset", new[] { typeof(string), typeof(string), typeof(int) });
 

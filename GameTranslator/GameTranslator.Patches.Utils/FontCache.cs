@@ -18,11 +18,11 @@ namespace GameTranslator.Patches.Utils
                 {
                     if (string.IsNullOrEmpty(TranslatePlugin.fallbackFontTextMeshPro.Value))
                     {
-                        FontCache.FallbackFontsTextMeshPro = new List<global::UnityEngine.Object>();
+                        FontCache.FallbackFontsTextMeshPro = [];
                         return FontCache.FallbackFontsTextMeshPro;
                     }
 
-                    FontCache.FallbackFontsTextMeshPro = new List<global::UnityEngine.Object>();
+                    FontCache.FallbackFontsTextMeshPro = [];
 
                     string configValue = TranslatePlugin.fallbackFontTextMeshPro.Value;
 

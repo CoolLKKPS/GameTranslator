@@ -5,8 +5,8 @@ namespace GameTranslator.Patches.Utils
 {
     internal static class FontDynamicLoader
     {
-        private static readonly HashSet<uint> _processedChars = new HashSet<uint>();
-        private static readonly HashSet<TMP_FontAsset> _dynamicFonts = new HashSet<TMP_FontAsset>();
+        private static readonly HashSet<uint> _processedChars = [];
+        private static readonly HashSet<TMP_FontAsset> _dynamicFonts = [];
         private static bool _warned;
 
         internal static void RegisterDynamicFont(TMP_FontAsset font)

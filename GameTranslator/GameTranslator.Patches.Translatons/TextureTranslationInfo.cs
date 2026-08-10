@@ -164,7 +164,7 @@ namespace GameTranslator.Patches.Translatons
             return new Texture2D(2, 2, newFormat, false);
         }
 
-        private static readonly Dictionary<string, string> NameToHash = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> NameToHash = [];
 
         private static readonly Encoding UTF8 = new UTF8Encoding(false);
 

@@ -9,8 +9,7 @@ namespace GameTranslator.Patches.Utils.Textures
 {
     internal static class TextureLoader
     {
-        private static readonly Dictionary<TranslateExtensions.ImageFormat, ITextureLoader> Loaders
-            = new Dictionary<TranslateExtensions.ImageFormat, ITextureLoader>();
+        private static readonly Dictionary<TranslateExtensions.ImageFormat, ITextureLoader> Loaders = [];
 
         static TextureLoader()
         {

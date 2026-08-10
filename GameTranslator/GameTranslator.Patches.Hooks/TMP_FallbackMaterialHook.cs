@@ -11,7 +11,7 @@ namespace GameTranslator.Patches.Hooks
     [HarmonyPatch]
     internal class TMP_FallbackMaterialHook
     {
-        private static readonly Dictionary<int, DateTime> _lastLogTime = new Dictionary<int, DateTime>();
+        private static readonly Dictionary<int, DateTime> _lastLogTime = [];
 
         private static readonly TimeSpan _logCooldown = TimeSpan.FromSeconds(5);
 
@@ -19,7 +19,7 @@ namespace GameTranslator.Patches.Hooks
 
         private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(5);
 
-        private static readonly HashSet<int> _fontAssetMaterialIds = new HashSet<int>();
+        private static readonly HashSet<int> _fontAssetMaterialIds = [];
 
         private static void CleanupLogCache()
         {

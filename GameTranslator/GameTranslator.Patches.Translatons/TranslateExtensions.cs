@@ -280,7 +280,7 @@ namespace GameTranslator.Patches.Translatons
 
         public static void Load()
         {
-            TranslateExtensions.TexturePropertyMovers = new List<TranslateExtensions.IPropertyMover>();
+            TranslateExtensions.TexturePropertyMovers = [];
             TranslateExtensions.LoadProperty<global::UnityEngine.Object, string>("name");
             TranslateExtensions.LoadProperty<Texture, int>("anisoLevel");
             TranslateExtensions.LoadProperty<Texture, FilterMode>("filterMode");
@@ -348,7 +348,7 @@ namespace GameTranslator.Patches.Translatons
             ((List<TMP_Character>)TranslateExtensions.m_CharacterTable.GetValue(fontAsset)).RemoveAll(character => character.unicode == unicode);
         }
 
-        private static readonly Dictionary<Type, ITextComponentManipulator> Manipulators = new Dictionary<Type, ITextComponentManipulator>();
+        private static readonly Dictionary<Type, ITextComponentManipulator> Manipulators = [];
 
         private static List<TranslateExtensions.IPropertyMover> TexturePropertyMovers;
 

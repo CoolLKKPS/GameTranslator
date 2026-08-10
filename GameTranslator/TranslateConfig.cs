@@ -381,8 +381,8 @@ namespace GameTranslator
                 {
                     TranslatePlugin.logger.LogInfo(">>> Reloading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
                 }
-                Dictionary<string, int> normalKeyLineOrder = new Dictionary<string, int>();
-                List<string> errors = new List<string>();
+                Dictionary<string, int> normalKeyLineOrder = [];
+                List<string> errors = [];
                 string[] lines = File.ReadAllLines(filePath);
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -456,13 +456,13 @@ namespace GameTranslator
 
             public IDictionary<string, string> normal = new ConcurrentDictionary<string, string>();
 
-            public static HashSet<TranslateConfigFile> configs = new HashSet<TranslateConfigFile>();
+            public static HashSet<TranslateConfigFile> configs = [];
 
-            public ConcurrentDictionary<string, string> translatePairs = new ConcurrentDictionary<string, string>();
+            public ConcurrentDictionary<string, string> translatePairs = new();
 
-            internal readonly object _fileLock = new object();
+            internal readonly object _fileLock = new();
 
-            internal List<RegexTranslation> regexTranslations = new List<RegexTranslation>();
+            internal List<RegexTranslation> regexTranslations = [];
 
             internal readonly ConcurrentDictionary<string, DateTime> _translatePairLastAccess = new ConcurrentDictionary<string, DateTime>();
 

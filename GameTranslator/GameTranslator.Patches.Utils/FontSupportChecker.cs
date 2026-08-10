@@ -11,7 +11,7 @@ namespace GameTranslator.Patches.Utils
     internal static class FontSupportChecker
     {
         private static readonly ConcurrentDictionary<TMP_FontAsset, bool> _availableFonts = new ConcurrentDictionary<TMP_FontAsset, bool>();
-        private static readonly Dictionary<char, bool> _characterSupportCache = new Dictionary<char, bool>();
+        private static readonly Dictionary<char, bool> _characterSupportCache = [];
         private static readonly LRUCache<string, string> _textCache = new LRUCache<string, string>(1000);
         private static bool _isInitialized = false;
         private static readonly object _lockObject = new object();

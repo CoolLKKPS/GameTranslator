@@ -637,13 +637,13 @@ namespace GameTranslator.Patches.Translatons
 
         private readonly ConcurrentDictionary<string, string> _reverseTranslations = new ConcurrentDictionary<string, string>();
 
-        internal List<RegexTranslation> _defaultRegexes = new List<RegexTranslation>();
+        internal List<RegexTranslation> _defaultRegexes = [];
 
-        private readonly HashSet<string> _registeredRegexes = new HashSet<string>();
+        private readonly HashSet<string> _registeredRegexes = [];
 
-        internal List<RegexTranslationSplitter> _splitterRegexes = new List<RegexTranslationSplitter>();
+        internal List<RegexTranslationSplitter> _splitterRegexes = [];
 
-        private readonly HashSet<string> _registeredSplitterRegexes = new HashSet<string>();
+        private readonly HashSet<string> _registeredSplitterRegexes = [];
 
         private readonly ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
 
@@ -657,10 +657,10 @@ namespace GameTranslator.Patches.Translatons
         {
             internal ConcurrentDictionary<string, string> Translations { get; set; } = new ConcurrentDictionary<string, string>();
             internal ConcurrentDictionary<string, string> ReverseTranslations { get; set; } = new ConcurrentDictionary<string, string>();
-            internal List<RegexTranslation> DefaultRegexes { get; set; } = new List<RegexTranslation>();
-            internal HashSet<string> RegisteredRegexes { get; set; } = new HashSet<string>();
-            internal List<RegexTranslationSplitter> SplitterRegexes { get; set; } = new List<RegexTranslationSplitter>();
-            internal HashSet<string> RegisteredSplitterRegexes { get; set; } = new HashSet<string>();
+            internal List<RegexTranslation> DefaultRegexes { get; set; } = [];
+            internal HashSet<string> RegisteredRegexes { get; set; } = [];
+            internal List<RegexTranslationSplitter> SplitterRegexes { get; set; } = [];
+            internal HashSet<string> RegisteredSplitterRegexes { get; set; } = [];
             internal ConcurrentDictionary<string, byte> FailedRegexLookups { get; set; } = new ConcurrentDictionary<string, byte>();
             internal ConcurrentDictionary<string, string> RegexResultCache { get; set; } = new ConcurrentDictionary<string, string>();
             internal ConcurrentDictionary<string, DateTime> RegexResultLastAccess { get; set; } = new ConcurrentDictionary<string, DateTime>();

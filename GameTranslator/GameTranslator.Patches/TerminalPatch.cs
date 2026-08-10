@@ -27,7 +27,7 @@ namespace GameTranslator.Patches
             else
             {
                 Debug.Log("first word: " + firstWord + "; second word: " + secondWord);
-                List<string> list = new List<string>();
+                List<string> list = [];
                 for (int i = 0; i < StartOfRound.Instance.mapScreen.radarTargets.Count; i++)
                 {
                     list.Add(StartOfRound.Instance.mapScreen.radarTargets[i].name);
@@ -346,7 +346,7 @@ namespace GameTranslator.Patches
 
         private static TextTranslationInfo info;
 
-        public static HashSet<object> ig = new HashSet<object>();
+        public static HashSet<object> ig = [];
 
         private static readonly FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
