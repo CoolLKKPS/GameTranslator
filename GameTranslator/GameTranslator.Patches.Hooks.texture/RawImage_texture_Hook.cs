@@ -25,8 +25,7 @@ namespace GameTranslator.Patches.Hooks.texture
 
         public static void Prefix(Component __instance, ref Texture value)
         {
-            Texture2D texture2D;
-            bool flag = value.TryCastTo(out texture2D);
+            bool flag = value.TryCastTo(out Texture2D texture2D);
             if (flag)
             {
                 TextureTranslate.Instance.Hook_ImageChangedOnComponent(__instance, ref texture2D, true, false);

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace GameTranslator.Patches.Utils.Textures
 // AutoTranslator Codes, under MIT license
 {
-    class TgaImageLoader : ITextureLoader
+    internal class TgaImageLoader : ITextureLoader
     {
         public void Load(Texture2D texture, byte[] data)
         {

@@ -71,7 +71,7 @@ namespace GameTranslator.Patches.Translatons
             using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
             {
                 var activeLevels = new HashSet<int>();
-                foreach (string text in streamReader.ReadToEnd().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                foreach (string text in streamReader.ReadToEnd().Split(_lineSeps, StringSplitOptions.RemoveEmptyEntries))
                 {
                     string trimmed = text.TrimStart();
                     if (trimmed.StartsWith("#set level "))
@@ -156,7 +156,7 @@ namespace GameTranslator.Patches.Translatons
                                         array3[3] = Environment.NewLine;
                                         int num = 4;
                                         Exception ex2 = ex;
-                                        array3[num] = ((ex2 != null) ? ex2.ToString() : null);
+                                        array3[num] = ex2?.ToString();
                                         logger.LogWarning(string.Concat(array3));
                                         continue;
                                     }
@@ -194,7 +194,7 @@ namespace GameTranslator.Patches.Translatons
                                         array4[3] = Environment.NewLine;
                                         int num2 = 4;
                                         Exception ex4 = ex3;
-                                        array4[num2] = ((ex4 != null) ? ex4.ToString() : null);
+                                        array4[num2] = ex4?.ToString();
                                         logger2.LogWarning(string.Concat(array4));
                                         continue;
                                     }
@@ -225,7 +225,7 @@ namespace GameTranslator.Patches.Translatons
                         array5[3] = Environment.NewLine;
                         int num3 = 4;
                         Exception ex6 = ex5;
-                        array5[num3] = ((ex6 != null) ? ex6.ToString() : null);
+                        array5[num3] = ex6?.ToString();
                         logger3.LogWarning(string.Concat(array5));
                     }
                 }
@@ -351,12 +351,9 @@ namespace GameTranslator.Patches.Translatons
                         int capturedScope = scope;
                         return splitter.CompiledRegex.Replace(text, delegate (Match match)
                         {
-                            if (translationFunc == null)
-                            {
-                                translationFunc = delegate (string groupValue)
+                            translationFunc ??= delegate (string groupValue)
                                 {
-                                    string text2;
-                                    if (capturedScope >= 0 && _scopedTranslations.TryGetValue(capturedScope, out var s) && s.Translations.TryGetValue(groupValue, out text2))
+                                    if (capturedScope >= 0 && _scopedTranslations.TryGetValue(capturedScope, out var s) && s.Translations.TryGetValue(groupValue, out string text2))
                                     {
                                         return text2;
                                     }
@@ -366,7 +363,6 @@ namespace GameTranslator.Patches.Translatons
                                     }
                                     return groupValue;
                                 };
-                            }
                             string translation = splitter.Translation;
                             return this.ApplyDotNetReplacement(translation, match, translationFunc);
                         });
@@ -441,22 +437,20 @@ namespace GameTranslator.Patches.Translatons
                                 if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedSplitter)
                                     && scopedSplitter.SplitterRegexes.Count > 0)
                                 {
-                                    splitterSnapshot = scopedSplitter.SplitterRegexes
-                                        .Concat(this._splitterRegexes).ToArray();
+                                    splitterSnapshot = [.. scopedSplitter.SplitterRegexes, .. this._splitterRegexes];
                                 }
                                 else
                                 {
-                                    splitterSnapshot = this._splitterRegexes.ToArray();
+                                    splitterSnapshot = [.. this._splitterRegexes];
                                 }
                                 if (scope >= 0 && _scopedTranslations.TryGetValue(scope, out var scopedRegex)
                                     && scopedRegex.DefaultRegexes.Count > 0)
                                 {
-                                    regexSnapshot = scopedRegex.DefaultRegexes
-                                        .Concat(this._defaultRegexes).ToArray();
+                                    regexSnapshot = [.. scopedRegex.DefaultRegexes, .. this._defaultRegexes];
                                 }
                                 else
                                 {
-                                    regexSnapshot = this._defaultRegexes.ToArray();
+                                    regexSnapshot = [.. this._defaultRegexes];
                                 }
                             }
 
@@ -604,8 +598,7 @@ namespace GameTranslator.Patches.Translatons
                             {
                                 num2++;
                             }
-                            int num3;
-                            if (int.TryParse(replacement.Substring(num, num2 - num), out num3) && num3 >= 0 && num3 < match.Groups.Count)
+                            if (int.TryParse(replacement.Substring(num, num2 - num), out int num3) && num3 >= 0 && num3 < match.Groups.Count)
                             {
                                 string value = match.Groups[num3].Value;
                                 stringBuilder.Append(translate(value));
@@ -686,6 +679,8 @@ namespace GameTranslator.Patches.Translatons
 
         private static readonly TimeSpan CACHE_CLEANUP_INTERVAL = TimeSpan.FromMinutes(30.0);
 
+        private static readonly char[] _lineSeps = { '\r', '\n' };
+
         private const long MEMORY_PRESSURE_THRESHOLD = 536870912L;
 
         private const float TRANSLATION_CACHE_EVICT_RATIO = 0.2f;
@@ -696,7 +691,7 @@ namespace GameTranslator.Patches.Translatons
 
         private const int FAILED_LOOKUP_CACHE_MAX = 10000;
 
-        private static RegexOptions _regexCompiledSupportedFlag = RegexOptions.None;
+        public static RegexOptions RegexCompiledSupportedFlag { get; private set; } = RegexOptions.None;
 
         static NormalTextTranslator()
         {
@@ -713,7 +708,7 @@ namespace GameTranslator.Patches.Translatons
                 var testResult = testRegex.Match(testSubject);
                 if (testResult.Success)
                 {
-                    _regexCompiledSupportedFlag = RegexOptions.Compiled;
+                    RegexCompiledSupportedFlag = RegexOptions.Compiled;
                 }
                 else
                 {
@@ -726,6 +721,5 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        public static RegexOptions RegexCompiledSupportedFlag => _regexCompiledSupportedFlag;
     }
 }

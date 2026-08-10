@@ -151,7 +151,7 @@ namespace GameTranslator.Patches.Translatons
                 StartTime = Time.realtimeSinceStartup,
                 MaxTries = (TranslatePlugin.stabilizationMaxRetries?.Value ?? 60) == 0 ? int.MaxValue : (TranslatePlugin.stabilizationMaxRetries?.Value ?? 60),
                 CurrentTries = 0,
-                Delay = (TranslatePlugin.stabilizationDelay?.Value > 0f ? TranslatePlugin.stabilizationDelay.Value : 0.9f)
+                Delay = TranslatePlugin.stabilizationDelay?.Value > 0f ? TranslatePlugin.stabilizationDelay.Value : 0.9f
             };
             string key = GetStabilizationKey(ui, text);
             _stabilizationContexts[key] = context;

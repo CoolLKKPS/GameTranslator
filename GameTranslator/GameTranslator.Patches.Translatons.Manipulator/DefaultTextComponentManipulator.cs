@@ -38,7 +38,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                     if (IsTextWindowTextMesh(ui))
                     {
                         BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-                        if (new StackTrace().GetFrames().Any((StackFrame x) => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType))
+                        if (new StackTrace().GetFrames().Any(x => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType))
                         {
                             if (TranslatePlugin.enableTypingTranslation.Value)
                             {
@@ -75,7 +75,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                 if (cachedProperty2 != null && cachedProperty2.PropertyType == typeof(int))
                 {
                     int num = (int)cachedProperty2.Get(ui);
-                    if (0 < num && num < 99999)
+                    if (num is > 0 and < 99999)
                     {
                         cachedProperty2.Set(ui, 99999);
                     }

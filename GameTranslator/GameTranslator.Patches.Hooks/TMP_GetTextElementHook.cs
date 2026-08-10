@@ -8,7 +8,7 @@ namespace GameTranslator.Patches.Hooks
     [HarmonyPatch]
     internal class TMP_GetTextElementHook
     {
-        static MethodBase TargetMethod()
+        private static MethodBase TargetMethod()
         {
             return AccessTools.Method(typeof(TMP_Text), "GetTextElement");
         }

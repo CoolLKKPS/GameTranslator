@@ -39,7 +39,7 @@ namespace GameTranslator.Patches.Hooks
             }
         }
 
-        static MethodBase TargetMethod()
+        private static MethodBase TargetMethod()
         {
             return AccessTools.Method(typeof(TMP_FontAsset), "UpdateGlyphAdjustmentRecords", Type.EmptyTypes, null);
         }

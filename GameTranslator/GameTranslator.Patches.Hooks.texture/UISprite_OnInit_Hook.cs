@@ -18,7 +18,7 @@ namespace GameTranslator.Patches.Hooks.texture
         private static MethodBase TargetMethod(object instance)
         {
             TypeContainer uisprite = UnityTypes.UISprite;
-            return AccessToolsShim.Method((uisprite != null) ? uisprite.ClrType : null, "OnInit", Array.Empty<Type>());
+            return AccessToolsShim.Method((uisprite != null) ? uisprite.ClrType : null, "OnInit", []);
         }
 
         public static void Postfix(object __instance)

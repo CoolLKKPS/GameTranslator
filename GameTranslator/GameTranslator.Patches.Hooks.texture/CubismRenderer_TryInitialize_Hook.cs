@@ -17,7 +17,7 @@ namespace GameTranslator.Patches.Hooks.texture
 
         private static MethodBase TargetMethod(object instance)
         {
-            return AccessToolsShim.Method(UnityTypes.CubismRenderer.ClrType, "TryInitialize", Array.Empty<Type>());
+            return AccessToolsShim.Method(UnityTypes.CubismRenderer.ClrType, "TryInitialize", []);
         }
 
         public static void Prefix(Component __instance)

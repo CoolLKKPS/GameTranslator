@@ -98,7 +98,7 @@ namespace GameTranslator.Patches.Translatons
             }
             if (!string.IsNullOrEmpty(TranslatePlugin.ignoredTextureNames.Value))
             {
-                var ignoredNames = TranslatePlugin.ignoredTextureNames.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                var ignoredNames = TranslatePlugin.ignoredTextureNames.Value.Split(_semicolonSep, StringSplitOptions.RemoveEmptyEntries);
                 if (ignoredNames.Contains(name))
                 {
                     this._key = TextureTranslationCache.HashHelper.Compute(TextureTranslationInfo.UTF8.GetBytes(name));
@@ -106,10 +106,9 @@ namespace GameTranslator.Patches.Translatons
                 }
             }
             bool flag = false;
-            string text = null;
             TextureDataResult textureData = texture.GetTextureData();
             string text2 = TextureTranslationCache.HashHelper.Compute(textureData.Data);
-            if (TextureTranslationInfo.NameToHash.TryGetValue(name, out text))
+            if (TextureTranslationInfo.NameToHash.TryGetValue(name, out string text))
             {
                 if (text != text2)
                 {
@@ -155,28 +154,21 @@ namespace GameTranslator.Patches.Translatons
 
         public static Texture2D CreateEmptyTexture2D(TextureFormat format)
         {
-            TextureFormat newFormat;
-            switch (format)
+            var newFormat = format switch
             {
-                case TextureFormat.RGB24:
-                    newFormat = TextureFormat.RGB24;
-                    break;
-                case TextureFormat.DXT1:
-                    newFormat = TextureFormat.RGB24;
-                    break;
-                case TextureFormat.DXT5:
-                    newFormat = TextureFormat.ARGB32;
-                    break;
-                default:
-                    newFormat = TextureFormat.ARGB32;
-                    break;
-            }
+                TextureFormat.RGB24 => TextureFormat.RGB24,
+                TextureFormat.DXT1 => TextureFormat.RGB24,
+                TextureFormat.DXT5 => TextureFormat.ARGB32,
+                _ => TextureFormat.ARGB32,
+            };
             return new Texture2D(2, 2, newFormat, false);
         }
 
         private static Dictionary<string, string> NameToHash = new Dictionary<string, string>();
 
         private static readonly Encoding UTF8 = new UTF8Encoding(false);
+
+        private static readonly char[] _semicolonSep = { ';' };
 
         private string _key;
 

@@ -20,7 +20,7 @@ namespace GameTranslator.Patches.Hooks.texture
                 if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && __instance != null)
                 {
                     var format = (int)__instance.format;
-                    if (format != 1 && format != 9 && format != 63)
+                    if (format is not 1 and not 9 and not 63)
                     {
                         TextureTranslate.Instance.Hook_ImageChanged(ref __instance, false);
                     }

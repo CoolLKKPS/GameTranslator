@@ -45,7 +45,7 @@ namespace GameTranslator.Patches.Utils
                         AddFont(font);
                     }
                 }
-                if (_availableFonts.Any())
+                if (_availableFonts.Count > 0)
                 {
                     _isInitialized = true;
                 }
@@ -164,18 +164,11 @@ namespace GameTranslator.Patches.Utils
         }
     }
 
-    internal class LRUCache<TKey, TValue>
+    internal class LRUCache<TKey, TValue>(int capacity)
     {
-        private readonly int _capacity;
-        private readonly Dictionary<TKey, LinkedListNode<CacheItem>> _cacheMap;
-        private readonly LinkedList<CacheItem> _lruList;
-
-        public LRUCache(int capacity)
-        {
-            _capacity = capacity;
-            _cacheMap = new Dictionary<TKey, LinkedListNode<CacheItem>>(capacity);
-            _lruList = new LinkedList<CacheItem>();
-        }
+        private readonly int _capacity = capacity;
+        private readonly Dictionary<TKey, LinkedListNode<CacheItem>> _cacheMap = new(capacity);
+        private readonly LinkedList<CacheItem> _lruList = new();
 
         public bool TryGetValue(TKey key, out TValue value)
         {
@@ -186,7 +179,7 @@ namespace GameTranslator.Patches.Utils
                 _lruList.AddFirst(node);
                 return true;
             }
-            value = default(TValue);
+            value = default;
             return false;
         }
 

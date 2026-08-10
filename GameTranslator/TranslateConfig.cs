@@ -106,8 +106,7 @@ namespace GameTranslator
                         if (!config.shouldLoad || !File.Exists(config.ConfigFilePath))
                             continue;
                         DateTime currentModifiedTime = File.GetLastWriteTime(config.ConfigFilePath);
-                        DateTime recordedTime;
-                        if (_fileLastModifiedTimes.TryGetValue(config.ConfigFilePath, out recordedTime))
+                        if (_fileLastModifiedTimes.TryGetValue(config.ConfigFilePath, out DateTime recordedTime))
                         {
                             if (currentModifiedTime > recordedTime)
                             {
@@ -208,10 +207,10 @@ namespace GameTranslator
                 {
                     return text;
                 }
-                if (file.translatePairs.ContainsKey(text))
+                if (file.translatePairs.TryGetValue(text, out var translation))
                 {
                     file._translatePairLastAccess[text] = DateTime.Now;
-                    return file.translatePairs[text];
+                    return translation;
                 }
                 StringBuffer stringBuffer = new StringBuffer(text);
                 if (file.regexTranslations.Count > 0)
@@ -219,7 +218,7 @@ namespace GameTranslator
                     RegexTranslation[] regexSnapshot;
                     lock (file._fileLock)
                     {
-                        regexSnapshot = file.regexTranslations.ToArray();
+                        regexSnapshot = [.. file.regexTranslations];
                     }
                     foreach (RegexTranslation regexTranslation in regexSnapshot)
                     {
@@ -246,7 +245,7 @@ namespace GameTranslator
                     stopwatch.Stop();
                     if (stopwatch.ElapsedMilliseconds > 500L)
                     {
-                        string text11 = ((text.Length > 50) ? (text.Substring(0, 50) + "...") : text);
+                        string text11 = text.Length > 50 ? text.Substring(0, 50) + "..." : text;
                         try { TranslatePlugin.logger.LogWarning(string.Format("replaceByMap took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, text11)); }
                         catch (IndexOutOfRangeException) { }
                     }
@@ -293,17 +292,11 @@ namespace GameTranslator
                 }
                 if (num > 0)
                 {
-                    List<string> list = translateConfigFile._translatePairLastAccess.OrderBy((KeyValuePair<string, DateTime> kv) => kv.Value).Take(num).Select(delegate (KeyValuePair<string, DateTime> kv)
-                    {
-                        KeyValuePair<string, DateTime> keyValuePair = kv;
-                        return keyValuePair.Key;
-                    })
-                        .ToList<string>();
+                    List<string> list = [.. translateConfigFile._translatePairLastAccess.OrderBy(kv => kv.Value).Take(num).Select(kv => kv.Key)];
                     foreach (string text in list)
                     {
                         translateConfigFile.translatePairs.TryRemove(text, out _);
-                        DateTime dateTime;
-                        translateConfigFile._translatePairLastAccess.TryRemove(text, out dateTime);
+                        translateConfigFile._translatePairLastAccess.TryRemove(text, out DateTime dateTime);
                     }
                     TranslatePlugin.logger.LogInfo(string.Format("Cleaned {0} translate pairs from {1}. Remaining: {2} (reason: {3})", list.Count, translateConfigFile.ConfigFileName, translateConfigFile.translatePairs.Count, reason));
                 }
@@ -474,7 +467,7 @@ namespace GameTranslator
 
             internal readonly ConcurrentDictionary<string, DateTime> _translatePairLastAccess = new ConcurrentDictionary<string, DateTime>();
 
-            internal KeyValuePair<string, string>[] _normalOrdered = Array.Empty<KeyValuePair<string, string>>();
+            internal KeyValuePair<string, string>[] _normalOrdered = [];
 
             internal int shouldTranslateMinLength = 300;    // Still using for other purposes
 
@@ -482,10 +475,12 @@ namespace GameTranslator
 
             private void GetNormalOrderedByLength(Dictionary<string, int> lineOrder)
             {
-                this._normalOrdered = this.normal
-                    .OrderByDescending(kv => kv.Key.Length)
-                    .ThenBy(kv => lineOrder.TryGetValue(kv.Key, out var line) ? line : int.MaxValue)
-                    .ToArray();
+                this._normalOrdered =
+                [
+                    .. this.normal
+                        .OrderByDescending(kv => kv.Key.Length)
+                        .ThenBy(kv => lineOrder.TryGetValue(kv.Key, out var line) ? line : int.MaxValue)
+                ];
             }
         }
     }

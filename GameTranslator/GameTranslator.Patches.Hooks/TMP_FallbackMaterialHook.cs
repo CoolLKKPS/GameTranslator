@@ -65,7 +65,7 @@ namespace GameTranslator.Patches.Hooks
 #endif
         }
 
-        static MethodBase TargetMethod()
+        private static MethodBase TargetMethod()
         {
             return AccessTools.Method(AccessTools.TypeByName("TMPro.TMP_MaterialManager"), "GetFallbackMaterial", new[] { typeof(Material), typeof(Material) });
         }
@@ -168,7 +168,7 @@ namespace GameTranslator.Patches.Hooks
     [HarmonyPatch]
     internal class TMP_FallbackMaterialHook_AtlasIndexRegister
     {
-        static MethodBase TargetMethod()
+        private static MethodBase TargetMethod()
         {
             return AccessTools.Method(AccessTools.TypeByName("TMPro.TMP_MaterialManager"), "GetFallbackMaterial", new[] { AccessTools.TypeByName("TMPro.TMP_FontAsset"), typeof(Material), typeof(int) });
         }

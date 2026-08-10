@@ -1,12 +1,7 @@
 namespace GameTranslator.Patches.Translatons
 {
-    internal class TextureDataResult
+    internal class TextureDataResult(byte[] data)
     {
-        public TextureDataResult(byte[] data)
-        {
-            this.Data = data;
-        }
-
-        public byte[] Data { get; }
+        public byte[] Data { get; } = data;
     }
 }

@@ -21,23 +21,22 @@ namespace GameTranslator.Patches.Translatons
         public static Texture2D GetTexture(this object ui)
         {
             Texture2D texture2D;
-            SpriteRenderer spriteRenderer;
             if (ui == null)
             {
                 texture2D = null;
             }
-            else if (!ui.TryCastTo(out spriteRenderer))
+            else if (!ui.TryCastTo(out SpriteRenderer spriteRenderer))
             {
                 Type type = ui.GetType();
                 CachedProperty cachedProperty = type.CachedProperty(TranslateExtensions.MainTexturePropertyName);
                 object obj;
-                if ((obj = ((cachedProperty != null) ? cachedProperty.Get(ui) : null)) == null)
+                if ((obj = cachedProperty != null ? cachedProperty.Get(ui) : null) == null)
                 {
                     CachedProperty cachedProperty2 = type.CachedProperty(TranslateExtensions.TexturePropertyName);
-                    if ((obj = ((cachedProperty2 != null) ? cachedProperty2.Get(ui) : null)) == null)
+                    if ((obj = cachedProperty2 != null ? cachedProperty2.Get(ui) : null) == null)
                     {
                         CachedProperty cachedProperty3 = type.CachedProperty(TranslateExtensions.CapitalMainTexturePropertyName);
-                        obj = ((cachedProperty3 != null) ? cachedProperty3.Get(ui) : null);
+                        obj = cachedProperty3 != null ? cachedProperty3.Get(ui) : null;
                     }
                 }
                 texture2D = obj as Texture2D;
@@ -59,8 +58,7 @@ namespace GameTranslator.Patches.Translatons
 
         public static string GetTextureName(this object texture, string fallbackName)
         {
-            Texture2D texture2D;
-            if (texture.TryCastTo(out texture2D))
+            if (texture.TryCastTo(out Texture2D texture2D))
             {
                 string name = texture2D.name;
                 if (!string.IsNullOrEmpty(name))
@@ -121,7 +119,7 @@ namespace GameTranslator.Patches.Translatons
             texture2D.ReadPixels(new Rect(0f, 0f, (float)temporary.width, (float)temporary.height), 0, 0);
             byte[] array = TranslateExtensions.EncodeToPNGEx(texture2D);
             global::UnityEngine.Object.DestroyImmediate(texture2D);
-            RenderTexture.active = ((active == temporary) ? null : active);
+            RenderTexture.active = active == temporary ? null : active;
             RenderTexture.ReleaseTemporary(temporary);
             return new TextureDataResult(array);
         }
@@ -143,9 +141,7 @@ namespace GameTranslator.Patches.Translatons
             else
             {
                 Type unityType = ui.GetUnityType();
-                Material material;
-                SpriteRenderer spriteRenderer;
-                if (!ui.TryCastTo(out material) && !ui.TryCastTo(out spriteRenderer) && (UnityTypes.Image == null || !UnityTypes.Image.IsAssignableFrom(unityType)) && (UnityTypes.RawImage == null || !UnityTypes.RawImage.IsAssignableFrom(unityType)) && (UnityTypes.CubismRenderer == null || !UnityTypes.CubismRenderer.IsAssignableFrom(unityType)))
+                if (!ui.TryCastTo(out Material material) && !ui.TryCastTo(out SpriteRenderer spriteRenderer) && (UnityTypes.Image == null || !UnityTypes.Image.IsAssignableFrom(unityType)) && (UnityTypes.RawImage == null || !UnityTypes.RawImage.IsAssignableFrom(unityType)) && (UnityTypes.CubismRenderer == null || !UnityTypes.CubismRenderer.IsAssignableFrom(unityType)))
                 {
                     if (UnityTypes.UIWidget != null)
                     {
@@ -181,8 +177,7 @@ namespace GameTranslator.Patches.Translatons
             else
             {
                 Type unityType = ui.GetUnityType();
-                ITextComponentManipulator textComponentManipulator2;
-                if (!TranslateExtensions.Manipulators.TryGetValue(unityType, out textComponentManipulator2))
+                if (!TranslateExtensions.Manipulators.TryGetValue(unityType, out ITextComponentManipulator textComponentManipulator2))
                 {
                     if (UnityTypes.TextField != null && UnityTypes.TextField.IsAssignableFrom(unityType))
                     {
@@ -274,7 +269,7 @@ namespace GameTranslator.Patches.Translatons
                     else
                     {
                         Transform parent = transform.parent;
-                        gameObject2 = ((parent != null) ? parent.gameObject : null);
+                        gameObject2 = parent?.gameObject;
                     }
                     gameObject = gameObject2;
                 }
@@ -339,7 +334,7 @@ namespace GameTranslator.Patches.Translatons
             }
             else
             {
-                text = ((info != null) ? info.TextManipulator.GetText(ui) : null);
+                text = info?.TextManipulator.GetText(ui);
             }
             return text;
         }
@@ -350,7 +345,7 @@ namespace GameTranslator.Patches.Translatons
             ((HashSet<uint>)TranslateExtensions.m_MissingUnicodesFromFontFile.GetValue(fontAsset)).Add(unicode);
             ((HashSet<uint>)TranslateExtensions.m_CharactersToAddLookup.GetValue(fontAsset)).Remove(unicode);
             ((Dictionary<uint, TMP_Character>)TranslateExtensions.m_CharacterLookupDictionary.GetValue(fontAsset)).Remove(unicode);
-            ((List<TMP_Character>)TranslateExtensions.m_CharacterTable.GetValue(fontAsset)).RemoveAll((TMP_Character character) => character.unicode == unicode);
+            ((List<TMP_Character>)TranslateExtensions.m_CharacterTable.GetValue(fontAsset)).RemoveAll(character => character.unicode == unicode);
         }
 
         private static readonly Dictionary<Type, ITextComponentManipulator> Manipulators = new Dictionary<Type, ITextComponentManipulator>();
@@ -396,8 +391,8 @@ namespace GameTranslator.Patches.Translatons
 
             public void MoveProperty(object source, object destination)
             {
-                TPropertyType tpropertyType = this._get((T)((object)source));
-                this._set((T)((object)destination), tpropertyType);
+                TPropertyType tpropertyType = this._get((T)(object)source);
+                this._set((T)(object)destination, tpropertyType);
             }
 
             private readonly Func<T, TPropertyType> _get;

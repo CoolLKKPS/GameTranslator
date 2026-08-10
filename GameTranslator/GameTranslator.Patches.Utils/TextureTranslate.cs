@@ -60,11 +60,11 @@ namespace GameTranslator.Patches.Utils
             {
                 TextureTranslate.ImageHooksEnabled = false;
 
-                texture = texture ?? source.GetTexture();
+                texture ??= source.GetTexture();
                 if (texture == null) return;
 
                 var format = (int)texture.format;
-                if (format == 1 || format == 9 || format == 63) return;
+                if (format is 1 or 9 or 63) return;
 
                 var tti = texture.GetOrCreateTextureTranslationInfo();
                 if (tti.IsDumped) return;
@@ -113,7 +113,7 @@ namespace GameTranslator.Patches.Utils
                 TextureTranslate.ImageHooksEnabled = false;
 
                 var previousTextureValue = texture;
-                texture = texture ?? source.GetTexture();
+                texture ??= source.GetTexture();
                 if (texture == null) return;
 
                 var tti = texture.GetOrCreateTextureTranslationInfo();
@@ -217,7 +217,7 @@ namespace GameTranslator.Patches.Utils
                 }
 
                 var format = (int)texture.format;
-                if (format == 1 || format == 9 || format == 63)
+                if (format is 1 or 9 or 63)
                 {
                     return false;
                 }

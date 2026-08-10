@@ -4,12 +4,9 @@ using XUnity.Common.Utilities;
 
 namespace GameTranslator.Patches.Translatons.Manipulator
 {
-    internal class UguiNovelTextComponentManipulator : ITextComponentManipulator
+    internal class UguiNovelTextComponentManipulator(Type type) : ITextComponentManipulator
     {
-        public UguiNovelTextComponentManipulator(Type type)
-        {
-            this._property = type.CachedProperty(UguiNovelTextComponentManipulator.TextPropertyName);
-        }
+        private readonly CachedProperty _property = type.CachedProperty(UguiNovelTextComponentManipulator.TextPropertyName);
 
         public string GetText(object ui)
         {
@@ -25,8 +22,6 @@ namespace GameTranslator.Patches.Translatons.Manipulator
         }
 
         private static readonly string TextPropertyName = "text";
-
-        private readonly CachedProperty _property;
 
     }
 }

@@ -22,7 +22,7 @@ namespace GameTranslator.Patches.Translatons
 
         public List<TranslationEndpointManager> Endpoints { get; private set; }
 
-        public List<TranslationEndpointManager> ConfiguredEndpoints => Endpoints.Where(e => e.Manager != null).ToList();
+        public List<TranslationEndpointManager> ConfiguredEndpoints => [.. Endpoints.Where(e => e.Manager != null)];
 
         public TranslationEndpointManager PrimaryEndpoint { get; set; }
 
@@ -37,7 +37,7 @@ namespace GameTranslator.Patches.Translatons
             List<TranslationEndpointManager> endpoints;
             lock (_endpointsWithUnstartedJobs)
             {
-                endpoints = _endpointsWithUnstartedJobs.ToList();
+                endpoints = [.. _endpointsWithUnstartedJobs];
             }
 
             for (int i = endpoints.Count - 1; i >= 0; i--)
@@ -104,10 +104,7 @@ namespace GameTranslator.Patches.Translatons
         {
             translationEndpointManager.Manager = this;
 
-            if (PrimaryEndpoint == null)
-            {
-                PrimaryEndpoint = translationEndpointManager;
-            }
+            PrimaryEndpoint ??= translationEndpointManager;
         }
 
         // This can be simplified but i will keep it

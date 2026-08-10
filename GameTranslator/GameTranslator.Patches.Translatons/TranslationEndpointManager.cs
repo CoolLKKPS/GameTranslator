@@ -7,26 +7,15 @@ using System.Threading.Tasks;
 
 namespace GameTranslator.Patches.Translatons
 {
-    internal class TranslationEndpointManager
+    internal class TranslationEndpointManager(int maxConcurrency = 3, int maxRetries = 3, float translationDelay = 1.0f)
     {
-        private readonly ConcurrentDictionary<string, TranslationJob> _unstartedJobs;
-        private readonly ConcurrentDictionary<string, TranslationJob> _ongoingJobs;
-        private readonly ConcurrentDictionary<string, byte> _failedTranslations;
-        private readonly SemaphoreSlim _concurrencyLimiter;
-        private readonly int _maxConcurrency;
-        private readonly int _maxRetries;
-        private readonly float _translationDelay;
-
-        public TranslationEndpointManager(int maxConcurrency = 3, int maxRetries = 3, float translationDelay = 1.0f)
-        {
-            _unstartedJobs = new ConcurrentDictionary<string, TranslationJob>();
-            _ongoingJobs = new ConcurrentDictionary<string, TranslationJob>();
-            _failedTranslations = new ConcurrentDictionary<string, byte>();
-            _concurrencyLimiter = new SemaphoreSlim(maxConcurrency, maxConcurrency);
-            _maxConcurrency = maxConcurrency;
-            _maxRetries = maxRetries;
-            _translationDelay = translationDelay;
-        }
+        private readonly ConcurrentDictionary<string, TranslationJob> _unstartedJobs = new();
+        private readonly ConcurrentDictionary<string, TranslationJob> _ongoingJobs = new();
+        private readonly ConcurrentDictionary<string, byte> _failedTranslations = new();
+        private readonly SemaphoreSlim _concurrencyLimiter = new(maxConcurrency, maxConcurrency);
+        private readonly int _maxConcurrency = maxConcurrency;
+        private readonly int _maxRetries = maxRetries;
+        private readonly float _translationDelay = translationDelay;
 
         public bool IsBusy => _ongoingJobs.Count >= _maxConcurrency;
 

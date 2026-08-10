@@ -28,7 +28,7 @@ namespace GameTranslator.Patches.Utils
                         char c2 = c;
                         if (c2 <= '\\')
                         {
-                            if (c2 != '=' && c2 != '\\')
+                            if (c2 is not '=' and not '\\')
                             {
                                 stringBuilder.Append('\\');
                                 stringBuilder.Append(c);

@@ -51,7 +51,7 @@ namespace GameTranslator.Patches.Utils
                         return FontCache.FallbackFontsTextMeshPro;
                     }
 
-                    string[] fontPaths = configValue.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] fontPaths = configValue.Split(_commaSep, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string fontSegment in fontPaths)
                     {
                         string trimmed = fontSegment.Trim();
@@ -102,7 +102,7 @@ namespace GameTranslator.Patches.Utils
                     }
                 }
             }
-            catch (Exception e) when (e.ToString().ToLowerInvariant().Contains("missing") || e.ToString().ToLowerInvariant().Contains("not found"))
+            catch (Exception e) when (e.ToString().IndexOf("missing", StringComparison.OrdinalIgnoreCase) >= 0 || e.ToString().IndexOf("not found", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 TranslatePlugin.logger.LogWarning("An error occurred while loading text mesh pro fallback font. This may be due to missing font file. Error: " + e.Message);
             }
@@ -113,6 +113,8 @@ namespace GameTranslator.Patches.Utils
         }
 
         private static bool _hasReadFallbackFontTextMeshPro = false;
+
+        private static readonly char[] _commaSep = { ',' };
 
         private static List<global::UnityEngine.Object> FallbackFontsTextMeshPro;
 

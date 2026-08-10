@@ -18,7 +18,7 @@ namespace GameTranslator.Patches.Hooks.texture
         private static MethodBase TargetMethod(object instance)
         {
             TypeContainer uirect = UnityTypes.UIRect;
-            return AccessToolsShim.Method((uirect != null) ? uirect.ClrType : null, "OnInit", Array.Empty<Type>());
+            return AccessToolsShim.Method((uirect != null) ? uirect.ClrType : null, "OnInit", []);
         }
 
         public static void Postfix(object __instance)

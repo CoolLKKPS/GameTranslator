@@ -27,14 +27,8 @@ namespace GameTranslator.Patches.Translatons
 
         public long ChangeTime
         {
-            get
-            {
-                return this.changeTime;
-            }
-            set
-            {
-                this.changeTime = value;
-            }
+            get => this.changeTime;
+            set => this.changeTime = value;
         }
 
         public void Init(object ui)
@@ -80,9 +74,8 @@ namespace GameTranslator.Patches.Translatons
 
                         if (originalFont != null && !TranslatePlugin.fallbackFontTextMeshPro.Value.IsNullOrWhiteSpace())
                         {
-                            if (!TextTranslationInfo._processedFonts.Contains(originalFont))
+                            if (TextTranslationInfo._processedFonts.Add(originalFont))
                             {
-                                TextTranslationInfo._processedFonts.Add(originalFont);
                                 foreach (char c in TranslatePlugin.shouldRemoveChar.Value.ToCharArray())
                                 {
                                     originalFont.TryRemoveCharacter((uint)c);

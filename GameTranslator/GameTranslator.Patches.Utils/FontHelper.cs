@@ -105,7 +105,7 @@ namespace GameTranslator.Patches.Utils
             catch (Exception ex)
             {
                 TranslatePlugin.logger.LogWarning("Unable to retrieve OS installed fonts: " + ex.Message);
-                return Array.Empty<string>();
+                return [];
             }
         }
 

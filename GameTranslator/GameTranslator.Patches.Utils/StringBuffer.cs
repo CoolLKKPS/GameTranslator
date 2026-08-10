@@ -8,7 +8,7 @@ namespace GameTranslator.Patches.Utils
         {
             if (str == null)
             {
-                throw new ArgumentNullException("str");
+                throw new ArgumentNullException(nameof(str));
             }
             this.value = new char[str.Length + 16];
             str.CopyTo(0, this.value, 0, str.Length);
@@ -18,15 +18,12 @@ namespace GameTranslator.Patches.Utils
 
         public int Length
         {
-            get
-            {
-                return this.length;
-            }
+            get => this.length;
             set
             {
                 if (value < 0 || value > this.capacity)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 if (value < this.length)
                 {
@@ -38,15 +35,12 @@ namespace GameTranslator.Patches.Utils
 
         public int Capacity
         {
-            get
-            {
-                return this.capacity;
-            }
+            get => this.capacity;
             set
             {
                 if (value < this.length)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 if (value != this.capacity)
                 {
@@ -62,7 +56,7 @@ namespace GameTranslator.Patches.Utils
         {
             if (minimumCapacity < 0)
             {
-                throw new ArgumentOutOfRangeException("minimumCapacity");
+                throw new ArgumentOutOfRangeException(nameof(minimumCapacity));
             }
             if (minimumCapacity > this.capacity)
             {
@@ -97,7 +91,7 @@ namespace GameTranslator.Patches.Utils
         {
             if (index < 0 || index > this.length)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             StringBuffer stringBuffer;
             if (str == null)
@@ -120,11 +114,11 @@ namespace GameTranslator.Patches.Utils
         {
             if (startIndex < 0 || startIndex > this.length)
             {
-                throw new ArgumentOutOfRangeException("startIndex");
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
             }
             if (length < 0 || startIndex + length > this.length)
             {
-                throw new ArgumentOutOfRangeException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
             }
             Array.Copy(this.value, startIndex + length, this.value, startIndex, this.length - startIndex - length);
             Array.Clear(this.value, this.length - length, length);
@@ -136,16 +130,13 @@ namespace GameTranslator.Patches.Utils
         {
             if (oldValue == null)
             {
-                throw new ArgumentNullException("oldValue");
+                throw new ArgumentNullException(nameof(oldValue));
             }
             if (oldValue.Length == 0)
             {
                 throw new ArgumentException("oldValue cannot be empty");
             }
-            if (newValue == null)
-            {
-                newValue = string.Empty;
-            }
+            newValue ??= string.Empty;
             int num = oldValue.Length;
             int num2 = newValue.Length;
             int[] lps = new int[num];
@@ -162,15 +153,15 @@ namespace GameTranslator.Patches.Utils
         {
             if (str == null)
             {
-                throw new ArgumentNullException("str");
+                throw new ArgumentNullException(nameof(str));
             }
             if (startIndex < 0 || startIndex > this.length)
             {
-                throw new ArgumentOutOfRangeException("startIndex");
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
             }
             if (count < 0 || startIndex + count > this.length)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
             int num = str.Length;
             int[] array = new int[num];

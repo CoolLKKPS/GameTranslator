@@ -19,7 +19,7 @@ namespace GameTranslator.Patches.Hooks.texture
         private static MethodBase TargetMethod(object instance)
         {
             TypeContainer maskableGraphic = UnityTypes.MaskableGraphic;
-            return AccessToolsShim.Method((maskableGraphic != null) ? maskableGraphic.ClrType : null, "OnEnable", Array.Empty<Type>());
+            return AccessToolsShim.Method((maskableGraphic != null) ? maskableGraphic.ClrType : null, "OnEnable", []);
         }
 
         public static void Postfix(Component __instance)

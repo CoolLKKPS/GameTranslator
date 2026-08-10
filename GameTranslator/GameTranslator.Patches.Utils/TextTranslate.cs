@@ -83,8 +83,7 @@ namespace GameTranslator.Patches.Utils
                     var igField = terminalPatchType.GetField("ig", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                     if (igField != null)
                     {
-                        var igValue = igField.GetValue(null) as System.Collections.Generic.HashSet<object>;
-                        if (igValue != null && igValue.Contains(ui))
+                        if (igField.GetValue(null) is System.Collections.Generic.HashSet<object> igValue && igValue.Contains(ui))
                         {
                             return true;
                         }
@@ -109,8 +108,7 @@ namespace GameTranslator.Patches.Utils
             if (!TranslatePlugin.shouldTranslateNormalText.Value)
                 return false;
 
-            if (text == null)
-                text = ui.GetText(info);
+            text ??= ui.GetText(info);
             translated = this.TranslateOrQueue(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, componentState);
             return !string.IsNullOrEmpty(translated) && !translated.Equals(text) && IsUIObjectValid(ui);
         }
@@ -247,7 +245,7 @@ namespace GameTranslator.Patches.Utils
                 return null;
             }
 
-            text = text ?? ui.GetText(info);
+            text ??= ui.GetText(info);
             if (text.IsNullOrWhiteSpace())
             {
                 return null;

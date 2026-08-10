@@ -26,7 +26,7 @@ namespace GameTranslator
 #if CORECLR
             var configPath = Path.Combine(Application.dataPath, "..", "BepInEx", "config", "GameTranslator.cfg");
             var metadata = new BepInEx.BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION);
-            _config = new ConfigFile(configPath, false, metadata);
+            Config = new ConfigFile(configPath, false, metadata);
             TranslatePlugin.logger = BepInEx.Logging.Logger.CreateLogSource(TranslatePlugin.PLUGIN_NAME);
 #else
             TranslatePlugin.logger = base.Logger;
@@ -47,7 +47,7 @@ namespace GameTranslator
                 GameTranslator.Patches.Utils.FontSupportChecker.InitializeFonts();
             }
             AsyncTranslationManager.Instance.Start();
-            SceneManager.activeSceneChanged += (Scene from, Scene to) =>
+            SceneManager.activeSceneChanged += (from, to) =>
             {
                 if (TranslatePlugin.showAvailableText.Value)
                 {
@@ -258,9 +258,7 @@ namespace GameTranslator
         private readonly Harmony harmony = new Harmony("GameTranslator");
 
 #if CORECLR
-        private static ConfigFile _config;
-
-        private static ConfigFile Config => _config;
+        private static ConfigFile Config { get; set; }
 #endif
 
         private const string PLUGIN_GUID = "GameTranslator";
