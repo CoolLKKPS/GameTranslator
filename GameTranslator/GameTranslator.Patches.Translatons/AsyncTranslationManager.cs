@@ -199,8 +199,8 @@ namespace GameTranslator.Patches.Translatons
             bool succeeded = false;
             while (currentTries < maxTries)
             {
-                string beforeText = null;
-                string afterText = null;
+                string beforeText;
+                string afterText;
                 try
                 {
                     beforeText = GetUIText(ui, info);
@@ -351,7 +351,7 @@ namespace GameTranslator.Patches.Translatons
                         return;
                     }
                 }
-                TextTranslate.Instance.SetTranslatedText(ui, translatedText, originalText, info as TextTranslationInfo);
+                TextTranslate.Instance.SetTranslatedText(ui, translatedText, originalText, info);
             }
             catch (System.NullReferenceException)
             {

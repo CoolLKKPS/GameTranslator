@@ -62,11 +62,11 @@ namespace GameTranslator.Patches.Translatons
         {
             if (isLoad)
             {
-                TranslatePlugin.logger.LogInfo("Loading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
+                TranslatePlugin.logger.LogInfo(">>> Loading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
             }
             else
             {
-                TranslatePlugin.logger.LogInfo("Reloading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
+                TranslatePlugin.logger.LogInfo(">>> Reloading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
             }
             using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
             {
@@ -635,23 +635,23 @@ namespace GameTranslator.Patches.Translatons
 
         internal ConcurrentDictionary<string, string> _translations = new ConcurrentDictionary<string, string>();
 
-        private ConcurrentDictionary<string, string> _reverseTranslations = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _reverseTranslations = new ConcurrentDictionary<string, string>();
 
         internal List<RegexTranslation> _defaultRegexes = new List<RegexTranslation>();
 
-        private HashSet<string> _registeredRegexes = new HashSet<string>();
+        private readonly HashSet<string> _registeredRegexes = new HashSet<string>();
 
         internal List<RegexTranslationSplitter> _splitterRegexes = new List<RegexTranslationSplitter>();
 
-        private HashSet<string> _registeredSplitterRegexes = new HashSet<string>();
+        private readonly HashSet<string> _registeredSplitterRegexes = new HashSet<string>();
 
-        private ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
+        private readonly ConcurrentDictionary<string, byte> _failedRegexLookups = new ConcurrentDictionary<string, byte>();
 
-        private ConcurrentDictionary<string, string> _regexResultCache = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _regexResultCache = new ConcurrentDictionary<string, string>();
 
-        private ConcurrentDictionary<string, DateTime> _regexResultLastAccess = new ConcurrentDictionary<string, DateTime>();
+        private readonly ConcurrentDictionary<string, DateTime> _regexResultLastAccess = new ConcurrentDictionary<string, DateTime>();
 
-        private ConcurrentDictionary<int, ScopedTranslationData> _scopedTranslations = new ConcurrentDictionary<int, ScopedTranslationData>();
+        private readonly ConcurrentDictionary<int, ScopedTranslationData> _scopedTranslations = new ConcurrentDictionary<int, ScopedTranslationData>();
 
         internal class ScopedTranslationData
         {

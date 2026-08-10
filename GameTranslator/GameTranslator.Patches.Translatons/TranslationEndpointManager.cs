@@ -69,9 +69,7 @@ namespace GameTranslator.Patches.Translatons
             if (kvp.Value == null) return;
 
             var jobKey = kvp.Key;
-            var job = kvp.Value;
-
-            if (!_unstartedJobs.TryRemove(jobKey, out job)) return;
+            if (!_unstartedJobs.TryRemove(jobKey, out var job)) return;
 
             _ongoingJobs.TryAdd(jobKey, job);
 

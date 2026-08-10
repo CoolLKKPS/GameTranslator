@@ -18,14 +18,14 @@ namespace GameTranslator.Patches.Utils.Textures
                 binaryReader.BaseStream.Seek(12L, SeekOrigin.Begin);
                 short num1 = binaryReader.ReadInt16();
                 short num2 = binaryReader.ReadInt16();
-                int num3 = (int)binaryReader.ReadByte();
+                int num3 = binaryReader.ReadByte();
                 binaryReader.BaseStream.Seek(1L, SeekOrigin.Current);
-                Color32[] colors = new Color32[(int)num1 * (int)num2];
+                Color32[] colors = new Color32[num1 * num2];
                 if (format == TextureFormat.RGB24)
                 {
                     if (num3 == 32)
                     {
-                        for (int index = 0; index < (int)num1 * (int)num2; ++index)
+                        for (int index = 0; index < num1 * num2; ++index)
                         {
                             byte b = binaryReader.ReadByte();
                             byte g = binaryReader.ReadByte();
@@ -36,7 +36,7 @@ namespace GameTranslator.Patches.Utils.Textures
                     }
                     else
                     {
-                        for (int index = 0; index < (int)num1 * (int)num2; ++index)
+                        for (int index = 0; index < num1 * num2; ++index)
                         {
                             byte b = binaryReader.ReadByte();
                             byte g = binaryReader.ReadByte();
@@ -49,7 +49,7 @@ namespace GameTranslator.Patches.Utils.Textures
                 {
                     if (num3 == 32)
                     {
-                        for (int index = 0; index < (int)num1 * (int)num2; ++index)
+                        for (int index = 0; index < num1 * num2; ++index)
                         {
                             byte b = binaryReader.ReadByte();
                             byte g = binaryReader.ReadByte();
@@ -60,7 +60,7 @@ namespace GameTranslator.Patches.Utils.Textures
                     }
                     else
                     {
-                        for (int index = 0; index < (int)num1 * (int)num2; ++index)
+                        for (int index = 0; index < num1 * num2; ++index)
                         {
                             byte b = binaryReader.ReadByte();
                             byte g = binaryReader.ReadByte();

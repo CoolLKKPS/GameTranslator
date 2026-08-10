@@ -19,7 +19,7 @@ namespace GameTranslator.Patches.Utils
                 int num = 0;
                 bool flag = false;
                 int length = str.Length;
-                StringBuilder stringBuilder = new StringBuilder((int)((double)length / 1.3));
+                StringBuilder stringBuilder = new StringBuilder((int)(length / 1.3));
                 for (int i = 0; i < length; i++)
                 {
                     char c = str[i];

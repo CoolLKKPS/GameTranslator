@@ -232,6 +232,6 @@ namespace GameTranslator.Patches.Translatons.Manipulator
         private static object _cachedTextWindowTextMesh;
         private static object _cachedTextWindow;
         private static bool _textWindowTextMeshCached;
-        private static Dictionary<object, (string original, string translated)> _typingCache = new Dictionary<object, (string, string)>();
+        private static readonly Dictionary<object, (string original, string translated)> _typingCache = new Dictionary<object, (string, string)>();
     }
 }

@@ -78,7 +78,7 @@ namespace GameTranslator.Patches.Translatons
                             {
                                 foreach (char c in TranslatePlugin.shouldRemoveChar.Value.ToCharArray())
                                 {
-                                    originalFont.TryRemoveCharacter((uint)c);
+                                    originalFont.TryRemoveCharacter(c);
                                 }
                             }
 
@@ -110,8 +110,8 @@ namespace GameTranslator.Patches.Translatons
 
         public long changeTime;
 
-        private static HashSet<TMP_FontAsset> _processedFonts = new HashSet<TMP_FontAsset>();
+        private static readonly HashSet<TMP_FontAsset> _processedFonts = new HashSet<TMP_FontAsset>();
 
-        private static HashSet<string> _loggedNullMaterialFonts = new HashSet<string>();
+        private static readonly HashSet<string> _loggedNullMaterialFonts = new HashSet<string>();
     }
 }

@@ -116,7 +116,7 @@ namespace GameTranslator.Patches.Translatons
             RenderTexture active = RenderTexture.active;
             RenderTexture.active = temporary;
             Texture2D texture2D = new Texture2D(width, height);
-            texture2D.ReadPixels(new Rect(0f, 0f, (float)temporary.width, (float)temporary.height), 0, 0);
+            texture2D.ReadPixels(new Rect(0f, 0f, temporary.width, temporary.height), 0, 0);
             byte[] array = TranslateExtensions.EncodeToPNGEx(texture2D);
             global::UnityEngine.Object.DestroyImmediate(texture2D);
             RenderTexture.active = active == temporary ? null : active;
@@ -141,7 +141,7 @@ namespace GameTranslator.Patches.Translatons
             else
             {
                 Type unityType = ui.GetUnityType();
-                if (!ui.TryCastTo(out Material material) && !ui.TryCastTo(out SpriteRenderer spriteRenderer) && (UnityTypes.Image == null || !UnityTypes.Image.IsAssignableFrom(unityType)) && (UnityTypes.RawImage == null || !UnityTypes.RawImage.IsAssignableFrom(unityType)) && (UnityTypes.CubismRenderer == null || !UnityTypes.CubismRenderer.IsAssignableFrom(unityType)))
+                if (!ui.TryCastTo(out Material _) && !ui.TryCastTo(out SpriteRenderer _) && (UnityTypes.Image == null || !UnityTypes.Image.IsAssignableFrom(unityType)) && (UnityTypes.RawImage == null || !UnityTypes.RawImage.IsAssignableFrom(unityType)) && (UnityTypes.CubismRenderer == null || !UnityTypes.CubismRenderer.IsAssignableFrom(unityType)))
                 {
                     if (UnityTypes.UIWidget != null)
                     {
@@ -391,8 +391,8 @@ namespace GameTranslator.Patches.Translatons
 
             public void MoveProperty(object source, object destination)
             {
-                TPropertyType tpropertyType = this._get((T)(object)source);
-                this._set((T)(object)destination, tpropertyType);
+                TPropertyType tpropertyType = this._get((T)source);
+                this._set((T)destination, tpropertyType);
             }
 
             private readonly Func<T, TPropertyType> _get;

@@ -446,7 +446,7 @@ namespace GameTranslator.Patches.Translatons
 
         public ConcurrentDictionary<string, byte> _untranslatedImages = new ConcurrentDictionary<string, byte>();
 
-        private ConcurrentDictionary<string, string> _keyToFileName = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _keyToFileName = new ConcurrentDictionary<string, string>();
 
         private bool _disposed;
 
@@ -512,7 +512,7 @@ namespace GameTranslator.Patches.Translatons
                 for (int i = 0; i < 256; i++)
                 {
                     string text = i.ToString("X2");
-                    array[i] = (uint)(text[0] + ((uint)text[1] << 16));
+                    array[i] = (uint)(text[0] + (text[1] << 16));
                 }
                 return array;
             }
@@ -523,7 +523,7 @@ namespace GameTranslator.Patches.Translatons
                 char[] array = new char[bytes.Length * 2];
                 for (int i = 0; i < bytes.Length; i++)
                 {
-                    uint num = lookup[(int)bytes[i]];
+                    uint num = lookup[bytes[i]];
                     array[2 * i] = (char)num;
                     array[(2 * i) + 1] = (char)(num >> 16);
                 }

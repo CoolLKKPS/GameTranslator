@@ -348,9 +348,9 @@ namespace GameTranslator.Patches
 
         public static HashSet<object> ig = new HashSet<object>();
 
-        private static FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        private static readonly FieldInfo hasGottenVerb = typeof(Terminal).GetField("hasGottenVerb", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
-        private static FieldInfo modifyingText = typeof(Terminal).GetField("modifyingText", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        private static readonly FieldInfo modifyingText = typeof(Terminal).GetField("modifyingText", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
     }
 }
 #endif

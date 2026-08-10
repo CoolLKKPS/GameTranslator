@@ -15,7 +15,7 @@ namespace GameTranslator.Patches.Hooks
 
         private static readonly PropertyInfo _sourceFontFileProp;
         private static readonly PropertyInfo _faceInfoProp;
-        private static PropertyInfo _pointSizeProp;
+        private static readonly PropertyInfo _pointSizeProp;
 
         static TMP_FontAsset_FontFeaturesHook()
         {

@@ -14,7 +14,7 @@ namespace GameTranslator
     {
         private static SafeFileWatcher _fileWatcher;
 
-        private static ConcurrentDictionary<string, DateTime> _fileLastModifiedTimes = new ConcurrentDictionary<string, DateTime>();
+        private static readonly ConcurrentDictionary<string, DateTime> _fileLastModifiedTimes = new ConcurrentDictionary<string, DateTime>();
 
         private static Timer _pollingTimer;
 
@@ -158,7 +158,6 @@ namespace GameTranslator
 
         private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should, bool needsParseFile = false)
         {
-            TranslatePlugin.logger.LogInfo(">>> Loading " + fileName + " file");
             return new TranslateConfig.TranslateConfigFile(fileName, should, needsParseFile);
         }
 
@@ -280,7 +279,7 @@ namespace GameTranslator
                 {
                     if (translateConfigFile.translatePairs.Count >= TRANSLATE_PAIR_EVICT_MIN)
                     {
-                        num = (int)((float)translateConfigFile.translatePairs.Count * TRANSLATE_PAIR_EVICT_RATIO);
+                        num = (int)(translateConfigFile.translatePairs.Count * TRANSLATE_PAIR_EVICT_RATIO);
                         num = Math.Max(1, Math.Min(num, translateConfigFile.translatePairs.Count));
                     }
                     reason = "memory pressure";
@@ -376,11 +375,11 @@ namespace GameTranslator
             {
                 if (isLoad)
                 {
-                    TranslatePlugin.logger.LogInfo("Loading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
+                    TranslatePlugin.logger.LogInfo(">>> Loading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
                 }
                 else
                 {
-                    TranslatePlugin.logger.LogInfo("Reloading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
+                    TranslatePlugin.logger.LogInfo(">>> Reloading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
                 }
                 Dictionary<string, int> normalKeyLineOrder = new Dictionary<string, int>();
                 List<string> errors = new List<string>();
