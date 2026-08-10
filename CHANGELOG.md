@@ -1,3 +1,7 @@
+## v2.3.2
+
+- Code maintain and hopefully improve performance
+
 ## v2.3.1
 
 - Fixed TMP_FallbackMaterialHook would try scale even font doesn't support
