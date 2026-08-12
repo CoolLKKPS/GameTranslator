@@ -1,6 +1,6 @@
 {
 	"name": "GameTranslator",
-	"version_number": "2.3.2",
+	"version_number": "2.3.3",
 	"website_url": "https://github.com/CoolLKKPS/GameTranslator",
 	"description": "A Lethal Company translate plugin",
 	"dependencies": [

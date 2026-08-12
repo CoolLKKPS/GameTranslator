@@ -268,20 +268,6 @@ namespace GameTranslator.Patches
             }
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch("OnSubmit")]
-        private static void changeSubmit(Terminal __instance)
-        {
-            if (TerminalPatch.info != null)
-            {
-                int texdAdded = __instance.currentText.Length - TerminalPatch.info.OriginalText.Length;
-                if (texdAdded != 0)
-                {
-                    TerminalPatch.info.Reset(__instance.currentText);
-                }
-            }
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch("Update")]
         private static void changeUpdateText(Terminal __instance)

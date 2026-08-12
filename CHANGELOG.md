@@ -1,3 +1,7 @@
+## v2.3.3
+
+- Fix re-translate issue when press enter in the terminal, why sweetfox?
+
 ## v2.3.2
 
 - Code maintain and hopefully improve performance
