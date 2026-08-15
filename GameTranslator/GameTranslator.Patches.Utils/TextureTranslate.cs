@@ -39,7 +39,7 @@ namespace GameTranslator.Patches.Utils
         {
             try
             {
-                if (TranslatePlugin.enableTextureDumping.Value)
+                if (TranslatePlugin.enableTextureDumping.Value && (dumpDirectory == null || TranslatePlugin.textureEnhancementDump))
                 {
                     this.DumpTexture(source, texture, dumpDirectory);
                 }

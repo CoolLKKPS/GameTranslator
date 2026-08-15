@@ -336,6 +336,8 @@ namespace GameTranslator
 
         public static bool textureEnhancement = false;
 
+        public static bool textureEnhancementDump = false;
+
         public static ConfigEntry<bool> cacheTexturesInMemory;
 
         public static ConfigEntry<bool> disableDuplicateTextureCheck;

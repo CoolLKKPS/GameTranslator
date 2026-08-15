@@ -291,6 +291,10 @@ namespace GameTranslator.Patches.Translatons
             }
             data = null;
             image = null;
+            if (this._untranslatedImages.ContainsKey(key))
+            {
+                return false;
+            }
             if (this._keyToFileName.TryGetValue(key, out string text2))
             {
                 TryGetPhysicalFilePath(text2, out string physicalPath);
