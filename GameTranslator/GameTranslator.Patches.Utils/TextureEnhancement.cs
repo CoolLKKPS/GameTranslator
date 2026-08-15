@@ -14,11 +14,13 @@ namespace GameTranslator.Patches.Utils
         private static bool _isProcessing;
         private static bool _initialized;
         private static readonly ConcurrentQueue<bool> RefreshRequests = [];
-        public static bool IsEnabled => TranslatePlugin.textureEnhancement && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value);
-        internal static bool CanProcess => IsEnabled && (TranslatePlugin.enableTextureDumping.Value || (TranslateConfig.cache != null && TranslateConfig.cache.HasRegisteredImages));
-        public static bool IsProcessing => _isProcessing;
+        internal static bool IsEnabled => TranslatePlugin.textureEnhancement || TranslatePlugin.textureEnhancementDump;
+        internal static bool CanTranslate => TranslatePlugin.changeTexture.Value && TranslatePlugin.textureEnhancement && TranslateConfig.cache != null && TranslateConfig.cache.HasRegisteredImages;
+        internal static bool CanDump => TranslatePlugin.enableTextureDumping.Value && TranslatePlugin.textureEnhancementDump;
+        internal static bool CanProcess => IsEnabled && (CanTranslate || CanDump);
+        internal static bool IsProcessing => _isProcessing;
 
-        public static bool ContainsRenderer(UnityEngine.Object source)
+        internal static bool ContainsRenderer(UnityEngine.Object source)
         {
             var gameObject = (source as GameObject) ?? (source as Component)?.gameObject;
             if (gameObject == null)
@@ -32,7 +34,7 @@ namespace GameTranslator.Patches.Utils
             return hasRenderers;
         }
 
-        public static void Initialize()
+        internal static void Initialize()
         {
             if (_initialized)
             {
@@ -48,7 +50,7 @@ namespace GameTranslator.Patches.Utils
             RefreshRequests.Enqueue(true);
         }
 
-        public static void ProcessRefreshRequests()
+        internal static void ProcessRefreshRequests()
         {
             if (RefreshRequests.IsEmpty || _isProcessing)
             {
@@ -95,7 +97,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        public static void ProcessObject(UnityEngine.Object source)
+        internal static void ProcessObject(UnityEngine.Object source)
         {
             if (!CanProcess || source == null || _isProcessing)
             {
@@ -117,7 +119,7 @@ namespace GameTranslator.Patches.Utils
             RendererBuffer.Clear();
         }
 
-        public static void ProcessMaterials(Material[] materials)
+        internal static void ProcessMaterials(Material[] materials)
         {
             if (!CanProcess || materials == null || materials.Length == 0 || _isProcessing)
             {

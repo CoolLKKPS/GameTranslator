@@ -43,7 +43,7 @@ namespace GameTranslator.Patches.Utils
                 {
                     this.DumpTexture(source, texture, dumpDirectory);
                 }
-                if (TranslatePlugin.changeTexture.Value && this.ShouldProcessTexture(source, texture))
+                if (TranslatePlugin.changeTexture.Value && (dumpDirectory == null || TranslatePlugin.textureEnhancement) && this.ShouldProcessTexture(source, texture))
                 {
                     this.TranslateTexture(source, ref sprite, ref texture, isPrefixHooked);
                 }
