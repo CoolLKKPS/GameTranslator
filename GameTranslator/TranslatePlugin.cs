@@ -36,6 +36,7 @@ namespace GameTranslator
             this.gameObject.hideFlags = HideFlags.HideAndDontSave;
             DontDestroyOnLoad(this.gameObject);
             this.ConfigFile();
+            GameTranslator.Patches.Utils.TextureEnhancement.Initialize();
             HookingHelper.PatchAll(ImageHooks.All, false);
             HookingHelper.PatchAll(ImageHooks.Sprite, false);
             HookingHelper.PatchAll(ImageHooks.SpriteRenderer, false);
@@ -79,6 +80,7 @@ namespace GameTranslator
                 try
                 {
                     AsyncTranslationManager.Instance.ProcessMainThreadActions();
+                    GameTranslator.Patches.Utils.TextureEnhancement.ProcessRefreshRequests();
                 }
                 catch (Exception ex)
                 {
@@ -147,6 +149,7 @@ namespace GameTranslator
             {
                 Directory.CreateDirectory(TranslatePlugin.DumpPath);
             }
+            TranslatePlugin.SceneDumpPath = TranslatePlugin.DumpPath + "Scene\\";
             TranslateConfig.Load();
             TranslateExtensions.Load();
         }
@@ -171,6 +174,10 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TMP_TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.Texture2DHook),
+                typeof(GameTranslator.Patches.Hooks.texture.Material_SetTexture_Hook),
+                typeof(GameTranslator.Patches.Hooks.texture.Material_SetTextureName_Hook),
+                typeof(GameTranslator.Patches.Hooks.texture.Renderer_Materials_Hook),
+                typeof(GameTranslator.Patches.Hooks.texture.Object_Instantiate_Hook),
                 };
                 var patchNames = patchTypes.Select(t => t.Name).ToList();
                 TranslatePlugin.logger.LogDebug($"Found {patchNames.Count} basic patch types: {string.Join(", ", patchNames)}");
@@ -327,6 +334,8 @@ namespace GameTranslator
 
         public static ConfigEntry<bool> changeTexture;
 
+        public static bool textureEnhancement = false;
+
         public static ConfigEntry<bool> cacheTexturesInMemory;
 
         public static ConfigEntry<bool> disableDuplicateTextureCheck;
@@ -340,5 +349,7 @@ namespace GameTranslator
         internal static string TexturesPath;
 
         internal static string DumpPath;
+
+        internal static string SceneDumpPath;
     }
 }

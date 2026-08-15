@@ -24,7 +24,7 @@ namespace GameTranslator.Patches.Hooks.texture
 
         private static void Postfix(ref Texture2D __result)
         {
-            TextureTranslate.Instance.Hook_ImageChanged(ref __result, true);
+            TextureTranslate.Instance.Hook_ImageChanged(ref __result, true, null);
         }
 
         private static void MM_Init(object detour)

@@ -49,9 +49,9 @@ namespace GameTranslator.Patches.Translatons
             }
         }
 
-        public IEnumerable<string> GetTextureFiles()
+        private static IEnumerable<string> GetTextureFiles(SearchOption searchOption)
         {
-            return from x in Directory.GetFiles(TranslatePlugin.TexturesPath, "*.*", SearchOption.AllDirectories)
+            return from x in Directory.GetFiles(TranslatePlugin.TexturesPath, "*.*", searchOption)
                    where x.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)
                    select x;
         }
@@ -73,11 +73,12 @@ namespace GameTranslator.Patches.Translatons
                     this._keyToFileName.Clear();
                     this._textureAccessTime.Clear();
                     Directory.CreateDirectory(TranslatePlugin.TexturesPath);
-                    foreach (string text in this.GetTextureFiles())
+                    foreach (string text in GetTextureFiles(SearchOption.AllDirectories))
                     {
                         this.RegisterImageFromFile(text);
                     }
                     TextureTranslate.ChangeTime += 1L;
+                    TextureTranslationCache.Reloaded?.Invoke();
                     this.CleanupInvalidEntries();
                     float realtimeSinceStartup2 = Time.realtimeSinceStartup;
                     XuaLogger.AutoTranslator.Debug(string.Format("Loaded texture files (took {0} seconds)", Math.Round((double)(realtimeSinceStartup2 - realtimeSinceStartup), 2)));
@@ -322,7 +323,7 @@ namespace GameTranslator.Patches.Translatons
             try
             {
                 bool hasChanges = false;
-                foreach (string filePath in GetTextureFiles())
+                foreach (string filePath in GetTextureFiles(SearchOption.TopDirectoryOnly))
                 {
                     if (!File.Exists(filePath))
                         continue;
@@ -447,6 +448,10 @@ namespace GameTranslator.Patches.Translatons
         public ConcurrentDictionary<string, byte> _untranslatedImages = new ConcurrentDictionary<string, byte>();
 
         private readonly ConcurrentDictionary<string, string> _keyToFileName = new ConcurrentDictionary<string, string>();
+
+        internal bool HasRegisteredImages => this._translatedImages.Count > 0 || this._untranslatedImages.Count > 0;
+
+        internal static event Action Reloaded;
 
         private bool _disposed;
 

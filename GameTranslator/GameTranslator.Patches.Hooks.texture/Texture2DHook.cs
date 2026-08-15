@@ -22,7 +22,7 @@ namespace GameTranslator.Patches.Hooks.texture
                     var format = (int)__instance.format;
                     if (format is not 1 and not 9 and not 63)
                     {
-                        TextureTranslate.Instance.Hook_ImageChanged(ref __instance, false);
+                        TextureTranslate.Instance.Hook_ImageChanged(ref __instance, false, null);
                     }
                 }
             }

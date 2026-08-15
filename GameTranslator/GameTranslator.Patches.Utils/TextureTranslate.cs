@@ -14,7 +14,7 @@ namespace GameTranslator.Patches.Utils
             if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && source.IsKnownImageType())
             {
                 Sprite sprite = null;
-                this.HandleImage(source, ref sprite, ref texture, isPrefixHooked);
+                this.HandleImage(source, ref sprite, ref texture, isPrefixHooked, null);
             }
         }
 
@@ -22,26 +22,26 @@ namespace GameTranslator.Patches.Utils
         {
             if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && source.IsKnownImageType())
             {
-                this.HandleImage(source, ref sprite, ref texture, isPrefixHooked);
+                this.HandleImage(source, ref sprite, ref texture, isPrefixHooked, null);
             }
         }
 
-        internal void Hook_ImageChanged(ref Texture2D texture, bool isPrefixHooked)
+        internal void Hook_ImageChanged(ref Texture2D texture, bool isPrefixHooked, string dumpDirectory)
         {
             if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && !(texture == null))
             {
                 Sprite sprite = null;
-                this.HandleImage(null, ref sprite, ref texture, isPrefixHooked);
+                this.HandleImage(null, ref sprite, ref texture, isPrefixHooked, dumpDirectory);
             }
         }
 
-        private void HandleImage(object source, ref Sprite sprite, ref Texture2D texture, bool isPrefixHooked)
+        private void HandleImage(object source, ref Sprite sprite, ref Texture2D texture, bool isPrefixHooked, string dumpDirectory)
         {
             try
             {
                 if (TranslatePlugin.enableTextureDumping.Value)
                 {
-                    this.DumpTexture(source, texture);
+                    this.DumpTexture(source, texture, dumpDirectory);
                 }
                 if (TranslatePlugin.changeTexture.Value && this.ShouldProcessTexture(source, texture))
                 {
@@ -54,7 +54,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        private void DumpTexture(object source, Texture2D texture)
+        private void DumpTexture(object source, Texture2D texture, string dumpDirectory)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace GameTranslator.Patches.Utils
 
                 var name = texture.GetTextureName("Unnamed");
                 var originalData = tti.GetOrCreateOriginalData();
-                DumpImageToDisk(name, key, originalData);
+                DumpImageToDisk(name, key, originalData, dumpDirectory ?? TranslatePlugin.DumpPath);
                 tti.IsDumped = true;
             }
             catch (Exception ex)
@@ -87,9 +87,9 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        private static void DumpImageToDisk(string textureName, string key, byte[] data)
+        private static void DumpImageToDisk(string textureName, string key, byte[] data, string dumpDirectory)
         {
-            Directory.CreateDirectory(TranslatePlugin.DumpPath);
+            Directory.CreateDirectory(dumpDirectory);
             string sanitizedName = textureName.SanitizeForFileSystem();
             string dataHash = TextureTranslationCache.HashHelper.Compute(data);
             string fileName;
@@ -101,7 +101,7 @@ namespace GameTranslator.Patches.Utils
             {
                 fileName = sanitizedName + " [" + key + "-" + dataHash + "].png";
             }
-            string fullPath = Path.Combine(TranslatePlugin.DumpPath, fileName);
+            string fullPath = Path.Combine(dumpDirectory, fileName);
             File.WriteAllBytes(fullPath, data);
             XuaLogger.AutoTranslator.Info("Dumped texture file: " + fileName);
         }

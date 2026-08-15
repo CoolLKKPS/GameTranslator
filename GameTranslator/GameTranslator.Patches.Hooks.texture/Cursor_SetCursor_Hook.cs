@@ -26,7 +26,7 @@ namespace GameTranslator.Patches.Hooks.texture
 
         public static void Prefix(ref Texture2D texture)
         {
-            TextureTranslate.Instance.Hook_ImageChanged(ref texture, true);
+            TextureTranslate.Instance.Hook_ImageChanged(ref texture, true, null);
         }
 
         private static void MM_Init(object detour)
