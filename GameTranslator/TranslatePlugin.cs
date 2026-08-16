@@ -81,6 +81,7 @@ namespace GameTranslator
                 {
                     AsyncTranslationManager.Instance.ProcessMainThreadActions();
                     GameTranslator.Patches.Utils.TextureEnhancement.ProcessRefreshRequests();
+                    GameTranslator.Patches.Utils.TextureTranslate.FlushPendingKeys();
                 }
                 catch (Exception ex)
                 {

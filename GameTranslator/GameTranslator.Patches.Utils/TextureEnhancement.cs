@@ -16,7 +16,7 @@ namespace GameTranslator.Patches.Utils
         private static readonly ConcurrentQueue<bool> RefreshRequests = [];
         internal static bool IsEnabled => TranslatePlugin.textureEnhancement || TranslatePlugin.textureEnhancementDump;
         internal static bool CanTranslate => TranslatePlugin.changeTexture.Value && TranslatePlugin.textureEnhancement && TranslateConfig.cache != null && TranslateConfig.cache.HasRegisteredImages;
-        internal static bool CanDump => TranslatePlugin.enableTextureDumping.Value && TranslatePlugin.textureEnhancementDump;
+        internal static bool CanDump => TranslatePlugin.textureEnhancementDump;
         internal static bool CanProcess => IsEnabled && (CanTranslate || CanDump);
         internal static bool IsProcessing => _isProcessing;
 

@@ -1,5 +1,6 @@
 using GameTranslator.Patches.Translatons;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using XUnity.Common.Extensions;
@@ -39,7 +40,7 @@ namespace GameTranslator.Patches.Utils
         {
             try
             {
-                if (TranslatePlugin.enableTextureDumping.Value && (dumpDirectory == null || TranslatePlugin.textureEnhancementDump))
+                if (dumpDirectory == null ? TranslatePlugin.enableTextureDumping.Value : TranslatePlugin.textureEnhancementDump)
                 {
                     this.DumpTexture(source, texture, dumpDirectory);
                 }
@@ -72,9 +73,16 @@ namespace GameTranslator.Patches.Utils
                 var key = tti.GetKey();
                 if (string.IsNullOrEmpty(key)) return;
 
-                var name = texture.GetTextureName("Unnamed");
-                var originalData = tti.GetOrCreateOriginalData();
-                DumpImageToDisk(name, key, originalData, dumpDirectory ?? TranslatePlugin.DumpPath);
+                if (dumpDirectory != null)
+                {
+                    RecordEncounteredKey(texture.GetTextureName("Unnamed"), key);
+                }
+                else
+                {
+                    var name = texture.GetTextureName("Unnamed");
+                    var originalData = tti.GetOrCreateOriginalData();
+                    DumpImageToDisk(name, key, originalData, TranslatePlugin.DumpPath);
+                }
                 tti.IsDumped = true;
             }
             catch (Exception ex)
@@ -85,6 +93,58 @@ namespace GameTranslator.Patches.Utils
             {
                 TextureTranslate.ImageHooksEnabled = true;
             }
+        }
+
+        private static readonly HashSet<string> RecordedKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        private static readonly List<string> PendingKeys = [];
+
+        private static bool _recordedKeysLoaded;
+
+        private const int FlushThreshold = 32;
+
+        private static void RecordEncounteredKey(string name, string key)
+        {
+            if (!_recordedKeysLoaded)
+            {
+                _recordedKeysLoaded = true;
+                var recordPath = Path.Combine(TranslatePlugin.SceneDumpPath, "scene_textures.txt");
+                if (File.Exists(recordPath))
+                {
+                    foreach (var line in File.ReadLines(recordPath))
+                    {
+                        var trimmed = line.Trim();
+                        if (trimmed.Length == 0)
+                        {
+                            continue;
+                        }
+                        var start = trimmed.IndexOf(" [", StringComparison.Ordinal);
+                        var segment = start >= 0 ? trimmed.Substring(start + 2).TrimEnd(']') : trimmed;
+                        var dash = segment.IndexOf('-');
+                        RecordedKeys.Add(dash >= 0 ? segment.Substring(0, dash) : segment);
+                    }
+                }
+            }
+            if (!RecordedKeys.Add(key))
+            {
+                return;
+            }
+            PendingKeys.Add(name + " [" + key + "]");
+            if (PendingKeys.Count >= FlushThreshold)
+            {
+                FlushPendingKeys();
+            }
+        }
+
+        internal static void FlushPendingKeys()
+        {
+            if (PendingKeys.Count == 0)
+            {
+                return;
+            }
+            Directory.CreateDirectory(TranslatePlugin.SceneDumpPath);
+            File.AppendAllLines(Path.Combine(TranslatePlugin.SceneDumpPath, "scene_textures.txt"), PendingKeys);
+            PendingKeys.Clear();
         }
 
         private static void DumpImageToDisk(string textureName, string key, byte[] data, string dumpDirectory)
