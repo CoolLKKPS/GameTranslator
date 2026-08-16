@@ -1,3 +1,9 @@
+## v2.3.6
+
+- I don't know what i can say now, ok maybe uh
+- 2.3.4 break some compatibility with some mods similar like EnemySkin, so i fixed in 2.3.5
+- 2.3.6 is a future support update
+
 ## v2.3.5
 
 - Added enhancement texture feature
