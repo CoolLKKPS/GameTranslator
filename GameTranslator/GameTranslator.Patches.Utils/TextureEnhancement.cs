@@ -146,7 +146,7 @@ namespace GameTranslator.Patches.Utils
             }
         }
 
-        private static void ProcessMaterialTextures(Material material)
+        internal static void ProcessMaterialTextures(Material material)
         {
             if (material == null)
             {

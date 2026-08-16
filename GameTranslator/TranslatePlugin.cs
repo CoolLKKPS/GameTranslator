@@ -176,6 +176,10 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.Texture2DHook),
                 typeof(GameTranslator.Patches.Hooks.texture.Object_Instantiate_Hook),
+                typeof(GameTranslator.Patches.Hooks.texture.Renderer_Material_Hook),
+#if CORECLR
+                typeof(GameTranslator.Patches.Hooks.texture.AsyncInstantiate_Hook),
+#endif
                 };
                 var patchNames = patchTypes.Select(t => t.Name).ToList();
                 TranslatePlugin.logger.LogDebug($"Found {patchNames.Count} basic patch types: {string.Join(", ", patchNames)}");
