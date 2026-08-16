@@ -174,9 +174,6 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.TMP_TextHook),
                 typeof(GameTranslator.Patches.Hooks.TextElement_text_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.Texture2DHook),
-                typeof(GameTranslator.Patches.Hooks.texture.Material_SetTexture_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Material_SetTextureName_Hook),
-                typeof(GameTranslator.Patches.Hooks.texture.Renderer_Materials_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.Object_Instantiate_Hook),
                 };
                 var patchNames = patchTypes.Select(t => t.Name).ToList();

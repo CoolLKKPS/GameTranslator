@@ -29,9 +29,17 @@ namespace GameTranslator.Patches.Utils
             }
             RendererBuffer.Clear();
             gameObject.GetComponentsInChildren(true, RendererBuffer);
-            var hasRenderers = RendererBuffer.Count > 0;
+            var hasContentRenderers = false;
+            for (var i = 0; i < RendererBuffer.Count; i++)
+            {
+                if (RendererBuffer[i] is MeshRenderer or SkinnedMeshRenderer)
+                {
+                    hasContentRenderers = true;
+                    break;
+                }
+            }
             RendererBuffer.Clear();
-            return hasRenderers;
+            return hasContentRenderers;
         }
 
         internal static void Initialize()
@@ -119,22 +127,9 @@ namespace GameTranslator.Patches.Utils
             RendererBuffer.Clear();
         }
 
-        internal static void ProcessMaterials(Material[] materials)
-        {
-            if (!CanProcess || materials == null || materials.Length == 0 || _isProcessing)
-            {
-                return;
-            }
-
-            for (var i = 0; i < materials.Length; i++)
-            {
-                ProcessMaterialTextures(materials[i]);
-            }
-        }
-
         private static void ProcessRenderer(Renderer renderer)
         {
-            if (renderer == null)
+            if (renderer is null or not (MeshRenderer or SkinnedMeshRenderer))
             {
                 return;
             }
