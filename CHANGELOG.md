@@ -1,7 +1,10 @@
+## v2.3.5
+
+- Added enhancement texture feature
+
 ## v2.3.4
 
-- Added enhancement texture feature which only mod developer need it, default to false and no config option
-- It just an idea and my solution, i know this will need to build another dll to use public method but, this can make localization more easier
+- Fixed the issue where unmodded texture will registered twice
 
 ## v2.3.3
 
