@@ -2,7 +2,7 @@
 	"name": "GameTranslator",
 	"version_number": "2.3.6",
 	"website_url": "https://github.com/CoolLKKPS/GameTranslator",
-	"description": "A Lethal Company translate plugin",
+	"description": "A normal translate plugin similar like AutoTranslator",
 	"dependencies": [
 		"BepInEx-BepInExPack-5.4.2305"
 	]

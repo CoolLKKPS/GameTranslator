@@ -95,8 +95,8 @@ namespace GameTranslator
             TranslatePlugin.syncTranslationThreshold = Config.Bind<int>("ASync", "Sync Translation Threshold", 300, "Define the character threshold to not use async translation");
             TranslatePlugin.showAvailableText = Config.Bind<bool>("Debug", "Show Available Text", false, "Define whether to show available text");
             TranslatePlugin.showOtherDebug = Config.Bind<bool>("Debug", "Show Other Debug", false, "Define whether to show other debug");
-            TranslatePlugin.enableFileWatcher = Config.Bind<bool>("Debug", "Enable File Watcher", false, "If true, enable file system watcher for file updates");
-            TranslatePlugin.enablePollingCheck = Config.Bind<bool>("Debug", "Enable Polling Check", false, "If true, enable the 10-seconds polling fallback for file updates");
+            TranslatePlugin.enableFileWatcher = Config.Bind<bool>("Debug", "Enable File Watcher", false, "Define whether to enable file system watcher for file updates");
+            TranslatePlugin.enablePollingCheck = Config.Bind<bool>("Debug", "Enable Polling Check", false, "Define whether to enable the 10-seconds polling fallback for file updates");
             TranslatePlugin.replaceUnsupportedCharacters = Config.Bind<bool>("Debug", "Replace Unsupported Characters", false, "Define whether to replace unsupported characters with Unicode character u25A1");
             TranslatePlugin.enableTypingTranslation = Config.Bind<bool>("Debug", "Enable TextWindow Typing Translation", false, "Define whether to display translated text letter-by-letter during the textwindow typing animation instead of waiting for the animation to complete");
             TranslatePlugin.enableAsyncDuringTyping = Config.Bind<bool>("Debug", "Enable Async During Typing Translation", false, "Define whether to allow async translation during typing animation which terminating the animation when async translation completes");
@@ -105,7 +105,7 @@ namespace GameTranslator
             TranslatePlugin.stabilizationMinTextLength = Config.Bind<int>("Debug", "Stabilization Min Text Length", 100, "Define minimum text length to trigger stabilization. Set to 0 to disable stabilization");
             TranslatePlugin.stabilizationDelay = Config.Bind<float>("Debug", "Stabilization Delay", 0.9f, "Define delay in seconds between stabilization checks. Must be greater than 0");
             TranslatePlugin.stabilizationMaxRetries = Config.Bind<int>("Debug", "Stabilization Max Retries", 60, "Define maximum retries for text stabilization safeguard. Set to 0 for unlimited retries");
-            TranslatePlugin.enableTerminalPatch = Config.Bind<bool>("Debug", "Enable Terminal Patch", true, "Define whether to patch Terminal");
+            TranslatePlugin.enableTerminalPatch = Config.Bind<bool>("Debug", "Enable Terminal Patch", false, "Define whether to patch Lethal Company Terminal");
             TranslatePlugin.changeFont = Config.Bind<bool>("Font", "Change Font", false, "Define whether to change the font");
             TranslatePlugin.enableDynamicFont = Config.Bind<bool>("Font", "Enable Dynamic Font", false, "Define whether to dynamically add missing characters to fallback fonts at runtime");
             TranslatePlugin.scaleFallbackEffects = Config.Bind<bool>("Font", "Scale Fallback Effects", false, "Define whether to proportionally scale SDF effects on fallback fonts");
@@ -114,8 +114,8 @@ namespace GameTranslator
             TranslatePlugin.shouldRemoveChar = Config.Bind<string>("Font", "Custom Characters", "", "Define what vanilla characters will use custom ones");
             TranslatePlugin.language = Config.Bind<string>("General", "Language", "Default", "Define what language folder is used");
             TranslatePlugin.shouldTranslateNormalText = Config.Bind<bool>("General", "Translate Normal Text", true, "Define whether to use Normal Translate method");
-            TranslatePlugin.shouldTranslateTerimal = Config.Bind<bool>("General", "Translate Terminal", false, "Define whether translate Terminal");
-            TranslatePlugin.shouldTranslateInteractiveTerminalAPI = Config.Bind<bool>("General", "Translate InteractiveTerminalAPI", false, "Define whether translate InteractiveTerminalAPI");
+            TranslatePlugin.shouldTranslateTerimal = Config.Bind<bool>("General", "Translate Terminal", false, "Define whether translate Lethal Company Terminal");
+            TranslatePlugin.shouldTranslateInteractiveTerminalAPI = Config.Bind<bool>("General", "Translate InteractiveTerminalAPI", false, "Define whether translate Lethal Company InteractiveTerminalAPI");
             TranslatePlugin.TerimalCanUseShortCutOne = Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category ZH", false, "Define whether the terminal can use category ZH shortcut commands");
             TranslatePlugin.TerimalCanUseShortCutTwo = Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category PY", false, "Define whether the terminal can use category PY shortcut commands");
             TranslatePlugin.shouldTranslateGui = Config.Bind<bool>("General", "Translate Gui", false, "Define whether translate Gui");
@@ -177,9 +177,7 @@ namespace GameTranslator
                 typeof(GameTranslator.Patches.Hooks.texture.Texture2DHook),
                 typeof(GameTranslator.Patches.Hooks.texture.Object_Instantiate_Hook),
                 typeof(GameTranslator.Patches.Hooks.texture.Renderer_Material_Hook),
-#if CORECLR
                 typeof(GameTranslator.Patches.Hooks.texture.AsyncInstantiate_Hook),
-#endif
                 };
                 var patchNames = patchTypes.Select(t => t.Name).ToList();
                 TranslatePlugin.logger.LogDebug($"Found {patchNames.Count} basic patch types: {string.Join(", ", patchNames)}");

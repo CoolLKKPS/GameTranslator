@@ -19,7 +19,7 @@ $iconPath = Join-Path $root "icon.png"
 $readmePath = Join-Path $root "README.md"
 $licensePath = Join-Path $root "LICENSE"
 $changelogPath = Join-Path $root "CHANGELOG.md"
-$releaseDir = Join-Path $root "Release"
+$modreleaseDir = Join-Path $root "Mod_Release"
 $tempDir = Join-Path $root "temp_package"
 
 $xunityDllPath = Join-Path $root "lib\net481\XUnity.Common.dll"
@@ -61,8 +61,8 @@ if (Test-Path $xunityDllPath) {
 }
 
 $zipName = "CoolLKK_Group-GameTranslator-$version.zip"
-$zipPath = Join-Path $releaseDir $zipName
-Get-ChildItem $releaseDir -Filter "CoolLKK_Group-GameTranslator-*.zip" | Remove-Item -Force
+$zipPath = Join-Path $modreleaseDir $zipName
+Get-ChildItem $modreleaseDir -Filter "CoolLKK_Group-GameTranslator-*.zip" | Remove-Item -Force
 
 Compress-Archive -Path "$tempDir\*" -DestinationPath $zipPath -CompressionLevel Optimal
 

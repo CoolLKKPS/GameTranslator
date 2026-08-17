@@ -1,4 +1,3 @@
-#if CORECLR
 using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
@@ -37,4 +36,3 @@ namespace GameTranslator.Patches.Hooks.texture
         }
     }
 }
-#endif
