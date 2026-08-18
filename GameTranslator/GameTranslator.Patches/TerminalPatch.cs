@@ -33,10 +33,9 @@ namespace GameTranslator.Patches
                     list.Add(StartOfRound.Instance.mapScreen.radarTargets[i].name);
                     Debug.Log(string.Format("name {0}: {1}", i, list[i]));
                 }
-                string secondWordLower = secondWord.ToLower();
                 for (int j = 0; j < list.Count; j++)
                 {
-                    if (list[j].ToLower() == secondWordLower)
+                    if (string.Equals(list[j], secondWord, StringComparison.OrdinalIgnoreCase))
                     {
                         return j;
                     }
@@ -70,8 +69,8 @@ namespace GameTranslator.Patches
             {
                 for (int j = playerWord.Length; j > 0; j--)
                 {
-                    if (TerminalPatch.GetCmd(options[i].noun.word, true).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()) ||
-                        TerminalPatch.GetCmd(options[i].noun.word, false).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
+                    if (TerminalPatch.GetCmd(options[i].noun.word, true).StartsWith(playerWord.Substring(0, j), StringComparison.OrdinalIgnoreCase) ||
+                        TerminalPatch.GetCmd(options[i].noun.word, false).StartsWith(playerWord.Substring(0, j), StringComparison.OrdinalIgnoreCase))
                     {
                         __result = options[i].result;
                         return;
@@ -157,8 +156,8 @@ namespace GameTranslator.Patches
                         {
                             for (int j = playerWord.Length; j > specificityRequired; j--)
                             {
-                                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()) ||
-                                    TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).ToLower().StartsWith(playerWord.Substring(0, j).ToLower()))
+                                if (TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, true).StartsWith(playerWord.Substring(0, j), StringComparison.OrdinalIgnoreCase) ||
+                                    TerminalPatch.GetCmd(__instance.terminalNodes.allKeywords[i].word, false).StartsWith(playerWord.Substring(0, j), StringComparison.OrdinalIgnoreCase))
                                 {
                                     terminalKeyword = __instance.terminalNodes.allKeywords[i];
                                 }
@@ -247,13 +246,13 @@ namespace GameTranslator.Patches
         {
             if (useC)
             {
-                if (TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey(name))
-                    return TranslateConfig.cmd_zh.normal[name];
+                if (TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.TryGetValue(name, out string value))
+                    return value;
             }
             else
             {
-                if (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey(name))
-                    return TranslateConfig.cmd_py.normal[name];
+                if (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.TryGetValue(name, out string value))
+                    return value;
             }
             return "";
         }

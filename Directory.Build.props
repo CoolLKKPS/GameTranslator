@@ -9,6 +9,7 @@
     <Nullable>disable</Nullable>
     <!-- Allows references to non-public members at runtime, for use with BepInEx.AssemblyPublicizer. -->
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net481'">
