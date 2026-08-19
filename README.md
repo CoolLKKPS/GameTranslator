@@ -9,14 +9,14 @@ This provided some translate solution, you need to place your localization conte
 - "Normal-Translate.cfg" works just like AutoTranslator, you can import some translate files content in here<br>
 - "GuiText-Translate.cfg" is for GUI<br>
 - "Terminal-Translate.cfg" and "InteractiveTerminalAPI-Translate.cfg" is for Lethal Company Terminal<br>
-- The above 3 translation files regex rules are independent of each other<br>
+- The above translation files regex rules are independent of each other<br>
 - "CMD-ZH-Translate.cfg" and "CMD-PY-Translate.cfg" can define Lethal Company Terminal shortcut commands, for example "transmit=tm" means you only just need to type "tm" and words in your terminal to send a transmit<br>
 
 ## Notice: This is not a replacement for AutoTranslator
 GameTranslator doesn't mean to replace AutoTranslator, the key design is different, but the core still using AutoTranslator and XUnity.Common<br>
 I don't recommand use both AutoTranslator and GameTranslator even this is technically feasible, GameTranslator already do the same things, you may have unexpected issues if you do<br>
 
-## Support Games (Please add language support naturally)
+## Support Games (Please game dev add language support naturally)
 Lethal Company<br>
 R.E.P.O<br>
 
