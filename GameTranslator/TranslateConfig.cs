@@ -41,11 +41,11 @@ namespace GameTranslator
             }
             if (TranslatePlugin.TerimalCanUseShortCutOne.Value)
             {
-                TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true, true);
+                TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true, true, caseInsensitiveKeys: true);
             }
             if (TranslatePlugin.TerimalCanUseShortCutTwo.Value)
             {
-                TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true, true);
+                TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true, true, caseInsensitiveKeys: true);
             }
             if (TranslatePlugin.shouldTranslateGui.Value)
             {
@@ -156,9 +156,9 @@ namespace GameTranslator
             }
         }
 
-        private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should, bool needsParseFile = false)
+        private static TranslateConfig.TranslateConfigFile CreateNewConfig(string fileName, bool should, bool needsParseFile = false, bool caseInsensitiveKeys = false)
         {
-            return new TranslateConfig.TranslateConfigFile(fileName, should, needsParseFile);
+            return new TranslateConfig.TranslateConfigFile(fileName, should, needsParseFile, caseInsensitiveKeys);
         }
 
         // Still using for other purposes
@@ -334,12 +334,16 @@ namespace GameTranslator
 
         internal class TranslateConfigFile
         {
-            public TranslateConfigFile(string configName, bool shouldLoad, bool needsParseFile = false)
+            public TranslateConfigFile(string configName, bool shouldLoad, bool needsParseFile = false, bool caseInsensitiveKeys = false)
             {
                 this.ConfigFileName = configName;
                 this.ConfigFilePath = Path.GetFullPath(TranslatePlugin.DefaultPath + configName + ".cfg");
                 this.shouldLoad = shouldLoad;
                 this.needsParseFile = needsParseFile;
+                if (caseInsensitiveKeys)
+                {
+                    this.normal = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                }
                 if (this.shouldLoad && this.needsParseFile && File.Exists(this.ConfigFilePath))
                 {
                     this.Reload(true);

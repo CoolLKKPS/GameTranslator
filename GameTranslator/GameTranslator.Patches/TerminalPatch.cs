@@ -94,7 +94,7 @@ namespace GameTranslator.Patches
             }
         }
 
-        private static string RemovePunctuation(string s)
+        private static string RemovePunctuation(string s, bool toLower)
         {
             StringBuilder stringBuilder = new StringBuilder();
             foreach (char c in s)
@@ -104,7 +104,7 @@ namespace GameTranslator.Patches
                     stringBuilder.Append(c);
                 }
             }
-            return stringBuilder.ToString().ToLower();
+            return toLower ? stringBuilder.ToString().ToLower() : stringBuilder.ToString();
         }
 
         [HarmonyPostfix]
@@ -177,8 +177,8 @@ namespace GameTranslator.Patches
         [HarmonyPatch("ParsePlayerSentence")]
         private static void customParser(Terminal __instance, ref TerminalNode __result)
         {
-            string[] array = TerminalPatch.RemovePunctuation(__instance.screenText.text.Substring(__instance.screenText.text.Length - __instance.textAdded)).Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
-            if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey("transmit") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["transmit"])) || (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey("transmit") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["transmit"]))))
+            string[] array = TerminalPatch.RemovePunctuation(__instance.screenText.text.Substring(__instance.screenText.text.Length - __instance.textAdded), true).Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
+            if (array.Length > 1 && (TerminalPatch.GetCmd("transmit", true).EqualsIgnoreCase(array[0]) || TerminalPatch.GetCmd("transmit", false).EqualsIgnoreCase(array[0])))
             {
                 try
                 {
@@ -205,7 +205,7 @@ namespace GameTranslator.Patches
                     return;
                 }
             }
-            if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey("switch") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["switch"])) || (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey("switch") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["switch"]))))
+            if (array.Length > 1 && (TerminalPatch.GetCmd("switch", true).EqualsIgnoreCase(array[0]) || TerminalPatch.GetCmd("switch", false).EqualsIgnoreCase(array[0])))
             {
                 int num = TerminalPatch.CheckForPlayerNameCommand(array[0], array[1]);
                 if (num != -1)
@@ -215,7 +215,7 @@ namespace GameTranslator.Patches
                     return;
                 }
             }
-            else if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey("ping") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["ping"])) || (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey("ping") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["ping"]))))
+            else if (array.Length > 1 && (TerminalPatch.GetCmd("ping", true).EqualsIgnoreCase(array[0]) || TerminalPatch.GetCmd("ping", false).EqualsIgnoreCase(array[0])))
             {
                 int num2 = TerminalPatch.CheckForPlayerNameCommand(array[0], array[1]);
                 if (num2 != -1)
@@ -225,7 +225,7 @@ namespace GameTranslator.Patches
                     return;
                 }
             }
-            else if (array.Length > 1 && ((TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.ContainsKey("flash") && array[0].ToLower().Equals(TranslateConfig.cmd_zh.normal["flash"])) || (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.ContainsKey("flash") && array[0].ToLower().Equals(TranslateConfig.cmd_py.normal["flash"]))))
+            else if (array.Length > 1 && (TerminalPatch.GetCmd("flash", true).EqualsIgnoreCase(array[0]) || TerminalPatch.GetCmd("flash", false).EqualsIgnoreCase(array[0])))
             {
                 int num3 = TerminalPatch.CheckForPlayerNameCommand(array[0], array[1]);
                 if (num3 != -1)
