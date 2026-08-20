@@ -29,7 +29,7 @@ namespace GameTranslator
                 TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
                 TranslateConfig.normalText.Load(true);
             }
-            if (TranslatePlugin.shouldTranslateTerimal.Value)
+            if (TranslatePlugin.enableTerminalPatch.Value && TranslatePlugin.shouldTranslateTerimal.Value)
             {
                 TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true, true);
                 TranslateConfig.terminal.shouldTranslate = true;

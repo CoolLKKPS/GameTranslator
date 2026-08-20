@@ -114,7 +114,7 @@ namespace GameTranslator
             TranslatePlugin.shouldRemoveChar = Config.Bind<string>("Font", "Custom Characters", "", "Define what vanilla characters will use custom ones");
             TranslatePlugin.language = Config.Bind<string>("General", "Language", "Default", "Define what language folder is used");
             TranslatePlugin.shouldTranslateNormalText = Config.Bind<bool>("General", "Translate Normal Text", true, "Define whether to use Normal Translate method");
-            TranslatePlugin.shouldTranslateTerimal = Config.Bind<bool>("General", "Translate Terminal", false, "Define whether translate Lethal Company Terminal");
+            TranslatePlugin.shouldTranslateTerimal = Config.Bind<bool>("General", "Translate Terminal", false, "Define whether translate Lethal Company Terminal, Requires Enable Terminal Patch");
             TranslatePlugin.shouldTranslateInteractiveTerminalAPI = Config.Bind<bool>("General", "Translate InteractiveTerminalAPI", false, "Define whether translate Lethal Company InteractiveTerminalAPI");
             TranslatePlugin.TerimalCanUseShortCutOne = Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category ZH", false, "Define whether the terminal can use category ZH shortcut commands");
             TranslatePlugin.TerimalCanUseShortCutTwo = Config.Bind<bool>("General", "Terminal Can Use Shortcut Commands Category PY", false, "Define whether the terminal can use category PY shortcut commands");
