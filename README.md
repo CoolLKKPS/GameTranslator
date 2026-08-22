@@ -25,6 +25,5 @@ You can contact me on Github<br>
 
 ## Credits
 [SweetFox](https://thunderstore.io/c/lethal-company/p/SweetFox) - Made this mod, check out his [Bilibili space website](https://space.bilibili.com/403741521)<br>
-[chuxiaaaa](https://thunderstore.io/c/lethal-company/p/chuxiaaaa) - Made some fixes for this mod, under MIT license<br>
 [Hayrizan](https://thunderstore.io/c/lethal-company/p/Hayrizan) and [bbepis](https://github.com/bbepis) - Provide [AutoTranslator and XUnity.Common](https://github.com/bbepis/XUnity.AutoTranslator) that GameTranslator can based on, under MIT license<br>
 CoolLKK - Tweaks some code, create icon, rework readme and changelog<br>
