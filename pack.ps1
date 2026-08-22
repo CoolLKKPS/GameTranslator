@@ -17,7 +17,7 @@ $outputDir = Join-Path $root "artifacts\bin\GameTranslator\${Configuration}_$Tar
 $manifestPath = Join-Path $root "manifest.json"
 $iconPath = Join-Path $root "icon.png"
 $readmePath = Join-Path $root "README.md"
-$licensePath = Join-Path $root "LICENSE"
+# $licensePath = Join-Path $root "LICENSE"
 $changelogPath = Join-Path $root "CHANGELOG.md"
 $modreleaseDir = Join-Path $root "Mod_Release"
 $tempDir = Join-Path $root "temp_package"
@@ -42,7 +42,7 @@ New-Item -ItemType Directory -Path $tempDir | Out-Null
 Copy-Item $manifestPath $tempDir
 Copy-Item $iconPath $tempDir
 Copy-Item $readmePath $tempDir
-Copy-Item $licensePath $tempDir
+# Copy-Item $licensePath $tempDir
 Copy-Item $changelogPath $tempDir
 
 $pluginsDir = Join-Path $tempDir "BepInEx\plugins"
