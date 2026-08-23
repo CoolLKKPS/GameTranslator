@@ -1,7 +1,7 @@
 using System.Reflection;
 
 [assembly: AssemblyCompany("CoolLKK_Group")]
-[assembly: AssemblyDescription("A Lethal Company translator plugin")]
+[assembly: AssemblyDescription("A normal translate plugin similar like AutoTranslator")]
 [assembly: AssemblyFileVersion(GameTranslator.TranslatePlugin.PLUGIN_VERSION_FULL)]
 [assembly: AssemblyInformationalVersion(GameTranslator.TranslatePlugin.PLUGIN_VERSION)]
 [assembly: AssemblyProduct(GameTranslator.TranslatePlugin.PLUGIN_NAME)]
