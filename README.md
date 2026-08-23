@@ -2,7 +2,6 @@
 A normal translate plugin similar like AutoTranslator<br>
 
 ## What does this mod do?
-
 This provided some translate solution, you need to place your localization content according to the methods required by this plugin:<br>
 - Once you run the game with this plugin, you will see this plugin create something inside your config folder, for advance user please read "GameTranslator.cfg" before using<br>
 - translations folder store all language folders that user defined, default to use "Default" language folder, you need to place font files and texture folder inside the language folder<br>
