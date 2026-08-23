@@ -1,3 +1,7 @@
+## v2.3.7
+
+- Some fixes
+
 ## v2.3.6
 
 - I don't know what i can say now, ok maybe uh
