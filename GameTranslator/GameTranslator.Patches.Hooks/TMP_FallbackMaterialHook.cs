@@ -2,13 +2,12 @@ using GameTranslator.Patches.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 
 namespace GameTranslator.Patches.Hooks
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(TMP_MaterialManager), "GetFallbackMaterial", new Type[] { typeof(Material), typeof(Material) })]
     internal class TMP_FallbackMaterialHook
     {
         private static readonly Dictionary<int, DateTime> _lastLogTime = [];
@@ -65,15 +64,11 @@ namespace GameTranslator.Patches.Hooks
 #endif
         }
 
-        private static MethodBase TargetMethod()
-        {
-            return AccessTools.Method(AccessTools.TypeByName("TMPro.TMP_MaterialManager"), "GetFallbackMaterial", new[] { typeof(Material), typeof(Material) });
-        }
-
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         public static void Postfix(Material sourceMaterial, Material targetMaterial, ref Material __result)
         {
+            if (!TranslatePlugin.scaleFallbackEffects.Value) return;
             ApplyScale(sourceMaterial, __result, targetMaterial);
         }
 
@@ -165,18 +160,14 @@ namespace GameTranslator.Patches.Hooks
         }
     }
 
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(TMP_MaterialManager), "GetFallbackMaterial", new Type[] { typeof(TMP_FontAsset), typeof(Material), typeof(int) })]
     internal class TMP_FallbackMaterialHook_AtlasIndexRegister
     {
-        private static MethodBase TargetMethod()
-        {
-            return AccessTools.Method(AccessTools.TypeByName("TMPro.TMP_MaterialManager"), "GetFallbackMaterial", new[] { AccessTools.TypeByName("TMPro.TMP_FontAsset"), typeof(Material), typeof(int) });
-        }
-
         [HarmonyPostfix]
         [HarmonyWrapSafe]
         public static void Postfix(Material sourceMaterial, ref Material __result)
         {
+            if (!TranslatePlugin.scaleFallbackEffects.Value) return;
             TMP_FallbackMaterialHook.RegisterAtlasMaterialIfSourceIsFontAsset(sourceMaterial, __result);
         }
     }

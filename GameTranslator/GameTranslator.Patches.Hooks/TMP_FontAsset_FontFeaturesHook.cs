@@ -7,7 +7,7 @@ using UnityEngine.TextCore.LowLevel;
 
 namespace GameTranslator.Patches.Hooks
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(TMP_FontAsset), "UpdateGlyphAdjustmentRecords", new Type[0])]
     internal class TMP_FontAsset_FontFeaturesHook
     {
         private static readonly MethodInfo _loadFontFaceMethod;
@@ -37,11 +37,6 @@ namespace GameTranslator.Patches.Hooks
                 var fiType = _faceInfoProp.PropertyType;
                 _pointSizeProp = AccessTools.Property(fiType, "pointSize");
             }
-        }
-
-        private static MethodBase TargetMethod()
-        {
-            return AccessTools.Method(typeof(TMP_FontAsset), "UpdateGlyphAdjustmentRecords", Type.EmptyTypes, null);
         }
 
         [HarmonyPrefix]
@@ -84,7 +79,6 @@ namespace GameTranslator.Patches.Hooks
             {
                 return false;
             }
-
             return true;
         }
     }

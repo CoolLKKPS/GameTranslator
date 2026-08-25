@@ -12,8 +12,10 @@ namespace GameTranslator.Patches.Hooks
         [HarmonyWrapSafe]
         public static void TMP_FontAsset_ReadFontAssetDefinition(TMP_FontAsset __instance)
         {
-            FontSupportChecker.RegisterFont(__instance);
-            TMP_FallbackMaterialHook.RegisterFontMaterial(__instance);
+            if (TranslatePlugin.replaceUnsupportedCharacters.Value)
+                FontSupportChecker.RegisterFont(__instance);
+            if (TranslatePlugin.scaleFallbackEffects.Value)
+                TMP_FallbackMaterialHook.RegisterFontMaterial(__instance);
         }
     }
 }
