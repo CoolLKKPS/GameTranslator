@@ -1,3 +1,7 @@
+## v2.3.8
+
+- IMGUI hook won't run if config not enabled
+
 ## v2.3.7
 
 - Some fixes

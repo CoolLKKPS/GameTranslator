@@ -1,6 +1,6 @@
 {
 	"name": "GameTranslator",
-	"version_number": "2.3.7",
+	"version_number": "2.3.8",
 	"website_url": "https://github.com/CoolLKKPS/GameTranslator",
 	"description": "A normal translate plugin similar like AutoTranslator",
 	"dependencies": [
