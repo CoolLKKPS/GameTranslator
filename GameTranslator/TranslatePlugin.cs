@@ -41,6 +41,7 @@ namespace GameTranslator
             HookingHelper.PatchAll(ImageHooks.Sprite, false);
             HookingHelper.PatchAll(ImageHooks.SpriteRenderer, false);
             this.ApplyBasicPatches();
+            this.ApplyIMGUIPatch();
             this.ApplyTerminalPatch();
             this.ApplyInteractiveTerminalAPIPatch();
             if (TranslatePlugin.replaceUnsupportedCharacters.Value)
@@ -162,7 +163,6 @@ namespace GameTranslator
                 TranslatePlugin.logger.LogInfo("Applying basic patches...");
                 var patchTypes = new Type[]
                 {typeof(GameTranslator.Patches.Hooks.GameObjectHook),
-                typeof(GameTranslator.Patches.Hooks.GuiContentHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProHook),
                 typeof(GameTranslator.Patches.Hooks.TeshMeshProUGUIHook),
                 typeof(GameTranslator.Patches.Hooks.TextHook),
@@ -211,6 +211,26 @@ namespace GameTranslator
             catch (Exception ex)
             {
                 TranslatePlugin.logger?.LogWarning($"Error applying basic patches: {ex.Message}");
+            }
+        }
+
+        private void ApplyIMGUIPatch()
+        {
+            try
+            {
+                if (TranslatePlugin.shouldTranslateGui != null && TranslatePlugin.shouldTranslateGui.Value)
+                {
+                    this.harmony.PatchAll(typeof(GameTranslator.Patches.Hooks.GuiContentHook));
+                    TranslatePlugin.logger?.LogInfo("IMGUI patch applied successfully");
+                }
+                else
+                {
+                    TranslatePlugin.logger?.LogInfo("IMGUI patch disabled by config");
+                }
+            }
+            catch (Exception ex)
+            {
+                TranslatePlugin.logger?.LogWarning($"Error applying IMGUI patch: {ex.Message}");
             }
         }
 
