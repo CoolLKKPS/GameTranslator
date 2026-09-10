@@ -78,9 +78,9 @@ namespace GameTranslator.Patches.Hooks
                 return;
 
 #if MANAGED
-            if (!_fontAssetMaterialIds.Contains(sourceMaterial.GetInstanceID()))
+            if (!_fontAssetMaterialIds.Contains(targetMaterial.GetInstanceID()))
 #else
-            if (!_fontAssetMaterialIds.Contains(sourceMaterial.GetEntityId().GetHashCode()))
+            if (!_fontAssetMaterialIds.Contains(targetMaterial.GetEntityId().GetHashCode()))
 #endif
                 return;
 

@@ -1,3 +1,7 @@
+## v2.3.9
+
+- Fixed Scale Fallback Effects breaking when another mod instances the text's fontMaterial
+
 ## v2.3.8
 
 - IMGUI hook won't run if config not enabled
