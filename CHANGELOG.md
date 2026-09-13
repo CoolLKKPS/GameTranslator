@@ -1,6 +1,6 @@
 ## v2.4.0
 
-- Fixed the issue where user need to type at least two characters to confirm or deny in some cases on the terminal
+- Fixed the issue when terminal node doesn't get translate, modifyingtext will trigger textchanged early return that cause user need type two times (character or word) to make terminal works in certain cases
 
 ## v2.3.9
 
