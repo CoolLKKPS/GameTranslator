@@ -300,16 +300,17 @@ namespace GameTranslator.Patches
 
         private static void SetText(string text, Terminal Instance)
         {
-            if (!(Instance == null))
+            if (Instance == null || Instance.screenText.text == text)
             {
-                TerminalPatch.modifyingText.SetValue(Instance, true);
-                Instance.screenText.interactable = true;
-                Instance.screenText.text = text;
-                Instance.currentText = Instance.screenText.text;
-                if (Instance.screenText.verticalScrollbar != null)
-                {
-                    Instance.screenText.verticalScrollbar.value = 0f;
-                }
+                return;
+            }
+            TerminalPatch.modifyingText.SetValue(Instance, true);
+            Instance.screenText.interactable = true;
+            Instance.screenText.text = text;
+            Instance.currentText = Instance.screenText.text;
+            if (Instance.screenText.verticalScrollbar != null)
+            {
+                Instance.screenText.verticalScrollbar.value = 0f;
             }
         }
 

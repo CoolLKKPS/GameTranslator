@@ -1,3 +1,7 @@
+## v2.4.0
+
+- Fixed the issue where user need to type at least two characters to confirm or deny in some cases on the terminal
+
 ## v2.3.9
 
 - Fixed Scale Fallback Effects breaking when another mod instances the text's fontMaterial
