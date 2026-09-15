@@ -25,7 +25,7 @@ namespace GameTranslator.Patches.Translatons
             {
                 if (this._source == null)
                 {
-                    return this._data;
+                    return field;
                 }
                 else
                 {
@@ -41,7 +41,7 @@ namespace GameTranslator.Patches.Translatons
             {
                 if (this._source == null)
                 {
-                    this._data = value;
+                    field = value;
                 }
                 else
                 {
@@ -84,8 +84,6 @@ namespace GameTranslator.Patches.Translatons
         private readonly TranslatedImage.ITranslatedImageSource _source;
 
         private XUnity.Common.Utilities.WeakReference<byte[]> _weakData;
-
-        private byte[] _data;
 
         public interface ITranslatedImageSource
         {

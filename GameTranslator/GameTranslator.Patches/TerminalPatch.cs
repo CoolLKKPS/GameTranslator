@@ -134,7 +134,7 @@ namespace GameTranslator.Patches
         [HarmonyPatch("ParseWord")]
         private static void ParseWord(Terminal __instance, string playerWord, int specificityRequired, ref TerminalKeyword __result)
         {
-            if (TranslatePlugin.TerimalCanUseShortCutOne.Value || TranslatePlugin.TerimalCanUseShortCutTwo.Value)
+            if (GameTranslatorCore.TerimalCanUseShortCutOne.Value || GameTranslatorCore.TerimalCanUseShortCutTwo.Value)
             {
                 if (playerWord.Length < specificityRequired)
                 {
@@ -201,7 +201,7 @@ namespace GameTranslator.Patches
                 }
                 catch (Exception ex)
                 {
-                    TranslatePlugin.logger.LogError(ex.Message);
+                    GameTranslatorCore.logger.LogError(ex.Message);
                     return;
                 }
             }
@@ -246,12 +246,12 @@ namespace GameTranslator.Patches
         {
             if (useC)
             {
-                if (TranslatePlugin.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.TryGetValue(name, out string value))
+                if (GameTranslatorCore.TerimalCanUseShortCutOne.Value && TranslateConfig.cmd_zh.normal.TryGetValue(name, out string value))
                     return value;
             }
             else
             {
-                if (TranslatePlugin.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.TryGetValue(name, out string value))
+                if (GameTranslatorCore.TerimalCanUseShortCutTwo.Value && TranslateConfig.cmd_py.normal.TryGetValue(name, out string value))
                     return value;
             }
             return "";
@@ -273,14 +273,14 @@ namespace GameTranslator.Patches
         {
             try
             {
-                if (TerminalPatch.info != null && TranslatePlugin.shouldTranslateTerimal.Value)
+                if (TerminalPatch.info != null && GameTranslatorCore.shouldTranslateTerimal.Value)
                 {
                     if (!TerminalPatch.info.IsTranslated)
                     {
-                        if (TranslatePlugin.showAvailableText.Value && !string.IsNullOrEmpty(__instance.currentText) &&
+                        if (GameTranslatorCore.showAvailableText.Value && !string.IsNullOrEmpty(__instance.currentText) &&
                             GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"terminal:{__instance.currentText}"))
                         {
-                            try { TranslatePlugin.logger.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'"); }
+                            try { GameTranslatorCore.logger.LogInfo($"[Debug] Terminal available text: '{__instance.currentText}'"); }
                             catch (IndexOutOfRangeException) { }
                         }
 
@@ -294,7 +294,7 @@ namespace GameTranslator.Patches
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogWarning(ex);
+                GameTranslatorCore.logger.LogWarning(ex);
             }
         }
 

@@ -25,7 +25,7 @@ namespace GameTranslator.Patches.Utils
                 _availableFonts.Clear();
                 _characterSupportCache.Clear();
                 _textCache.Clear();
-                if (TranslatePlugin.changeFont.Value)
+                if (GameTranslatorCore.changeFont.Value)
                 {
                     var fallbackFonts = FontCache.GetOrCreateFallbackFontTextMeshPro();
                     foreach (var fontObj in fallbackFonts)
@@ -49,7 +49,7 @@ namespace GameTranslator.Patches.Utils
                 {
                     _isInitialized = true;
                 }
-                TranslatePlugin.logger.LogInfo($"FontSupportChecker initialized with {_availableFonts.Count} fonts");
+                GameTranslatorCore.logger.LogInfo($"FontSupportChecker initialized with {_availableFonts.Count} fonts");
             }
         }
 
@@ -78,7 +78,7 @@ namespace GameTranslator.Patches.Utils
                 _isInitialized = true;
                 _characterSupportCache.Clear();
                 _textCache.Clear();
-                TranslatePlugin.logger.LogDebug(string.IsNullOrEmpty(font.name) ? "Registered new font (unnamed)" : $"Registered new font: {font.name}");
+                GameTranslatorCore.logger.LogDebug(string.IsNullOrEmpty(font.name) ? "Registered new font (unnamed)" : $"Registered new font: {font.name}");
             }
         }
 
@@ -96,7 +96,7 @@ namespace GameTranslator.Patches.Utils
 
         internal static string ReplaceUnsupportedCharacters(string text, TMPro.TMP_Text textComponent = null)
         {
-            if (string.IsNullOrEmpty(text) || !TranslatePlugin.replaceUnsupportedCharacters.Value)
+            if (string.IsNullOrEmpty(text) || !GameTranslatorCore.replaceUnsupportedCharacters.Value)
                 return text;
             if (!_isInitialized)
                 InitializeFonts();
@@ -137,9 +137,9 @@ namespace GameTranslator.Patches.Utils
                 }
             }
             string result = stringBuilder.ToString();
-            if (hasReplacement && TranslatePlugin.showOtherDebug.Value)
+            if (hasReplacement && GameTranslatorCore.showOtherDebug.Value)
             {
-                try { TranslatePlugin.logger.LogInfo($"[FontSupport] Replaced unsupported characters for text: '{text}' -> '{result}'"); }
+                try { GameTranslatorCore.logger.LogInfo($"[FontSupport] Replaced unsupported characters for text: '{text}' -> '{result}'"); }
                 catch (IndexOutOfRangeException) { }
             }
             _textCache.Add(text, result);
@@ -153,7 +153,7 @@ namespace GameTranslator.Patches.Utils
             {
                 _characterSupportCache.Clear();
                 _textCache.Clear();
-                TranslatePlugin.logger.LogDebug("FontSupportChecker cache cleared");
+                GameTranslatorCore.logger.LogDebug("FontSupportChecker cache cleared");
             }
         }
 

@@ -1,3 +1,7 @@
+## v2.4.1
+
+- Use own GameObject instead of touching the shared BepInEx manager
+
 ## v2.4.0
 
 - Fixed the issue when terminal node doesn't get translate, modifyingtext will trigger textchanged early return that cause user need type two times (character or word) to make terminal works in certain cases

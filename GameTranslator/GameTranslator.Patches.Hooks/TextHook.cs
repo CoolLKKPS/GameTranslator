@@ -18,7 +18,7 @@ namespace GameTranslator.Patches.Hooks
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger?.LogError($"Error in TextHook.OnEnable: {ex.Message}");
+                GameTranslatorCore.logger?.LogError($"Error in TextHook.OnEnable: {ex.Message}");
             }
         }
 

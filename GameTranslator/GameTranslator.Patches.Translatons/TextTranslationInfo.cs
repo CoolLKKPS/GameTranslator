@@ -72,11 +72,11 @@ namespace GameTranslator.Patches.Translatons
                         CachedProperty cachedProperty = unityType.CachedProperty("font");
                         TMP_FontAsset originalFont = (TMP_FontAsset)cachedProperty.Get(ui);
 
-                        if (originalFont != null && !TranslatePlugin.fallbackFontTextMeshPro.Value.IsNullOrWhiteSpace())
+                        if (originalFont != null && !GameTranslatorCore.fallbackFontTextMeshPro.Value.IsNullOrWhiteSpace())
                         {
                             if (TextTranslationInfo._processedFonts.Add(originalFont))
                             {
-                                foreach (char c in TranslatePlugin.shouldRemoveChar.Value.ToCharArray())
+                                foreach (char c in GameTranslatorCore.shouldRemoveChar.Value.ToCharArray())
                                 {
                                     originalFont.TryRemoveCharacter(c);
                                 }
@@ -93,14 +93,14 @@ namespace GameTranslator.Patches.Translatons
                                 }
                                 else if (fallbackFont != null && FontHelper.GetFontMaterial(fallbackFont) == null && _loggedNullMaterialFonts.Add(fallbackFont.name))
                                 {
-                                    TranslatePlugin.logger.LogError($"Font '{fallbackFont.name}' has no material. Please regenerate it in the Font Asset Creator.");
+                                    GameTranslatorCore.logger.LogError($"Font '{fallbackFont.name}' has no material. Please regenerate it in the Font Asset Creator.");
                                 }
                             }
                         }
                     }
                     catch (Exception ex2)
                     {
-                        TranslatePlugin.logger.LogWarning("There was a problem when changing the font!" + ex2.Message);
+                        GameTranslatorCore.logger.LogWarning("There was a problem when changing the font!" + ex2.Message);
                     }
                 }
             }

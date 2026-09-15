@@ -20,17 +20,17 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
 
                 if (_isInteractiveTerminalAPIAvailable)
                 {
-                    TranslatePlugin.logger.LogInfo("InteractiveTerminalAPI translation module initialized");
+                    GameTranslatorCore.logger.LogInfo("InteractiveTerminalAPI translation module initialized");
                     RegisterTranslationHandlers();
                 }
                 else
                 {
-                    TranslatePlugin.logger.LogInfo("InteractiveTerminalAPI not found, translation module disabled");
+                    GameTranslatorCore.logger.LogInfo("InteractiveTerminalAPI not found, translation module disabled");
                 }
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError("Failed to initialize InteractiveTerminalAPI: " + ex.Message);
+                GameTranslatorCore.logger.LogError("Failed to initialize InteractiveTerminalAPI: " + ex.Message);
                 _isInteractiveTerminalAPIAvailable = false;
             }
         }
@@ -59,7 +59,7 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError("Failed to register InteractiveTerminalAPI translation handlers: " + ex.Message);
+                GameTranslatorCore.logger.LogError("Failed to register InteractiveTerminalAPI translation handlers: " + ex.Message);
             }
         }
 
@@ -81,11 +81,11 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
                         try
                         {
                             _harmony.Patch(getTextMethod, postfix: new HarmonyMethod(typeof(InteractiveTerminalAPIPatch).GetMethod("GetTextPostfix", BindingFlags.NonPublic | BindingFlags.Static)));
-                            TranslatePlugin.logger.LogInfo($"Patched {type.Name}.GetText method");
+                            GameTranslatorCore.logger.LogInfo($"Patched {type.Name}.GetText method");
                         }
                         catch (Exception ex)
                         {
-                            TranslatePlugin.logger.LogWarning($"Failed to patch {type.Name}.GetText: {ex}");
+                            GameTranslatorCore.logger.LogWarning($"Failed to patch {type.Name}.GetText: {ex}");
                         }
                     }
                 }
@@ -94,7 +94,7 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
 
         private static void GetTextPostfix(ref string __result)
         {
-            if (!string.IsNullOrEmpty(__result) && TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
+            if (!string.IsNullOrEmpty(__result) && GameTranslatorCore.shouldTranslateInteractiveTerminalAPI.Value)
             {
                 __result = TranslateInteractiveText(__result);
             }
@@ -102,24 +102,24 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
 
         public static string TranslateInteractiveText(string text)
         {
-            if (string.IsNullOrEmpty(text) || !TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
+            if (string.IsNullOrEmpty(text) || !GameTranslatorCore.shouldTranslateInteractiveTerminalAPI.Value)
                 return text;
             try
             {
-                if (TranslatePlugin.showAvailableText.Value &&
+                if (GameTranslatorCore.showAvailableText.Value &&
                     GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"InteractiveTerminalAPI:{text}"))
                 {
-                    try { TranslatePlugin.logger.LogInfo($"[Debug] InteractiveTerminalAPI available text: '{text}'"); }
+                    try { GameTranslatorCore.logger.LogInfo($"[Debug] InteractiveTerminalAPI available text: '{text}'"); }
                     catch (IndexOutOfRangeException) { }
                 }
 
                 if (TranslateConfig.interactiveTerminalAPI != null && TranslateConfig.interactiveTerminalAPI.shouldTranslate)
                 {
                     string translated = TranslateConfig.replaceByMap(text, TranslateConfig.interactiveTerminalAPI);
-                    if (TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value &&
+                    if (GameTranslatorCore.showAvailableText.Value && GameTranslatorCore.showOtherDebug.Value &&
                         GameTranslator.Patches.Utils.TextTranslate.ShouldOutputDebug($"InteractiveTerminalAPI_translated:{translated}"))
                     {
-                        try { TranslatePlugin.logger.LogInfo($"[Debug] InteractiveTerminalAPI translated: '{translated}'"); }
+                        try { GameTranslatorCore.logger.LogInfo($"[Debug] InteractiveTerminalAPI translated: '{translated}'"); }
                         catch (IndexOutOfRangeException) { }
                     }
                     return translated;
@@ -128,7 +128,7 @@ namespace GameTranslator.Patches.InteractiveTerminalAPI
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError("Error translating InteractiveTerminalAPI text: " + ex.Message);
+                GameTranslatorCore.logger.LogError("Error translating InteractiveTerminalAPI text: " + ex.Message);
                 return text;
             }
         }

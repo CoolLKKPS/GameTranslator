@@ -56,7 +56,7 @@ namespace GameTranslator.Patches.Translatons
                         }
                         catch (Exception ex)
                         {
-                            TranslatePlugin.logger.LogError($"Error processing translation job: {ex.Message}");
+                            GameTranslatorCore.logger.LogError($"Error processing translation job: {ex.Message}");
                         }
                     });
                 }

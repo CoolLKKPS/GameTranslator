@@ -17,7 +17,7 @@ namespace GameTranslator.Patches.Utils
 
         public static bool ShouldOutputDebug(string text)
         {
-            if (!TranslatePlugin.showAvailableText.Value && !TranslatePlugin.showOtherDebug.Value)
+            if (!GameTranslatorCore.showAvailableText.Value && !GameTranslatorCore.showOtherDebug.Value)
             {
                 return false;
             }
@@ -43,7 +43,7 @@ namespace GameTranslator.Patches.Utils
 
         private static void CleanupDebugCache()
         {
-            if (!TranslatePlugin.showAvailableText.Value && !TranslatePlugin.showOtherDebug.Value)
+            if (!GameTranslatorCore.showAvailableText.Value && !GameTranslatorCore.showOtherDebug.Value)
             {
                 _debugOutputCache.Clear();
                 return;
@@ -67,13 +67,13 @@ namespace GameTranslator.Patches.Utils
 
             if (keysToRemove.Count > 0)
             {
-                TranslatePlugin.logger.LogInfo($"[Debug] Cleaned up {keysToRemove.Count} old debug cache entries");
+                GameTranslatorCore.logger.LogInfo($"[Debug] Cleaned up {keysToRemove.Count} old debug cache entries");
             }
         }
 
         private static bool IsTerminalIgnoredUI(object ui)
         {
-            if (TranslatePlugin.enableTerminalPatch == null || !TranslatePlugin.enableTerminalPatch.Value)
+            if (GameTranslatorCore.enableTerminalPatch == null || !GameTranslatorCore.enableTerminalPatch.Value)
                 return false;
             try
             {
@@ -105,7 +105,7 @@ namespace GameTranslator.Patches.Utils
             info = ui.GetOrCreateTextTranslationInfo();
             bool componentState = this.DiscoverComponent(ui, info);
 
-            if (!TranslatePlugin.shouldTranslateNormalText.Value)
+            if (!GameTranslatorCore.shouldTranslateNormalText.Value)
                 return false;
 
             text ??= ui.GetText(info);
@@ -147,14 +147,14 @@ namespace GameTranslator.Patches.Utils
             string cachedTranslation = normalText?.TryGetCachedTranslation(text, TranslationScopeHelper.GetScope(ui));
             if (cachedTranslation != null)
             {
-                if (!TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached-result:{text}"))
+                if (!GameTranslatorCore.showAvailableText.Value && GameTranslatorCore.showOtherDebug.Value && ShouldOutputDebug($"cached-result:{text}"))
                 {
-                    try { TranslatePlugin.logger.LogInfo($"[Debug] Cached translation found for text: '{text}' -> '{cachedTranslation}'"); }
+                    try { GameTranslatorCore.logger.LogInfo($"[Debug] Cached translation found for text: '{text}' -> '{cachedTranslation}'"); }
                     catch (IndexOutOfRangeException) { }
                 }
-                else if (TranslatePlugin.showAvailableText.Value && TranslatePlugin.showOtherDebug.Value && ShouldOutputDebug($"cached:{text}"))
+                else if (GameTranslatorCore.showAvailableText.Value && GameTranslatorCore.showOtherDebug.Value && ShouldOutputDebug($"cached:{text}"))
                 {
-                    try { TranslatePlugin.logger.LogInfo($"[Debug] Cached translation hit for text: '{text}'"); }
+                    try { GameTranslatorCore.logger.LogInfo($"[Debug] Cached translation hit for text: '{text}'"); }
                     catch (IndexOutOfRangeException) { }
                 }
                 if (info != null)
@@ -173,7 +173,7 @@ namespace GameTranslator.Patches.Utils
 
             if (normalText == null || normalText.IsTranslatable(text, false, TranslationScopeHelper.GetScope(ui)))
             {
-                if (text.Length <= TranslatePlugin.syncTranslationThreshold.Value)
+                if (text.Length <= GameTranslatorCore.syncTranslationThreshold.Value)
                 {
                     var translatedText = TranslateImmediate(ui, text, info, normalText, config, ignoreComponentState);
                     if (translatedText != null)
@@ -183,9 +183,9 @@ namespace GameTranslator.Patches.Utils
                 }
                 else
                 {
-                    if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"queued:{text}"))
+                    if (GameTranslatorCore.showAvailableText.Value && ShouldOutputDebug($"queued:{text}"))
                     {
-                        try { TranslatePlugin.logger.LogInfo($"[Debug] Queued available text: '{text}'"); }
+                        try { GameTranslatorCore.logger.LogInfo($"[Debug] Queued available text: '{text}'"); }
                         catch (IndexOutOfRangeException) { }
                     }
                     GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.QueueTranslation(ui, text, info, normalText, config, ignoreComponentState);
@@ -210,11 +210,11 @@ namespace GameTranslator.Patches.Utils
             int scope = TranslationScopeHelper.GetScope(ui);
             if (normalText == null || normalText.IsTranslatable(text, false, scope))
             {
-                if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value)
+                if (normalText != null && GameTranslatorCore.shouldTranslateNormalText.Value)
                 {
-                    if (TranslatePlugin.showAvailableText.Value && ShouldOutputDebug($"available:{text}"))
+                    if (GameTranslatorCore.showAvailableText.Value && ShouldOutputDebug($"available:{text}"))
                     {
-                        try { TranslatePlugin.logger.LogInfo($"[Debug] Found available text: '{text}'"); }
+                        try { GameTranslatorCore.logger.LogInfo($"[Debug] Found available text: '{text}'"); }
                         catch (IndexOutOfRangeException) { }
                     }
                     result = normalText.TryTranslate(text, scope);
@@ -298,11 +298,11 @@ namespace GameTranslator.Patches.Utils
             }
             catch (System.IndexOutOfRangeException ex)
             {
-                TranslatePlugin.logger.LogError($"IndexOutOfRangeException in SetTranslatedText: {ex.Message}");
+                GameTranslatorCore.logger.LogError($"IndexOutOfRangeException in SetTranslatedText: {ex.Message}");
             }
             catch (System.Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Exception in SetTranslatedText: {ex.Message}");
+                GameTranslatorCore.logger.LogError($"Exception in SetTranslatedText: {ex.Message}");
             }
             finally
             {
@@ -333,11 +333,11 @@ namespace GameTranslator.Patches.Utils
                 }
                 catch (System.IndexOutOfRangeException ex)
                 {
-                    TranslatePlugin.logger.LogError($"IndexOutOfRangeException in SetText: {ex.Message}");
+                    GameTranslatorCore.logger.LogError($"IndexOutOfRangeException in SetText: {ex.Message}");
                 }
                 catch (System.Exception ex)
                 {
-                    TranslatePlugin.logger.LogError($"Exception in SetText: {ex.Message}");
+                    GameTranslatorCore.logger.LogError($"Exception in SetText: {ex.Message}");
                 }
                 finally
                 {
@@ -381,12 +381,12 @@ namespace GameTranslator.Patches.Utils
 
         public bool DiscoverComponent(object ui, TextTranslationInfo info)
         {
-            if (info != null && TranslatePlugin.changeFont.Value)
+            if (info != null && GameTranslatorCore.changeFont.Value)
             {
                 try
                 {
                     bool flag = ui.IsComponentActive();
-                    if (TranslatePlugin.fallbackFontTextMeshPro.Value != null && flag)
+                    if (GameTranslatorCore.fallbackFontTextMeshPro.Value != null && flag)
                     {
                         info.ChangeFont(ui);
                         return true;
@@ -395,7 +395,7 @@ namespace GameTranslator.Patches.Utils
                 }
                 catch (Exception ex)
                 {
-                    ManualLogSource logger = TranslatePlugin.logger;
+                    ManualLogSource logger = GameTranslatorCore.logger;
                     string text = "An error occurred while processing the UI.";
                     string newLine = Environment.NewLine;
                     Exception ex2 = ex;

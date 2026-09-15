@@ -18,12 +18,12 @@ namespace GameTranslator.Patches.Translatons
             try
             {
                 this.FileName = fileName;
-                this.FilePath = Path.Combine(TranslatePlugin.DefaultPath, fileName);
+                this.FilePath = Path.Combine(GameTranslatorCore.DefaultPath, fileName);
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError("An error occurred while initializing the translation file: " + fileName);
-                TranslatePlugin.logger.LogError(ex);
+                GameTranslatorCore.logger.LogError("An error occurred while initializing the translation file: " + fileName);
+                GameTranslatorCore.logger.LogError(ex);
             }
         }
 
@@ -31,7 +31,7 @@ namespace GameTranslator.Patches.Translatons
         {
             if (!File.Exists(this.FilePath))
             {
-                TranslatePlugin.logger.LogWarning("Translation file not found: " + this.FilePath);
+                GameTranslatorCore.logger.LogWarning("Translation file not found: " + this.FilePath);
                 return;
             }
             try
@@ -53,8 +53,8 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError("An error occurred while loading " + this.FileName + " file!");
-                TranslatePlugin.logger.LogError(ex);
+                GameTranslatorCore.logger.LogError("An error occurred while loading " + this.FileName + " file!");
+                GameTranslatorCore.logger.LogError(ex);
             }
         }
 
@@ -62,11 +62,11 @@ namespace GameTranslator.Patches.Translatons
         {
             if (isLoad)
             {
-                TranslatePlugin.logger.LogInfo(">>> Loading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
+                GameTranslatorCore.logger.LogInfo(">>> Loading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
             }
             else
             {
-                TranslatePlugin.logger.LogInfo(">>> Reloading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
+                GameTranslatorCore.logger.LogInfo(">>> Reloading text file: " + Path.GetFileNameWithoutExtension(stream) + ".");
             }
             using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
             {
@@ -148,7 +148,7 @@ namespace GameTranslator.Patches.Translatons
                                     }
                                     catch (Exception ex)
                                     {
-                                        ManualLogSource logger = TranslatePlugin.logger;
+                                        ManualLogSource logger = GameTranslatorCore.logger;
                                         string[] array3 = new string[5];
                                         array3[0] = "An error occurred while constructing the regexTranslationSplitter: '";
                                         array3[1] = text;
@@ -186,7 +186,7 @@ namespace GameTranslator.Patches.Translatons
                                     }
                                     catch (Exception ex3)
                                     {
-                                        ManualLogSource logger2 = TranslatePlugin.logger;
+                                        ManualLogSource logger2 = GameTranslatorCore.logger;
                                         string[] array4 = new string[5];
                                         array4[0] = "An error occurred while constructing the regexTranslation: '";
                                         array4[1] = text;
@@ -217,7 +217,7 @@ namespace GameTranslator.Patches.Translatons
                     }
                     catch (Exception ex5)
                     {
-                        ManualLogSource logger3 = TranslatePlugin.logger;
+                        ManualLogSource logger3 = GameTranslatorCore.logger;
                         string[] array5 = new string[5];
                         array5[0] = "An error occurred while reading the translation: '";
                         array5[1] = text;
@@ -285,7 +285,7 @@ namespace GameTranslator.Patches.Translatons
                 translations.TryRemove(key, out _);
                 lastAccess.TryRemove(key, out _);
             }
-            TranslatePlugin.logger.LogInfo(string.Format("Translation cache evicted {0} entries, {1} remaining (reason: {2})", keysToRemove.Count, translations.Count, reason));
+            GameTranslatorCore.logger.LogInfo(string.Format("Translation cache evicted {0} entries, {1} remaining (reason: {2})", keysToRemove.Count, translations.Count, reason));
         }
 
         private void PeriodicCacheCleanup()
@@ -369,7 +369,7 @@ namespace GameTranslator.Patches.Translatons
                     }
                     catch (Exception ex)
                     {
-                        TranslatePlugin.logger.LogWarning($"Splitter regex '{splitter.Original}' error: {ex.Message}");
+                        GameTranslatorCore.logger.LogWarning($"Splitter regex '{splitter.Original}' error: {ex.Message}");
                         return text;
                     }
                 }
@@ -404,7 +404,7 @@ namespace GameTranslator.Patches.Translatons
             }
 
             Stopwatch stopwatch = null;
-            if (TranslatePlugin.showOtherDebug.Value)
+            if (GameTranslatorCore.showOtherDebug.Value)
             {
                 stopwatch = Stopwatch.StartNew();
             }
@@ -479,7 +479,7 @@ namespace GameTranslator.Patches.Translatons
                                     if (scopedFail.FailedRegexLookups.Count > FAILED_LOOKUP_CACHE_MAX)
                                     {
                                         scopedFail.FailedRegexLookups.Clear();
-                                        TranslatePlugin.logger.LogInfo($"Scoped failed regex lookup cache reached limit for scope {scope}, cleared");
+                                        GameTranslatorCore.logger.LogInfo($"Scoped failed regex lookup cache reached limit for scope {scope}, cleared");
                                     }
                                 }
                                 else
@@ -488,7 +488,7 @@ namespace GameTranslator.Patches.Translatons
                                     if (this._failedRegexLookups.Count > FAILED_LOOKUP_CACHE_MAX)
                                     {
                                         this._failedRegexLookups.Clear();
-                                        TranslatePlugin.logger.LogInfo("Failed regex lookup cache reached limit, cleared");
+                                        GameTranslatorCore.logger.LogInfo("Failed regex lookup cache reached limit, cleared");
                                     }
                                 }
                             }
@@ -515,8 +515,8 @@ namespace GameTranslator.Patches.Translatons
                     catch (Exception ex)
                     {
                         string textSnippet = NormalTextTranslator.GetTextSnippet(text, 50);
-                        TranslatePlugin.logger.LogError("There is a problem with the translation method: " + textSnippet);
-                        TranslatePlugin.logger.LogError("Translation error: " + ex.Message + "\n" + ex.StackTrace);
+                        GameTranslatorCore.logger.LogError("There is a problem with the translation method: " + textSnippet);
+                        GameTranslatorCore.logger.LogError("Translation error: " + ex.Message + "\n" + ex.StackTrace);
                     }
                     text2 = text3;
                 }
@@ -529,7 +529,7 @@ namespace GameTranslator.Patches.Translatons
                     if (stopwatch.ElapsedMilliseconds > 500L)
                     {
                         string textSnippet2 = NormalTextTranslator.GetTextSnippet(text, 50);
-                        try { TranslatePlugin.logger.LogWarning(string.Format("TryTranslate took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, textSnippet2)); }
+                        try { GameTranslatorCore.logger.LogWarning(string.Format("TryTranslate took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, textSnippet2)); }
                         catch (IndexOutOfRangeException) { }
                     }
                 }
@@ -712,12 +712,12 @@ namespace GameTranslator.Patches.Translatons
                 }
                 else
                 {
-                    TranslatePlugin.logger.LogInfo("Regex compilation support check encountered unknown error");
+                    GameTranslatorCore.logger.LogInfo("Regex compilation support check encountered unknown error");
                 }
             }
             catch (Exception)
             {
-                TranslatePlugin.logger.LogInfo("Current game version does not support compiled regex, using non-compiled mode");
+                GameTranslatorCore.logger.LogInfo("Current game version does not support compiled regex, using non-compiled mode");
             }
         }
 

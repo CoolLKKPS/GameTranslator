@@ -11,14 +11,13 @@ namespace GameTranslator.Patches.Utils
         private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
         private static readonly List<Renderer> RendererBuffer = [];
         private static readonly List<Material> MaterialBuffer = [];
-        private static bool _isProcessing;
         private static bool _initialized;
         private static readonly ConcurrentQueue<bool> RefreshRequests = [];
-        internal static bool IsEnabled => TranslatePlugin.textureEnhancement || TranslatePlugin.textureEnhancementDump;
-        internal static bool CanTranslate => TranslatePlugin.changeTexture.Value && TranslatePlugin.textureEnhancement && TranslateConfig.cache != null && TranslateConfig.cache.HasRegisteredImages;
-        internal static bool CanDump => TranslatePlugin.textureEnhancementDump;
+        internal static bool IsEnabled => GameTranslatorCore.textureEnhancement || GameTranslatorCore.textureEnhancementDump;
+        internal static bool CanTranslate => GameTranslatorCore.changeTexture.Value && GameTranslatorCore.textureEnhancement && TranslateConfig.cache != null && TranslateConfig.cache.HasRegisteredImages;
+        internal static bool CanDump => GameTranslatorCore.textureEnhancementDump;
         internal static bool CanProcess => IsEnabled && (CanTranslate || CanDump);
-        internal static bool IsProcessing => _isProcessing;
+        internal static bool IsProcessing { get; private set; }
 
         internal static bool ContainsRenderer(UnityEngine.Object source)
         {
@@ -60,7 +59,7 @@ namespace GameTranslator.Patches.Utils
 
         internal static void ProcessRefreshRequests()
         {
-            if (RefreshRequests.IsEmpty || _isProcessing)
+            if (RefreshRequests.IsEmpty || IsProcessing)
             {
                 return;
             }
@@ -86,7 +85,7 @@ namespace GameTranslator.Patches.Utils
 
         private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (!CanProcess || _isProcessing)
+            if (!CanProcess || IsProcessing)
             {
                 return;
             }
@@ -107,7 +106,7 @@ namespace GameTranslator.Patches.Utils
 
         internal static void ProcessObject(UnityEngine.Object source)
         {
-            if (!CanProcess || source == null || _isProcessing)
+            if (!CanProcess || source == null || IsProcessing)
             {
                 return;
             }
@@ -173,15 +172,15 @@ namespace GameTranslator.Patches.Utils
             var original = texture;
             try
             {
-                _isProcessing = true;
-                TextureTranslate.Instance.Hook_ImageChanged(ref texture, false, TranslatePlugin.SceneDumpPath);
+                IsProcessing = true;
+                TextureTranslate.Instance.Hook_ImageChanged(ref texture, false, GameTranslatorCore.SceneDumpPath);
             }
             catch
             {
             }
             finally
             {
-                _isProcessing = false;
+                IsProcessing = false;
             }
 
             if (!ReferenceEquals(texture, original) && texture != null)

@@ -22,12 +22,12 @@ namespace GameTranslator.Patches.Utils
             string fontBundlePath = Path.Combine(Paths.GameRoot, assetBundle);
             if (File.Exists(fontBundlePath))
             {
-                TranslatePlugin.logger.LogInfo($"Attempting to load TextMesh Pro font from asset bundle: {fontBundlePath}");
+                GameTranslatorCore.logger.LogInfo($"Attempting to load TextMesh Pro font from asset bundle: {fontBundlePath}");
 
                 AssetBundle bundle = AssetBundle.LoadFromFile(fontBundlePath);
                 if (bundle == null)
                 {
-                    TranslatePlugin.logger.LogWarning("Could not load asset bundle while loading font: " + fontBundlePath);
+                    GameTranslatorCore.logger.LogWarning("Could not load asset bundle while loading font: " + fontBundlePath);
                     return fonts;
                 }
                 FontHelper._loadedBundles.Add(bundle);
@@ -64,7 +64,7 @@ namespace GameTranslator.Patches.Utils
                             string pointSizeStr = FontHelper._getFaceInfoPointSize(font);
                             string versionStr = FontHelper._getVersion(font);
                             int atlasPaddingVal = FontHelper._getAtlasPadding(font);
-                            TranslatePlugin.logger.LogDebug($"Loaded TextMesh Pro font '{font.name}' version={versionStr}, shader={shaderName}, render={renderMode}, {atlasInfo}, pointSize={pointSizeStr}, padding={atlasPaddingVal}");
+                            GameTranslatorCore.logger.LogDebug($"Loaded TextMesh Pro font '{font.name}' version={versionStr}, shader={shaderName}, render={renderMode}, {atlasInfo}, pointSize={pointSizeStr}, padding={atlasPaddingVal}");
                             fonts.Add(font);
                         }
                     }
@@ -79,7 +79,7 @@ namespace GameTranslator.Patches.Utils
                 }
                 else
                 {
-                    TranslatePlugin.logger.LogInfo("Attempting to load TextMesh Pro font from internal Resources API: " + assetBundle);
+                    GameTranslatorCore.logger.LogInfo("Attempting to load TextMesh Pro font from internal Resources API: " + assetBundle);
                     var font = Resources.Load(assetBundle);
                     if (font != null)
                     {
@@ -90,7 +90,7 @@ namespace GameTranslator.Patches.Utils
 
             if (fonts.Count == 0)
             {
-                TranslatePlugin.logger.LogError("Could not find any TextMeshPro font assets: " + assetBundle);
+                GameTranslatorCore.logger.LogError("Could not find any TextMeshPro font assets: " + assetBundle);
             }
 
             return fonts;
@@ -104,7 +104,7 @@ namespace GameTranslator.Patches.Utils
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogWarning("Unable to retrieve OS installed fonts: " + ex.Message);
+                GameTranslatorCore.logger.LogWarning("Unable to retrieve OS installed fonts: " + ex.Message);
                 return [];
             }
         }
@@ -132,22 +132,22 @@ namespace GameTranslator.Patches.Utils
 
                 if (FontHelper._createFontAssetFromStringMethod != null)
                 {
-                    TranslatePlugin.logger.LogInfo($"System font '{fontName}' found. Creating TextMesh Pro font asset from it.");
+                    GameTranslatorCore.logger.LogInfo($"System font '{fontName}' found. Creating TextMesh Pro font asset from it.");
                     var font = (TMP_FontAsset)FontHelper._createFontAssetFromStringMethod.Invoke(null, new object[] { fontName, "", 90 });
                     if (font != null)
                     {
                         font.name = fontName;
-                        TranslatePlugin.logger.LogDebug($"System font asset created: {font.name}");
+                        GameTranslatorCore.logger.LogDebug($"System font asset created: {font.name}");
                     }
                     return font;
                 }
 
-                TranslatePlugin.logger.LogWarning("System font loading not supported on this TextMeshPro version.");
+                GameTranslatorCore.logger.LogWarning("System font loading not supported on this TextMeshPro version.");
                 return null;
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogWarning($"Error creating font from system font '{fontName}': {ex.Message}");
+                GameTranslatorCore.logger.LogWarning($"Error creating font from system font '{fontName}': {ex.Message}");
                 return null;
             }
         }
@@ -166,7 +166,7 @@ namespace GameTranslator.Patches.Utils
                 }
                 catch (Exception ex)
                 {
-                    TranslatePlugin.logger.LogError("Error unloading bundle: " + ex.Message);
+                    GameTranslatorCore.logger.LogError("Error unloading bundle: " + ex.Message);
                 }
             }
             FontHelper._loadedBundles.Clear();

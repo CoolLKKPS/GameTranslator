@@ -91,14 +91,14 @@ namespace GameTranslator.Patches.Translatons
 
         private TextureDataResult SetupKeyForNameWithFallback(string name, Texture2D texture)
         {
-            if (TranslatePlugin.disableDuplicateTextureCheck.Value)
+            if (GameTranslatorCore.disableDuplicateTextureCheck.Value)
             {
                 this._key = TextureTranslationCache.HashHelper.Compute(TextureTranslationInfo.UTF8.GetBytes(name));
                 return null;
             }
-            if (!string.IsNullOrEmpty(TranslatePlugin.ignoredTextureNames.Value))
+            if (!string.IsNullOrEmpty(GameTranslatorCore.ignoredTextureNames.Value))
             {
-                var ignoredNames = TranslatePlugin.ignoredTextureNames.Value.Split(_semicolonSep, StringSplitOptions.RemoveEmptyEntries);
+                var ignoredNames = GameTranslatorCore.ignoredTextureNames.Value.Split(_semicolonSep, StringSplitOptions.RemoveEmptyEntries);
                 if (ignoredNames.Contains(name))
                 {
                     this._key = TextureTranslationCache.HashHelper.Compute(TextureTranslationInfo.UTF8.GetBytes(name));
@@ -137,7 +137,7 @@ namespace GameTranslator.Patches.Translatons
                 if (textureName != null)
                 {
                     TextureDataResult textureDataResult = this.SetupKeyForNameWithFallback(textureName, texture);
-                    if (TranslatePlugin.enableTextureDumping.Value && _originalData == null)
+                    if (GameTranslatorCore.enableTextureDumping.Value && _originalData == null)
                     {
                         if (textureDataResult != null)
                         {

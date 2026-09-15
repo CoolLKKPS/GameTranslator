@@ -11,13 +11,13 @@ namespace GameTranslator.Patches.Utils
 
         internal static void RegisterDynamicFont(TMP_FontAsset font)
         {
-            if (font != null && font.atlasPopulationMode != AtlasPopulationMode.Static && TranslatePlugin.changeFont.Value && TranslatePlugin.enableDynamicFont.Value)
+            if (font != null && font.atlasPopulationMode != AtlasPopulationMode.Static && GameTranslatorCore.changeFont.Value && GameTranslatorCore.enableDynamicFont.Value)
                 _dynamicFonts.Add(font);
         }
 
         internal static void TryAddCharacterOnDemand(uint unicode)
         {
-            if (_dynamicFonts.Count == 0 || !TranslatePlugin.changeFont.Value || !TranslatePlugin.enableDynamicFont.Value)
+            if (_dynamicFonts.Count == 0 || !GameTranslatorCore.changeFont.Value || !GameTranslatorCore.enableDynamicFont.Value)
                 return;
 
             if (!_processedChars.Add(unicode))
@@ -33,14 +33,14 @@ namespace GameTranslator.Patches.Utils
                 }
                 catch (System.Exception ex)
                 {
-                    TranslatePlugin.logger.LogWarning($"[DynamicFont] Failed: {ex.Message}");
+                    GameTranslatorCore.logger.LogWarning($"[DynamicFont] Failed: {ex.Message}");
                 }
             }
 
             if (!_warned)
             {
                 _warned = true;
-                TranslatePlugin.logger.LogWarning($"[DynamicFont] Cannot add character. Atlas may be full or character unsupported.");
+                GameTranslatorCore.logger.LogWarning($"[DynamicFont] Cannot add character. Atlas may be full or character unsupported.");
             }
         }
     }

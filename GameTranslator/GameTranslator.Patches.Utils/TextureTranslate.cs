@@ -12,7 +12,7 @@ namespace GameTranslator.Patches.Utils
     {
         internal void Hook_ImageChangedOnComponent(object source, ref Texture2D texture, bool isPrefixHooked, bool onEnable = false)
         {
-            if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && source.IsKnownImageType())
+            if (TextureTranslate.ImageHooksEnabled && (GameTranslatorCore.changeTexture.Value || GameTranslatorCore.enableTextureDumping.Value) && source.IsKnownImageType())
             {
                 Sprite sprite = null;
                 this.HandleImage(source, ref sprite, ref texture, isPrefixHooked, null);
@@ -21,7 +21,7 @@ namespace GameTranslator.Patches.Utils
 
         internal void Hook_ImageChangedOnComponent(object source, ref Sprite sprite, ref Texture2D texture, bool isPrefixHooked, bool onEnable)
         {
-            if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && source.IsKnownImageType())
+            if (TextureTranslate.ImageHooksEnabled && (GameTranslatorCore.changeTexture.Value || GameTranslatorCore.enableTextureDumping.Value) && source.IsKnownImageType())
             {
                 this.HandleImage(source, ref sprite, ref texture, isPrefixHooked, null);
             }
@@ -29,7 +29,7 @@ namespace GameTranslator.Patches.Utils
 
         internal void Hook_ImageChanged(ref Texture2D texture, bool isPrefixHooked, string dumpDirectory)
         {
-            if (TextureTranslate.ImageHooksEnabled && (TranslatePlugin.changeTexture.Value || TranslatePlugin.enableTextureDumping.Value) && !(texture == null))
+            if (TextureTranslate.ImageHooksEnabled && (GameTranslatorCore.changeTexture.Value || GameTranslatorCore.enableTextureDumping.Value) && !(texture == null))
             {
                 Sprite sprite = null;
                 this.HandleImage(null, ref sprite, ref texture, isPrefixHooked, dumpDirectory);
@@ -40,11 +40,11 @@ namespace GameTranslator.Patches.Utils
         {
             try
             {
-                if (dumpDirectory == null ? TranslatePlugin.enableTextureDumping.Value : TranslatePlugin.textureEnhancementDump)
+                if (dumpDirectory == null ? GameTranslatorCore.enableTextureDumping.Value : GameTranslatorCore.textureEnhancementDump)
                 {
                     this.DumpTexture(source, texture, dumpDirectory);
                 }
-                if (TranslatePlugin.changeTexture.Value && (dumpDirectory == null || TranslatePlugin.textureEnhancement) && this.ShouldProcessTexture(source, texture))
+                if (GameTranslatorCore.changeTexture.Value && (dumpDirectory == null || GameTranslatorCore.textureEnhancement) && this.ShouldProcessTexture(source, texture))
                 {
                     this.TranslateTexture(source, ref sprite, ref texture, isPrefixHooked);
                 }
@@ -81,7 +81,7 @@ namespace GameTranslator.Patches.Utils
                 {
                     var name = texture.GetTextureName("Unnamed");
                     var originalData = tti.GetOrCreateOriginalData();
-                    DumpImageToDisk(name, key, originalData, TranslatePlugin.DumpPath);
+                    DumpImageToDisk(name, key, originalData, GameTranslatorCore.DumpPath);
                 }
                 tti.IsDumped = true;
             }
@@ -108,7 +108,7 @@ namespace GameTranslator.Patches.Utils
             if (!_recordedKeysLoaded)
             {
                 _recordedKeysLoaded = true;
-                var recordPath = Path.Combine(TranslatePlugin.SceneDumpPath, "scene_textures.txt");
+                var recordPath = Path.Combine(GameTranslatorCore.SceneDumpPath, "scene_textures.txt");
                 if (File.Exists(recordPath))
                 {
                     foreach (var line in File.ReadLines(recordPath))
@@ -142,8 +142,8 @@ namespace GameTranslator.Patches.Utils
             {
                 return;
             }
-            Directory.CreateDirectory(TranslatePlugin.SceneDumpPath);
-            File.AppendAllLines(Path.Combine(TranslatePlugin.SceneDumpPath, "scene_textures.txt"), PendingKeys);
+            Directory.CreateDirectory(GameTranslatorCore.SceneDumpPath);
+            File.AppendAllLines(Path.Combine(GameTranslatorCore.SceneDumpPath, "scene_textures.txt"), PendingKeys);
             PendingKeys.Clear();
         }
 

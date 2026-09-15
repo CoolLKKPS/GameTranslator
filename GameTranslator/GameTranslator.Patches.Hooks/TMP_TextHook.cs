@@ -73,7 +73,7 @@ namespace GameTranslator.Patches.Hooks
 
         private static void ReplaceUnsupportedCharacters(ref string text, TMP_Text textComponent)
         {
-            if (string.IsNullOrEmpty(text) || !TranslatePlugin.replaceUnsupportedCharacters.Value)
+            if (string.IsNullOrEmpty(text) || !GameTranslatorCore.replaceUnsupportedCharacters.Value)
                 return;
 
             string replacedText = FontSupportChecker.ReplaceUnsupportedCharacters(text);

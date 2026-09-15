@@ -40,7 +40,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                         BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
                         if (new StackTrace().GetFrames().Any(x => x.GetMethod().DeclaringType == UnityTypes.TextWindow.ClrType))
                         {
-                            if (TranslatePlugin.enableTypingTranslation.Value)
+                            if (GameTranslatorCore.enableTypingTranslation.Value)
                             {
                                 string partial = GetPartialTypingTranslation(ui, text);
                                 if (partial != null)
@@ -88,14 +88,14 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
             catch (System.IndexOutOfRangeException ex)
             {
-                TranslatePlugin.logger.LogError($"IndexOutOfRangeException in DefaultTextComponentManipulator.SetText: {ex.Message}");
+                GameTranslatorCore.logger.LogError($"IndexOutOfRangeException in DefaultTextComponentManipulator.SetText: {ex.Message}");
             }
             catch (System.NullReferenceException)
             {
             }
             catch (System.Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Exception in DefaultTextComponentManipulator.SetText: {ex.Message}");
+                GameTranslatorCore.logger.LogError($"Exception in DefaultTextComponentManipulator.SetText: {ex.Message}");
             }
         }
 
@@ -148,7 +148,7 @@ namespace GameTranslator.Patches.Translatons.Manipulator
         {
             if (IsPartialTypingText(value))
             {
-                if (TranslatePlugin.enableTypingTranslation.Value)
+                if (GameTranslatorCore.enableTypingTranslation.Value)
                 {
                     string partial = GetPartialTypingTranslation(ui, value);
                     if (partial != null)
@@ -158,11 +158,11 @@ namespace GameTranslator.Patches.Translatons.Manipulator
             }
             string text = value;
             var info = ui.GetOrCreateTextTranslationInfo();
-            bool shouldSync = text.Length <= TranslatePlugin.syncTranslationThreshold.Value || !TranslatePlugin.enableAsyncDuringTyping.Value;
+            bool shouldSync = text.Length <= GameTranslatorCore.syncTranslationThreshold.Value || !GameTranslatorCore.enableAsyncDuringTyping.Value;
             string translated = null;
             if (shouldSync)
                 translated = TextTranslate.Instance.TranslateImmediate(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, false);      // ignoreComponentState = false, for now
-            if (string.IsNullOrEmpty(translated) && TranslatePlugin.enableAsyncDuringTyping.Value)
+            if (string.IsNullOrEmpty(translated) && GameTranslatorCore.enableAsyncDuringTyping.Value)
                 translated = TextTranslate.Instance.TranslateOrQueue(ui, text, info, TranslateConfig.normalText, TranslateConfig.normal, false);        // ignoreComponentState = false, for now
             if (!string.IsNullOrEmpty(translated) && !translated.Equals(text))
             {
@@ -186,13 +186,13 @@ namespace GameTranslator.Patches.Translatons.Manipulator
                 info.MustIgnore = false;
                 try
                 {
-                    bool shouldSync = fullText.Length <= TranslatePlugin.syncTranslationThreshold.Value || !TranslatePlugin.enableAsyncDuringTyping.Value;
+                    bool shouldSync = fullText.Length <= GameTranslatorCore.syncTranslationThreshold.Value || !GameTranslatorCore.enableAsyncDuringTyping.Value;
                     string t = null;
                     if (shouldSync)
                         t = TextTranslate.Instance.TranslateImmediate(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.normal, false);
-                    if (string.IsNullOrEmpty(t) && TranslatePlugin.enableAsyncDuringTyping.Value)
+                    if (string.IsNullOrEmpty(t) && GameTranslatorCore.enableAsyncDuringTyping.Value)
                         t = TextTranslate.Instance.TranslateOrQueue(ui, fullText, info, TranslateConfig.normalText, TranslateConfig.normal, false);
-                    bool isAsync = fullText.Length > TranslatePlugin.syncTranslationThreshold.Value;
+                    bool isAsync = fullText.Length > GameTranslatorCore.syncTranslationThreshold.Value;
                     if (isAsync && t == null)
                         return null;
                     if (string.IsNullOrEmpty(t) || t == fullText)

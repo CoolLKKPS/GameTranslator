@@ -22,7 +22,7 @@ namespace GameTranslator.Patches.Hooks
 
         private static void CleanupLogCache()
         {
-            if (!TranslatePlugin.showOtherDebug.Value)
+            if (!GameTranslatorCore.showOtherDebug.Value)
             {
                 _lastLogTime.Clear();
                 return;
@@ -68,13 +68,13 @@ namespace GameTranslator.Patches.Hooks
         [HarmonyWrapSafe]
         public static void Postfix(Material sourceMaterial, Material targetMaterial, ref Material __result)
         {
-            if (!TranslatePlugin.scaleFallbackEffects.Value) return;
+            if (!GameTranslatorCore.scaleFallbackEffects.Value) return;
             ApplyScale(sourceMaterial, __result, targetMaterial);
         }
 
         internal static void ApplyScale(Material sourceMaterial, Material result, Material targetMaterial)
         {
-            if (!TranslatePlugin.scaleFallbackEffects.Value || result == null || sourceMaterial == null || targetMaterial == null)
+            if (!GameTranslatorCore.scaleFallbackEffects.Value || result == null || sourceMaterial == null || targetMaterial == null)
                 return;
 
 #if MANAGED
@@ -109,7 +109,7 @@ namespace GameTranslator.Patches.Hooks
             float srcFaceDilate = sourceMaterial.GetFloat("_FaceDilate");
             float srcGS = sourceMaterial.GetFloat("_GradientScale");
             float targetGS = targetMaterial.GetFloat("_GradientScale");
-            float scale = Clamp(TranslatePlugin.fallbackEffectScale.Value, -1f, 1f);
+            float scale = Clamp(GameTranslatorCore.fallbackEffectScale.Value, -1f, 1f);
 
             result.SetFloat("_OutlineWidth", Mathf.Max(0f, srcOutline * scale));
             result.SetFloat("_OutlineSoftness", Mathf.Max(0f, srcOutlineSoftness * scale));
@@ -124,7 +124,7 @@ namespace GameTranslator.Patches.Hooks
             result.SetFloat("_BevelOffset", Clamp(srcBevelOffset * scale, -0.5f, 0.5f));
             result.SetFloat("_FaceDilate", srcFaceDilate * scale);
 
-            if (TranslatePlugin.showOtherDebug.Value)
+            if (GameTranslatorCore.showOtherDebug.Value)
             {
 #if MANAGED
                 int key = sourceMaterial.GetInstanceID() ^ (targetMaterial.GetInstanceID() << 16);
@@ -138,22 +138,22 @@ namespace GameTranslator.Patches.Hooks
                     _lastLogTime[key] = now;
 #if MANAGED
                     string tgtDesc = $"{targetMaterial.name}#{targetMaterial.GetInstanceID()}";
-                    TranslatePlugin.logger.LogInfo(
+                    GameTranslatorCore.logger.LogInfo(
                         $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetInstanceID()}, tgt={tgtDesc}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
 #else
                     string tgtDesc = $"{targetMaterial.name}#{targetMaterial.GetEntityId().GetHashCode()}";
-                    TranslatePlugin.logger.LogInfo(
+                    GameTranslatorCore.logger.LogInfo(
                         $"[FallbackScale] srcMat={sourceMaterial.name}#{sourceMaterial.GetEntityId().GetHashCode()}, tgt={tgtDesc}, srcGS={srcGS}, tgtGS={targetGS}, scale={scale:F4}");
 #endif
-                    TranslatePlugin.logger.LogInfo(
+                    GameTranslatorCore.logger.LogInfo(
                         $"[FallbackScale] Outline: width={srcOutline}→{result.GetFloat("_OutlineWidth"):F4}, color={sourceMaterial.GetColor("_OutlineColor")}, keyword={sourceMaterial.IsKeywordEnabled("OUTLINE_ON")}");
-                    TranslatePlugin.logger.LogInfo(
+                    GameTranslatorCore.logger.LogInfo(
                         $"[FallbackScale] Underlay: dilate={srcUnderlay}→{result.GetFloat("_UnderlayDilate"):F4}, color={sourceMaterial.GetColor("_UnderlayColor")}, keyword={sourceMaterial.IsKeywordEnabled("UNDERLAY_ON")}");
-                    TranslatePlugin.logger.LogInfo(
+                    GameTranslatorCore.logger.LogInfo(
                         $"[FallbackScale] Glow: inner={srcGlowInner}→{result.GetFloat("_GlowInner"):F4}, outer={srcGlowOuter}→{result.GetFloat("_GlowOuter"):F4}, color={sourceMaterial.GetColor("_GlowColor")}, keyword={sourceMaterial.IsKeywordEnabled("GLOW_ON")}");
-                    TranslatePlugin.logger.LogInfo(
+                    GameTranslatorCore.logger.LogInfo(
                         $"[FallbackScale] Face: dilate={srcFaceDilate}, color={sourceMaterial.GetColor("_FaceColor")}");
-                    TranslatePlugin.logger.LogInfo(
+                    GameTranslatorCore.logger.LogInfo(
                         $"[FallbackScale] Bevel: width={srcBevelWidth}→{result.GetFloat("_BevelWidth"):F4}");
                 }
             }
@@ -167,7 +167,7 @@ namespace GameTranslator.Patches.Hooks
         [HarmonyWrapSafe]
         public static void Postfix(Material sourceMaterial, ref Material __result)
         {
-            if (!TranslatePlugin.scaleFallbackEffects.Value) return;
+            if (!GameTranslatorCore.scaleFallbackEffects.Value) return;
             TMP_FallbackMaterialHook.RegisterAtlasMaterialIfSourceIsFontAsset(sourceMaterial, __result);
         }
     }

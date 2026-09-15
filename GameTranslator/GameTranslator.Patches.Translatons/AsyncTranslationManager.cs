@@ -72,7 +72,7 @@ namespace GameTranslator.Patches.Translatons
                     }
                     return;
                 }
-                if (originalText.Length <= TranslatePlugin.syncTranslationThreshold.Value)
+                if (originalText.Length <= GameTranslatorCore.syncTranslationThreshold.Value)
                 {
                     var translatedText = TranslationEndpointManager.TranslateText(originalText, normalText, config, scope);
                     if (!string.IsNullOrEmpty(translatedText) && !translatedText.Equals(originalText))
@@ -122,8 +122,8 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception e)
             {
-                TranslatePlugin.logger.LogError($"An unexpected error occurred in QueueTranslation: {e.Message}");
-                TranslatePlugin.logger.LogError(e);
+                GameTranslatorCore.logger.LogError($"An unexpected error occurred in QueueTranslation: {e.Message}");
+                GameTranslatorCore.logger.LogError(e);
             }
         }
 
@@ -134,7 +134,7 @@ namespace GameTranslator.Patches.Translatons
             {
                 return false;
             }
-            int threshold = TranslatePlugin.stabilizationMinTextLength?.Value ?? 100;
+            int threshold = GameTranslatorCore.stabilizationMinTextLength?.Value ?? 100;
             if (threshold == 0) return false;
             return text.Length > threshold;
         }
@@ -149,15 +149,15 @@ namespace GameTranslator.Patches.Translatons
                 NormalText = normalText,
                 Config = config,
                 StartTime = Time.realtimeSinceStartup,
-                MaxTries = (TranslatePlugin.stabilizationMaxRetries?.Value ?? 60) == 0 ? int.MaxValue : (TranslatePlugin.stabilizationMaxRetries?.Value ?? 60),
+                MaxTries = (GameTranslatorCore.stabilizationMaxRetries?.Value ?? 60) == 0 ? int.MaxValue : (GameTranslatorCore.stabilizationMaxRetries?.Value ?? 60),
                 CurrentTries = 0,
-                Delay = TranslatePlugin.stabilizationDelay?.Value > 0f ? TranslatePlugin.stabilizationDelay.Value : 0.9f
+                Delay = GameTranslatorCore.stabilizationDelay?.Value > 0f ? GameTranslatorCore.stabilizationDelay.Value : 0.9f
             };
             string key = GetStabilizationKey(ui, text);
             _stabilizationContexts[key] = context;
             if (s_SupportsCoroutine)
             {
-                TranslatePlugin.Instance.StartCoroutine(WaitForTextStablization(ui, info, context.Delay, context.MaxTries, 0,
+                GameTranslatorCore.Instance.StartCoroutine(WaitForTextStablization(ui, info, context.Delay, context.MaxTries, 0,
                     stabilizedText =>
                     {
                         OnTextStabilized(context, stabilizedText);
@@ -168,7 +168,7 @@ namespace GameTranslator.Patches.Translatons
                         }
                         catch (Exception ex)
                         {
-                            TranslatePlugin.logger.LogError($"Error cleaning up stabilization context: {ex.Message}");
+                            GameTranslatorCore.logger.LogError($"Error cleaning up stabilization context: {ex.Message}");
                         }
                     },
                     () =>
@@ -181,7 +181,7 @@ namespace GameTranslator.Patches.Translatons
                         }
                         catch (Exception ex)
                         {
-                            TranslatePlugin.logger.LogError($"Error cleaning up stabilization context: {ex.Message}");
+                            GameTranslatorCore.logger.LogError($"Error cleaning up stabilization context: {ex.Message}");
                         }
                     }));
             }
@@ -207,7 +207,7 @@ namespace GameTranslator.Patches.Translatons
                 }
                 catch (Exception ex)
                 {
-                    TranslatePlugin.logger.LogError($"Error getting before text during stabilization: {ex.Message}");
+                    GameTranslatorCore.logger.LogError($"Error getting before text during stabilization: {ex.Message}");
                     break;
                 }
                 float start = Time.realtimeSinceStartup;
@@ -222,7 +222,7 @@ namespace GameTranslator.Patches.Translatons
                 }
                 catch (Exception ex)
                 {
-                    TranslatePlugin.logger.LogError($"Error getting after text during stabilization: {ex.Message}");
+                    GameTranslatorCore.logger.LogError($"Error getting after text during stabilization: {ex.Message}");
                     break;
                 }
                 if (beforeText == afterText)
@@ -276,8 +276,8 @@ namespace GameTranslator.Patches.Translatons
                 }
                 catch (Exception ex)
                 {
-                    TranslatePlugin.logger.LogError($"Error in main thread action: {ex.Message}");
-                    TranslatePlugin.logger.LogError(ex);
+                    GameTranslatorCore.logger.LogError($"Error in main thread action: {ex.Message}");
+                    GameTranslatorCore.logger.LogError(ex);
                 }
             }
         }
@@ -306,8 +306,8 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Error handling translation job completion: {ex.Message}");
-                TranslatePlugin.logger.LogError(ex);
+                GameTranslatorCore.logger.LogError($"Error handling translation job completion: {ex.Message}");
+                GameTranslatorCore.logger.LogError(ex);
             }
         }
 
@@ -319,12 +319,12 @@ namespace GameTranslator.Patches.Translatons
                 _immediatelyTranslating.TryRemove(immKey, out _);
                 _pendingStabilizationUIs.TryRemove(immKey, out _);
 
-                TranslatePlugin.logger.LogWarning($"Translation failed for '{job.OriginalText}': {job.ErrorMessage}");
+                GameTranslatorCore.logger.LogWarning($"Translation failed for '{job.OriginalText}': {job.ErrorMessage}");
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Error handling translation job failure: {ex.Message}");
-                TranslatePlugin.logger.LogError(ex);
+                GameTranslatorCore.logger.LogError($"Error handling translation job failure: {ex.Message}");
+                GameTranslatorCore.logger.LogError(ex);
             }
         }
 
@@ -358,9 +358,9 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (System.Exception ex)
             {
-                try { TranslatePlugin.logger.LogError($"Failed to safely update UI for text '{originalText}': {ex.Message}"); }
+                try { GameTranslatorCore.logger.LogError($"Failed to safely update UI for text '{originalText}': {ex.Message}"); }
                 catch (IndexOutOfRangeException) { }
-                TranslatePlugin.logger.LogError(ex);
+                GameTranslatorCore.logger.LogError(ex);
             }
         }
 
@@ -373,7 +373,7 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Error getting UI text: {ex.Message}");
+                GameTranslatorCore.logger.LogError($"Error getting UI text: {ex.Message}");
                 return string.Empty;
             }
         }

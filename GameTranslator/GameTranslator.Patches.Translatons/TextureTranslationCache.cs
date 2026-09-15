@@ -29,18 +29,18 @@ namespace GameTranslator.Patches.Translatons
         {
             try
             {
-                Directory.CreateDirectory(TranslatePlugin.TexturesPath);
-                string fullPath = Path.GetFullPath(TranslatePlugin.TexturesPath);
-                if (TranslatePlugin.enableFileWatcher?.Value ?? false)
+                Directory.CreateDirectory(GameTranslatorCore.TexturesPath);
+                string fullPath = Path.GetFullPath(GameTranslatorCore.TexturesPath);
+                if (GameTranslatorCore.enableFileWatcher?.Value ?? false)
                 {
                     _textureFileWatcher = new SafeFileWatcher(fullPath);
                     _textureFileWatcher.DirectoryUpdated += TextureFileWatcher_DirectoryUpdated;
-                    TranslatePlugin.logger.LogInfo("Tracking texture path: " + fullPath);
+                    GameTranslatorCore.logger.LogInfo("Tracking texture path: " + fullPath);
                 }
-                if (TranslatePlugin.enablePollingCheck?.Value ?? false)
+                if (GameTranslatorCore.enablePollingCheck?.Value ?? false)
                 {
                     _texturePollingTimer = new Timer(_ => TextureFileWatcher_DirectoryUpdated(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
-                    TranslatePlugin.logger.LogInfo("Polling check tracking texture path " + fullPath);
+                    GameTranslatorCore.logger.LogInfo("Polling check tracking texture path " + fullPath);
                 }
             }
             catch (Exception ex)
@@ -51,7 +51,7 @@ namespace GameTranslator.Patches.Translatons
 
         private static IEnumerable<string> GetTextureFiles(SearchOption searchOption)
         {
-            return from x in Directory.GetFiles(TranslatePlugin.TexturesPath, "*.*", searchOption)
+            return from x in Directory.GetFiles(GameTranslatorCore.TexturesPath, "*.*", searchOption)
                    where x.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)
                    select x;
         }
@@ -72,7 +72,7 @@ namespace GameTranslator.Patches.Translatons
                     this._untranslatedImages.Clear();
                     this._keyToFileName.Clear();
                     this._textureAccessTime.Clear();
-                    Directory.CreateDirectory(TranslatePlugin.TexturesPath);
+                    Directory.CreateDirectory(GameTranslatorCore.TexturesPath);
                     foreach (string text in GetTextureFiles(SearchOption.AllDirectories))
                     {
                         this.RegisterImageFromFile(text);
@@ -122,7 +122,7 @@ namespace GameTranslator.Patches.Translatons
                     string text3 = TextureTranslationCache.HashHelper.Compute(data);
                     bool flag = StringComparer.InvariantCultureIgnoreCase.Compare(text2, text3) != 0;
                     this._keyToFileName[text] = fullFileName;
-                    if (flag || TranslatePlugin.cacheUnmodifiedTextures.Value)
+                    if (flag || GameTranslatorCore.cacheUnmodifiedTextures.Value)
                     {
                         this.RegisterTranslatedImage(fullFileName, text, data, source);
                         if (!flag)
@@ -159,7 +159,7 @@ namespace GameTranslator.Patches.Translatons
                 {
                     _textureFileLastModifiedTimes[fullFileName] = File.GetLastWriteTime(fullFileName);
                     var zip = new ZipArchive(File.OpenRead(fullFileName), ZipArchiveMode.Read);
-                    if (!TranslatePlugin.cacheTexturesInMemory.Value)
+                    if (!GameTranslatorCore.cacheTexturesInMemory.Value)
                     {
                         _openZipArchives.AddOrUpdate(fullFileName, zip,
                             (key, oldZip) => { oldZip.Dispose(); return zip; });
@@ -177,7 +177,7 @@ namespace GameTranslator.Patches.Translatons
                     }
                     finally
                     {
-                        if (TranslatePlugin.cacheTexturesInMemory.Value)
+                        if (GameTranslatorCore.cacheTexturesInMemory.Value)
                         {
                             zip.Dispose();
                         }
@@ -227,12 +227,12 @@ namespace GameTranslator.Patches.Translatons
             {
                 text3 = string.Concat(new string[] { text, " [", key, "-", text2, "].png" });
             }
-            string text4 = Path.Combine(TranslatePlugin.TexturesPath, text3);
+            string text4 = Path.Combine(GameTranslatorCore.TexturesPath, text3);
             File.WriteAllBytes(text4, data);
             XuaLogger.AutoTranslator.Info("Dumped texture file: " + text3);
             this._keyToFileName[key] = text4;
 
-            if (TranslatePlugin.cacheUnmodifiedTextures.Value)
+            if (GameTranslatorCore.cacheUnmodifiedTextures.Value)
             {
                 this.RegisterTranslatedImage(text4, key, data);
             }
@@ -244,7 +244,7 @@ namespace GameTranslator.Patches.Translatons
 
         private void RegisterTranslatedImage(string fileName, string key, byte[] data, TranslatedImage.ITranslatedImageSource source = null)
         {
-            if (TranslatePlugin.cacheTexturesInMemory.Value)
+            if (GameTranslatorCore.cacheTexturesInMemory.Value)
             {
                 this._translatedImages[key] = new TranslatedImage(fileName, data, null);
             }

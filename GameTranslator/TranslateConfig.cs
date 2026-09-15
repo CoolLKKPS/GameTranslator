@@ -22,49 +22,49 @@ namespace GameTranslator
 
         public static void Load()
         {
-            if (TranslatePlugin.shouldTranslateNormalText.Value)
+            if (GameTranslatorCore.shouldTranslateNormalText.Value)
             {
                 TranslateConfig.normal = TranslateConfig.CreateNewConfig("Normal-Translate", true, false);
                 TranslateConfig.normal.shouldTranslate = true;
                 TranslateConfig.normalText = new NormalTextTranslator(TranslateConfig.normal.ConfigFileName + ".cfg");
                 TranslateConfig.normalText.Load(true);
             }
-            if (TranslatePlugin.enableTerminalPatch.Value && TranslatePlugin.shouldTranslateTerimal.Value)
+            if (GameTranslatorCore.enableTerminalPatch.Value && GameTranslatorCore.shouldTranslateTerimal.Value)
             {
                 TranslateConfig.terminal = TranslateConfig.CreateNewConfig("Terminal-Translate", true, true);
                 TranslateConfig.terminal.shouldTranslate = true;
             }
-            if (TranslatePlugin.shouldTranslateInteractiveTerminalAPI.Value)
+            if (GameTranslatorCore.shouldTranslateInteractiveTerminalAPI.Value)
             {
                 TranslateConfig.interactiveTerminalAPI = TranslateConfig.CreateNewConfig("InteractiveTerminalAPI-Translate", true, true);
                 TranslateConfig.interactiveTerminalAPI.shouldTranslate = true;
             }
-            if (TranslatePlugin.TerimalCanUseShortCutOne.Value)
+            if (GameTranslatorCore.TerimalCanUseShortCutOne.Value)
             {
                 TranslateConfig.cmd_zh = TranslateConfig.CreateNewConfig("CMD-ZH-Translate", true, true, caseInsensitiveKeys: true);
             }
-            if (TranslatePlugin.TerimalCanUseShortCutTwo.Value)
+            if (GameTranslatorCore.TerimalCanUseShortCutTwo.Value)
             {
                 TranslateConfig.cmd_py = TranslateConfig.CreateNewConfig("CMD-PY-Translate", true, true, caseInsensitiveKeys: true);
             }
-            if (TranslatePlugin.shouldTranslateGui.Value)
+            if (GameTranslatorCore.shouldTranslateGui.Value)
             {
                 TranslateConfig.gui = TranslateConfig.CreateNewConfig("GuiText-Translate", true, false);
                 TranslateConfig.gui.shouldTranslate = true;
                 TranslateConfig.guiText = new NormalTextTranslator(TranslateConfig.gui.ConfigFileName + ".cfg");
                 TranslateConfig.guiText.Load(true);
             }
-            if (TranslatePlugin.changeTexture.Value)
+            if (GameTranslatorCore.changeTexture.Value)
             {
                 TranslateConfig.cache = new TextureTranslationCache();
                 TranslateConfig.cache.LoadTranslationFiles();
             }
-            string fullPath = Path.GetFullPath(TranslatePlugin.DefaultPath);
-            if (TranslatePlugin.enableFileWatcher?.Value ?? false)
+            string fullPath = Path.GetFullPath(GameTranslatorCore.DefaultPath);
+            if (GameTranslatorCore.enableFileWatcher?.Value ?? false)
             {
                 _fileWatcher = new SafeFileWatcher(fullPath);
                 _fileWatcher.DirectoryUpdated += OnDirectoryUpdated;
-                TranslatePlugin.logger.LogInfo("Tracking path " + fullPath);
+                GameTranslatorCore.logger.LogInfo("Tracking path " + fullPath);
             }
             foreach (TranslateConfig.TranslateConfigFile config in TranslateConfig.TranslateConfigFile.configs)
             {
@@ -75,10 +75,10 @@ namespace GameTranslator
             }
             GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
             GameTranslator.Patches.Translatons.Manipulator.DefaultTextComponentManipulator.ClearCache();
-            if (TranslatePlugin.enablePollingCheck?.Value ?? false)
+            if (GameTranslatorCore.enablePollingCheck?.Value ?? false)
             {
                 _pollingTimer = new Timer(_ => OnDirectoryUpdated(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
-                TranslatePlugin.logger.LogInfo("Polling check tracking path " + fullPath);
+                GameTranslatorCore.logger.LogInfo("Polling check tracking path " + fullPath);
             }
         }
 
@@ -131,7 +131,7 @@ namespace GameTranslator
                                     }
                                     catch (Exception ex)
                                     {
-                                        TranslatePlugin.logger.LogError($"Unexpected error reloading config {config.ConfigFileName}: {ex.Message}");
+                                        GameTranslatorCore.logger.LogError($"Unexpected error reloading config {config.ConfigFileName}: {ex.Message}");
                                         break;
                                     }
                                 }
@@ -146,12 +146,12 @@ namespace GameTranslator
                     {
                         GameTranslator.Patches.Translatons.AsyncTranslationManager.Instance.ClearCache();
                         GameTranslator.Patches.Translatons.Manipulator.DefaultTextComponentManipulator.ClearCache();
-                        TranslatePlugin.logger.LogInfo("Translate files reloaded due to file changes.");
+                        GameTranslatorCore.logger.LogInfo("Translate files reloaded due to file changes.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    TranslatePlugin.logger.LogError("Error in OnDirectoryUpdated: " + ex.Message);
+                    GameTranslatorCore.logger.LogError("Error in OnDirectoryUpdated: " + ex.Message);
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace GameTranslator
             {
                 foreach (string text in file.normal.Keys)
                 {
-                    TranslatePlugin.logger.LogInfo(text + "=" + file.normal[text]);
+                    GameTranslatorCore.logger.LogInfo(text + "=" + file.normal[text]);
                 }
 
                 NormalTextTranslator translator = GetModuleTranslator(file);
@@ -176,7 +176,7 @@ namespace GameTranslator
                 {
                     foreach (var kv in translator._translations)
                     {
-                        TranslatePlugin.logger.LogInfo(kv.Key + "=" + kv.Value);
+                        GameTranslatorCore.logger.LogInfo(kv.Key + "=" + kv.Value);
                     }
                 }
             }
@@ -190,7 +190,7 @@ namespace GameTranslator
                 return text;
             }
             Stopwatch stopwatch = null;
-            if (TranslatePlugin.showOtherDebug.Value)
+            if (GameTranslatorCore.showOtherDebug.Value)
             {
                 stopwatch = Stopwatch.StartNew();
             }
@@ -245,7 +245,7 @@ namespace GameTranslator
                     if (stopwatch.ElapsedMilliseconds > 500L)
                     {
                         string text11 = text.Length > 50 ? text.Substring(0, 50) + "..." : text;
-                        try { TranslatePlugin.logger.LogWarning(string.Format("replaceByMap took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, text11)); }
+                        try { GameTranslatorCore.logger.LogWarning(string.Format("replaceByMap took {0}ms for text: {1}", stopwatch.ElapsedMilliseconds, text11)); }
                         catch (IndexOutOfRangeException) { }
                     }
                 }
@@ -297,7 +297,7 @@ namespace GameTranslator
                         translateConfigFile.translatePairs.TryRemove(text, out _);
                         translateConfigFile._translatePairLastAccess.TryRemove(text, out DateTime dateTime);
                     }
-                    TranslatePlugin.logger.LogInfo(string.Format("Cleaned {0} translate pairs from {1}. Remaining: {2} (reason: {3})", list.Count, translateConfigFile.ConfigFileName, translateConfigFile.translatePairs.Count, reason));
+                    GameTranslatorCore.logger.LogInfo(string.Format("Cleaned {0} translate pairs from {1}. Remaining: {2} (reason: {3})", list.Count, translateConfigFile.ConfigFileName, translateConfigFile.translatePairs.Count, reason));
                 }
             }
         }
@@ -337,7 +337,7 @@ namespace GameTranslator
             public TranslateConfigFile(string configName, bool shouldLoad, bool needsParseFile = false, bool caseInsensitiveKeys = false)
             {
                 this.ConfigFileName = configName;
-                this.ConfigFilePath = Path.GetFullPath(TranslatePlugin.DefaultPath + configName + ".cfg");
+                this.ConfigFilePath = Path.GetFullPath(GameTranslatorCore.DefaultPath + configName + ".cfg");
                 this.shouldLoad = shouldLoad;
                 this.needsParseFile = needsParseFile;
                 if (caseInsensitiveKeys)
@@ -379,11 +379,11 @@ namespace GameTranslator
             {
                 if (isLoad)
                 {
-                    TranslatePlugin.logger.LogInfo(">>> Loading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
+                    GameTranslatorCore.logger.LogInfo(">>> Loading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
                 }
                 else
                 {
-                    TranslatePlugin.logger.LogInfo(">>> Reloading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
+                    GameTranslatorCore.logger.LogInfo(">>> Reloading text file: " + Path.GetFileNameWithoutExtension(filePath) + ".");
                 }
                 Dictionary<string, int> normalKeyLineOrder = [];
                 List<string> errors = [];
@@ -408,7 +408,7 @@ namespace GameTranslator
                             {
                                 string text4 = text2 + "=" + text3;
                                 errors.Add("Invalid regex: " + text4 + " - " + ex.Message);
-                                TranslatePlugin.logger.LogWarning("Failed to parse regex: " + text4 + ". Error: " + ex.Message);
+                                GameTranslatorCore.logger.LogWarning("Failed to parse regex: " + text4 + ". Error: " + ex.Message);
                                 continue;
                             }
                         }

@@ -16,7 +16,7 @@ namespace GameTranslator.Patches.Utils
 
                 try
                 {
-                    if (string.IsNullOrEmpty(TranslatePlugin.fallbackFontTextMeshPro.Value))
+                    if (string.IsNullOrEmpty(GameTranslatorCore.fallbackFontTextMeshPro.Value))
                     {
                         FontCache.FallbackFontsTextMeshPro = [];
                         return FontCache.FallbackFontsTextMeshPro;
@@ -24,12 +24,12 @@ namespace GameTranslator.Patches.Utils
 
                     FontCache.FallbackFontsTextMeshPro = [];
 
-                    string configValue = TranslatePlugin.fallbackFontTextMeshPro.Value;
+                    string configValue = GameTranslatorCore.fallbackFontTextMeshPro.Value;
 
                     if (!configValue.Contains(','))
                     {
                         string trimmed = configValue.Trim();
-                        string fmtPath = Path.Combine(TranslatePlugin.DefaultPath, trimmed);
+                        string fmtPath = Path.Combine(GameTranslatorCore.DefaultPath, trimmed);
                         if (File.Exists(fmtPath))
                         {
                             LoadFontFile(fmtPath);
@@ -37,7 +37,7 @@ namespace GameTranslator.Patches.Utils
                         }
                         if (Directory.Exists(fmtPath))
                         {
-                            TranslatePlugin.logger.LogInfo("Loading fallback fonts from directory: " + fmtPath);
+                            GameTranslatorCore.logger.LogInfo("Loading fallback fonts from directory: " + fmtPath);
                             foreach (string filePath in Directory.GetFiles(fmtPath, "*").OrderBy(f => f))
                             {
                                 LoadFontFile(filePath);
@@ -57,7 +57,7 @@ namespace GameTranslator.Patches.Utils
                         string trimmed = fontSegment.Trim();
                         if (string.IsNullOrEmpty(trimmed)) continue;
 
-                        string fontPath = Path.Combine(TranslatePlugin.DefaultPath, trimmed);
+                        string fontPath = Path.Combine(GameTranslatorCore.DefaultPath, trimmed);
                         if (File.Exists(fontPath))
                         {
                             LoadFontFile(fontPath);
@@ -65,7 +65,7 @@ namespace GameTranslator.Patches.Utils
                         }
                         if (Directory.Exists(fontPath))
                         {
-                            TranslatePlugin.logger.LogInfo("Loading fallback fonts from directory: " + fontPath);
+                            GameTranslatorCore.logger.LogInfo("Loading fallback fonts from directory: " + fontPath);
                             foreach (string filePath in Directory.GetFiles(fontPath, "*").OrderBy(f => f))
                             {
                                 LoadFontFile(filePath);
@@ -80,7 +80,7 @@ namespace GameTranslator.Patches.Utils
                 }
                 catch (Exception e)
                 {
-                    TranslatePlugin.logger.LogError("An error occurred while loading fallback fonts. Error: " + e.Message);
+                    GameTranslatorCore.logger.LogError("An error occurred while loading fallback fonts. Error: " + e.Message);
                 }
             }
             return FontCache.FallbackFontsTextMeshPro;
@@ -104,11 +104,11 @@ namespace GameTranslator.Patches.Utils
             }
             catch (Exception e) when (e.ToString().IndexOf("missing", StringComparison.OrdinalIgnoreCase) >= 0 || e.ToString().IndexOf("not found", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                TranslatePlugin.logger.LogWarning("An error occurred while loading text mesh pro fallback font. This may be due to missing font file. Error: " + e.Message);
+                GameTranslatorCore.logger.LogWarning("An error occurred while loading text mesh pro fallback font. This may be due to missing font file. Error: " + e.Message);
             }
             catch (Exception e)
             {
-                TranslatePlugin.logger.LogError("An error occurred while loading text mesh pro fallback font: " + fontPath + ". Error: " + e.Message);
+                GameTranslatorCore.logger.LogError("An error occurred while loading text mesh pro fallback font: " + fontPath + ". Error: " + e.Message);
             }
         }
 

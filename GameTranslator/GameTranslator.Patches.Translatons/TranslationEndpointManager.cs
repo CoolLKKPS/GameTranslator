@@ -119,7 +119,7 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception ex)
             {
-                TranslatePlugin.logger.LogError($"Translation job failed: {ex.Message}");
+                GameTranslatorCore.logger.LogError($"Translation job failed: {ex.Message}");
 
                 if (job.RetryCount < _maxRetries)
                 {
@@ -156,7 +156,7 @@ namespace GameTranslator.Patches.Translatons
         {
             var failureKey = $"{scope}:{untranslatedText}";
             _failedTranslations.AddOrUpdate(failureKey, 1, (k, value) => (byte)(value + 1));
-            try { TranslatePlugin.logger.LogWarning($"Translation failure registered for text: '{NormalTextTranslator.GetTextSnippet(untranslatedText, 50)}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})"); }
+            try { GameTranslatorCore.logger.LogWarning($"Translation failure registered for text: '{NormalTextTranslator.GetTextSnippet(untranslatedText, 50)}' (scope={scope}, Total failures: {_failedTranslations[failureKey]})"); }
             catch (IndexOutOfRangeException) { }
         }
 
@@ -168,7 +168,7 @@ namespace GameTranslator.Patches.Translatons
 
             try
             {
-                if (normalText != null && TranslatePlugin.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false, scope))
+                if (normalText != null && GameTranslatorCore.shouldTranslateNormalText.Value && normalText.IsTranslatable(text, false, scope))
                 {
                     translatedText = normalText.TryTranslate(translatedText, scope);
                 }
@@ -178,7 +178,7 @@ namespace GameTranslator.Patches.Translatons
             }
             catch (Exception ex)
             {
-                try { TranslatePlugin.logger.LogError($"Translation error for text '{NormalTextTranslator.GetTextSnippet(text, 50)}': {ex.Message}"); }
+                try { GameTranslatorCore.logger.LogError($"Translation error for text '{NormalTextTranslator.GetTextSnippet(text, 50)}': {ex.Message}"); }
                 catch (IndexOutOfRangeException) { }
                 return text;
             }
